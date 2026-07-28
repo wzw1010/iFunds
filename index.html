@@ -10,10 +10,16 @@
     <meta name="apple-mobile-web-app-title" content="iFunds" />
     <link rel="apple-touch-icon" href="./icon-1024.png" />
     <meta name="theme-color" content="#0b1a33" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
     <style>
+        /* ===== 完整样式 ===== */
         :root {
+            --radius-top: 22px;
             --radius-md: 20px;
+            --radius-bottom: 18px;
             --radius-sm: 12px;
+            --radius-xs: 6px;
             --radius-full: 50%;
             --color-bg: #f2f5fc;
             --color-card-bg: #ffffff;
@@ -22,77 +28,273 @@
             --color-text: #0b1a33;
             --color-text-secondary: #6b7d98;
             --color-text-light: #94a3b8;
-            --color-border: #eef2f8;
-            --color-positive: #E63946;
+            --color-border: #e2e8f0;
+            --color-positive: #E05050;
             --color-negative: #2A9D8F;
             --color-neutral: #94a3b8;
             --color-edit-border: #d0d8e0;
             --color-edit-bg: #f8fafc;
-            --shadow-card: 0 4px 16px rgba(0,0,0,0.08);
-            --shadow-summary: 0 6px 24px rgba(0,0,0,0.12);
+            --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-summary: 0 6px 24px rgba(0, 0, 0, 0.12);
             --decor-today: #0b1a33;
             --decor-old: #b8c8d8;
+            --chart-grid: #eef2f8;
+            --chart-text: #6b7d98;
         }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-        html, body {
-            width:100%;
-            min-height:100vh;
-            background:var(--color-bg);
-            display:flex;
-            justify-content:center;
-            padding:4px;
-            overflow-y:auto;
-            -webkit-overflow-scrolling:touch;
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--color-bg);
+            display: flex;
+            justify-content: center;
+            padding: 4px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-        body::-webkit-scrollbar { display: none; }
-
-        .app-container {
-            max-width:480px;
-            width:100%;
-            background:#ffffff;
-            border-radius:var(--radius-md);
-            box-shadow:0 8px 32px rgba(0,0,0,0.05);
-            padding:14px 14px 10px 14px;
-            display:flex;
-            flex-direction:column;
-            align-self:flex-start;
-            gap:14px;
+        body::-webkit-scrollbar {
+            display: none;
         }
 
-        .summary-card { background:linear-gradient(145deg,var(--color-primary),var(--color-primary-light)); border-radius:var(--radius-md); padding:10px 14px 8px 14px; color:white; flex-shrink:0; box-shadow:var(--shadow-summary); }
-        .summary-today { display:flex; flex-direction:column; align-items:center; margin-bottom:6px; }
-        .summary-today .today-label { font-size:13px; font-weight:500; opacity:0.7; letter-spacing:0.3px; display:flex; align-items:center; gap:6px; }
-        .summary-today .today-label svg { width:16px; height:16px; stroke:rgba(255,255,255,0.7); stroke-width:2; fill:none; }
-        .summary-today .today-value { font-size:22px; font-weight:700; letter-spacing:-0.5px; line-height:1.2; margin-top:0px; }
-        .summary-today .today-value.positive { color:var(--color-positive); }
-        .summary-today .today-value.negative { color:var(--color-negative); }
-        .summary-today .today-value.neutral { color:var(--color-text-light); }
-        .summary-today .today-value.privacy { color:var(--color-text-light); letter-spacing:4px; }
-        .summary-divider { border:none; border-top:1px solid rgba(255,255,255,0.10); margin:0 0 6px 0; }
-        .summary-stats { display:flex; justify-content:space-between; align-items:center; }
-        .summary-stat-item { display:flex; flex-direction:column; align-items:center; flex:1; position:relative; gap:2px; }
-        .summary-stat-item:not(:last-child)::after { content:''; position:absolute; right:0; top:15%; height:70%; width:1px; background:rgba(255,255,255,0.12); }
-        .summary-stat-item .stat-label-wrap { display:flex; align-items:center; gap:4px; }
-        .summary-stat-item .stat-label { font-size:10px; opacity:0.5; font-weight:500; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
-        .summary-stat-item .stat-number { font-size:14px; font-weight:600; line-height:1.3; }
-        .summary-stat-item .stat-number.privacy { letter-spacing:3px; color:var(--color-text-light) !important; }
-        .stat-number.positive { color:var(--color-positive); }
-        .stat-number.negative { color:var(--color-negative); }
-        .stat-number.neutral { color:var(--color-text-light); }
-        .data-timestamp { font-size:10px; opacity:0.5; text-align:center; margin-top:4px; letter-spacing:0.3px; }
+        .app-container {
+            max-width: 480px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            padding: 14px 14px 10px 14px;
+            display: flex;
+            flex-direction: column;
+            align-self: flex-start;
+            gap: 16px;
+            transition: transform 0.3s ease;
+        }
 
-        .fund-list { display:flex; flex-direction:column; gap:5px; flex:1; }
+        /* ===== 下拉刷新指示器 ===== */
+        #pullIndicator {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 6px 0 2px;
+            font-size: 12px;
+            color: var(--color-text-light);
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: opacity 0.2s ease, height 0.2s ease;
+        }
+        #pullIndicator.show {
+            display: flex;
+            opacity: 1;
+            height: 36px;
+        }
+        #pullIndicator .arrow {
+            display: inline-block;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        #pullIndicator .arrow.flip {
+            transform: rotate(180deg);
+        }
+        #pullIndicator .status-text {
+            font-weight: 500;
+            font-size: 12px;
+        }
+        #pullIndicator .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--color-border);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        #pullIndicator .spinner.active {
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-        .fund-card { background:var(--color-card-bg); border-radius:var(--radius-md); padding:10px 14px 12px 14px; border:1px solid var(--color-border); box-shadow:var(--shadow-card); display:flex; flex-direction:column; gap:8px; flex-shrink:0; transition:box-shadow 0.2s,border-color 0.3s; position:relative; overflow:hidden; }
-        .fund-card:active { box-shadow:0 2px 8px rgba(0,0,0,0.04); background:#fafcff; }
-        .fund-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; border-radius:0; transition:background 0.4s ease; }
-        .fund-card.decor-today::before { background:var(--decor-today); }
-        .fund-card.decor-old::before { background:var(--decor-old); }
-        .fund-card.flash-update { animation:flashCard 0.6s ease; }
-        @keyframes flashCard { 0% { background:#f0f7ff; } 50% { background:#e0edf9; } 100% { background:var(--color-card-bg); } }
+        /* ===== 顶部摘要 ===== */
+        .summary-card {
+            background: linear-gradient(145deg, var(--color-primary), var(--color-primary-light));
+            border-radius: var(--radius-top);
+            padding: 10px 14px 8px 14px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-summary);
+        }
+        .summary-today {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .summary-today .today-label {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.7;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .summary-today .today-label svg {
+            width: 16px;
+            height: 16px;
+            stroke: rgba(255, 255, 255, 0.7);
+            stroke-width: 2;
+            fill: none;
+        }
+        .summary-today .today-value {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            margin-top: 0px;
+        }
+        .summary-today .today-value.positive {
+            color: var(--color-positive);
+        }
+        .summary-today .today-value.negative {
+            color: var(--color-negative);
+        }
+        .summary-today .today-value.neutral {
+            color: var(--color-text-light);
+        }
+        .summary-today .today-value.privacy {
+            color: var(--color-text-light);
+            letter-spacing: 4px;
+        }
+        .summary-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.10);
+            margin: 0 0 6px 0;
+        }
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .summary-stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            gap: 2px;
+        }
+        .summary-stat-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .summary-stat-item .stat-label-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .summary-stat-item .stat-label {
+            font-size: 10px;
+            opacity: 0.5;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .summary-stat-item .stat-number {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        .summary-stat-item .stat-number.privacy {
+            letter-spacing: 3px;
+            color: var(--color-text-light) !important;
+        }
+        .stat-number.positive {
+            color: var(--color-positive);
+        }
+        .stat-number.negative {
+            color: var(--color-negative);
+        }
+        .stat-number.neutral {
+            color: var(--color-text-light);
+        }
+        .data-timestamp {
+            font-size: 10px;
+            opacity: 0.5;
+            text-align: center;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== 基金列表 ===== */
+        .fund-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .fund-card {
+            background: var(--color-card-bg);
+            border-radius: var(--radius-md);
+            padding: 10px 14px 12px 14px;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+            transition: box-shadow 0.2s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .fund-card:active {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            background: #fafcff;
+        }
+        .fund-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            border-radius: 0;
+            transition: background 0.4s ease;
+        }
+        .fund-card.decor-today::before {
+            background: var(--decor-today);
+        }
+        .fund-card.decor-old::before {
+            background: var(--decor-old);
+        }
+        .fund-card.flash-update {
+            animation: flashCard 0.6s ease;
+        }
+        @keyframes flashCard {
+            0% { background: #f0f7ff; }
+            50% { background: #e0edf9; }
+            100% { background: var(--color-card-bg); }
+        }
 
         .fund-row-top {
             display: grid;
@@ -102,167 +304,823 @@
             padding-left: 10px;
             column-gap: 0;
         }
-        .fund-name-wrap { grid-column: 1 / 3; min-width:0; overflow:hidden; padding-right:4px; }
-        .fund-name { font-size:14px; font-weight:600; color:var(--color-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
-        .fund-code-wrap { grid-column:3; display:flex; justify-content:center; align-items:center; }
-        .fund-code-standalone { display:inline-block; font-weight:400; font-size:10px; color:var(--color-text-secondary); background:#f0f4fc; padding:0 8px; border-radius:var(--radius-md); line-height:18px; text-align:center; }
-        .fund-right-actions { grid-column:4; display:flex; align-items:center; justify-content:flex-end; white-space:nowrap; }
-        .fund-market-value { font-size:14px; font-weight:600; color:var(--color-text); display:flex; align-items:center; gap:3px; }
-        .coin-icon { font-size:12px; color:var(--color-text-secondary); opacity:0.7; }  /* Font Awesome 样式 */
+        .fund-name-wrap {
+            grid-column: 1 / 3;
+            min-width: 0;
+            overflow: hidden;
+            padding-right: 4px;
+        }
+        .fund-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+        .fund-code-wrap {
+            grid-column: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .fund-code-standalone {
+            display: inline-block;
+            font-weight: 400;
+            font-size: 10px;
+            color: var(--color-text-secondary);
+            background: #f0f4fc;
+            padding: 0 8px;
+            border-radius: var(--radius-md);
+            line-height: 18px;
+            text-align: center;
+        }
+        .fund-right-actions {
+            grid-column: 4;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            white-space: nowrap;
+        }
+        .fund-market-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .coin-icon {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            opacity: 0.7;
+        }
 
-        .fund-row-metrics { display:flex; align-items:stretch; padding-left:10px; height:40px; position:relative; }
-        .edit-mode .fund-row-metrics { display:none; }
-        .metric-item { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:2px 0; position:relative; min-width:0; }
-        .metric-item:not(:last-child)::after { content:''; position:absolute; right:0; top:10%; height:80%; width:1px; background:#e0e5ed; }
-        .metric-item .metric-label { font-size:9px; font-weight:500; color:var(--color-text-light); letter-spacing:0.2px; text-transform:uppercase; line-height:1.2; }
-        .metric-item .metric-value { font-size:13px; font-weight:600; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .metric-item .metric-value.positive { color:var(--color-positive); }
-        .metric-item .metric-value.negative { color:var(--color-negative); }
-        .metric-item .metric-value.neutral { color:var(--color-text-light); }
-        .fund-edit-area { display:none; padding:8px 0 2px 10px; border-top:1px dashed var(--color-border); flex-direction:column; gap:6px; }
-        .fund-edit-area.active { display:flex; }
-        .edit-row { display:flex; gap:8px; align-items:center; width:100%; flex-wrap:nowrap; }
-        .edit-row .edit-input { flex:1; min-width:0; height:38px; padding:6px 10px; font-size:13px; font-family:inherit; border-radius:var(--radius-sm); border:1px solid var(--color-edit-border); background:var(--color-edit-bg); color:var(--color-text); outline:none; transition:border 0.2s ease; -webkit-appearance:none; }
-        .edit-row .edit-input:focus { border-color:var(--color-primary); box-shadow:0 0 0 2px rgba(11,26,51,0.08); }
-        .edit-row .edit-input::placeholder { color:var(--color-text-light); opacity:0.6; }
-        .edit-row .edit-delete-btn { flex:0 0 auto; height:38px; padding:0 14px; font-size:12px; font-weight:600; font-family:inherit; border:none; border-radius:var(--radius-sm); background:var(--color-positive); color:#fff; cursor:pointer; transition:opacity 0.2s ease; white-space:nowrap; }
-        .edit-row .edit-delete-btn:active { opacity:0.6; transform:scale(0.96); }
-        .edit-hint { font-size:11px; color:var(--color-text-light); display:flex; justify-content:space-between; align-items:center; padding:0 2px; }
-        .edit-hint .current-cost { font-weight:500; color:var(--color-text-secondary); }
-        .empty-state { text-align:center; padding:40px 20px; color:var(--color-text-secondary); }
-        .empty-state i { font-size:36px; color:#d5dde8; margin-bottom:6px; }
-        .empty-state p { font-size:14px; font-weight:500; }
-        .empty-state .sub { font-size:12px; opacity:0.6; margin-top:2px; }
+        .fund-row-metrics {
+            display: flex;
+            align-items: stretch;
+            padding-left: 10px;
+            height: 40px;
+            position: relative;
+        }
+        .edit-mode .fund-row-metrics {
+            display: none;
+        }
+        .metric-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2px 0;
+            position: relative;
+            min-width: 0;
+        }
+        .metric-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 10%;
+            height: 80%;
+            width: 1px;
+            background: #e0e5ed;
+        }
+        .metric-item .metric-label {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--color-text-light);
+            letter-spacing: 0.2px;
+            line-height: 1.2;
+        }
+        .metric-item .metric-value {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .metric-item .metric-value.positive {
+            color: var(--color-positive);
+        }
+        .metric-item .metric-value.negative {
+            color: var(--color-negative);
+        }
+        .metric-item .metric-value.neutral {
+            color: var(--color-text-light);
+        }
 
+        /* ===== 趋势图展开 ===== */
+        .trend-wrapper {
+            display: none;
+            padding-top: 10px;
+            margin-top: 4px;
+            border-top: 1px solid var(--color-border);
+            height: 150px;
+            position: relative;
+        }
+        .trend-wrapper.expanded {
+            display: block;
+        }
+        .trend-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .trend-loading {
+            text-align: center;
+            color: var(--color-text-light);
+            font-size: 12px;
+            padding: 30px 0;
+        }
+        .trend-error {
+            text-align: center;
+            color: var(--color-text-light);
+            font-size: 12px;
+            padding: 30px 0;
+        }
+        .trend-retry-btn {
+            display: block;
+            margin: 8px auto 0;
+            padding: 4px 16px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--color-card-bg);
+            color: var(--color-text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .trend-retry-btn:active {
+            transform: scale(0.96);
+            opacity: 0.6;
+        }
+
+        /* ===== 编辑区域 ===== */
+        .fund-edit-area {
+            display: none;
+            padding: 8px 0 2px 10px;
+            border-top: 1px dashed var(--color-border);
+            flex-direction: column;
+            gap: 6px;
+        }
+        .fund-edit-area.active {
+            display: flex;
+        }
+        .edit-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+        .edit-row .edit-input {
+            flex: 1;
+            min-width: 0;
+            height: 36px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-family: inherit;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-edit-border);
+            background: var(--color-edit-bg);
+            color: var(--color-text);
+            outline: none;
+            transition: border 0.2s ease;
+            -webkit-appearance: none;
+            text-align: center;
+        }
+        .edit-row .edit-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(11, 26, 51, 0.08);
+        }
+        .edit-row .edit-input::placeholder {
+            color: var(--color-text-light);
+            opacity: 0.6;
+            text-align: center;
+        }
+        .edit-row .edit-delete-btn {
+            flex: 0 0 60px;
+            height: 36px;
+            padding: 0 12px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--color-positive);
+            color: #fff;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+        .edit-row .edit-delete-btn:active {
+            opacity: 0.6;
+            transform: scale(0.96);
+        }
+        .edit-hint {
+            font-size: 10px;
+            color: var(--color-text-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2px;
+        }
+        .edit-hint .current-cost {
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
+
+        /* ===== 空状态 ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--color-text-secondary);
+        }
+        .empty-state i {
+            font-size: 36px;
+            color: #d5dde8;
+            margin-bottom: 6px;
+        }
+        .empty-state p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .empty-state .sub {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-top: 2px;
+        }
+
+        /* ===== 卡片区块 ===== */
+        .card-block {
+            background: var(--color-card-bg);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-card);
+            transition: opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+            overflow: hidden;
+        }
+        .card-block.edit-hidden {
+            opacity: 0;
+            max-height: 0;
+            padding: 0 14px;
+            border: none;
+            margin: 0;
+            pointer-events: none;
+        }
+        .chart-container {
+            height: 170px;
+            position: relative;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ===== 柱状图空状态 ===== */
+        .chart-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ===== 持仓分析（饼图 · 海洋渐变 · 图例左侧） ===== */
+        .pie-chart-container {
+            height: 200px;
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .pie-chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .analysis-empty {
+            font-size: 13px;
+            color: var(--color-text-light);
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        /* ===== 底部操作栏 ===== */
         .bottom-action-card {
-            background:linear-gradient(145deg,var(--color-primary),var(--color-primary-light));
-            border-radius:var(--radius-md);
-            padding:10px 6px;
-            border:1px solid rgba(255,255,255,0.15);
-            box-shadow:0 8px 32px rgba(0,0,0,0.12);
-            display:flex;
-            align-items:stretch;
-            position:relative;
-            overflow:hidden;
-            flex-shrink:0;
-            margin-top:1px;
-            transition:all 0.3s ease;
-            justify-content:center;
-            min-height:72px;
+            background: linear-gradient(145deg, var(--color-primary), var(--color-primary-light));
+            border-radius: var(--radius-bottom);
+            padding: 10px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: stretch;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            margin-top: 1px;
+            transition: all 0.3s ease;
+            justify-content: center;
+            min-height: 72px;
         }
-        .bottom-action-card::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.08) 0%, transparent 60%); pointer-events:none; }
-        .action-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 4px; cursor:pointer; transition:background 0.2s ease; border:none; background:transparent; color:#ffffff; position:relative; border-radius:var(--radius-md); min-height:52px; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; }
-        .action-btn:not(:last-child)::after { content:''; position:absolute; right:0; top:15%; height:70%; width:1px; background:rgba(255,255,255,0.12); }
-        .action-btn:active { background:rgba(255,255,255,0.06); transform:scale(0.96); }
-        .action-btn .icon-wrap { width:28px; height:28px; border-radius:var(--radius-full); background:rgba(255,255,255,0.12); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; font-size:14px; color:#ffffff; flex-shrink:0; border:1px solid rgba(255,255,255,0.08); transition:background 0.2s; will-change:transform; pointer-events:none; }
-        @keyframes iconPop { 0% { transform:scale(1); } 35% { transform:scale(1.3); } 60% { transform:scale(0.92); } 100% { transform:scale(1); } }
-        .action-btn .icon-wrap.pop { animation:iconPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-        .action-btn .label { font-size:10px; font-weight:500; color:rgba(255,255,255,0.75); letter-spacing:0.2px; white-space:nowrap; pointer-events:none; }
-        .bottom-action-card.edit-mode .action-btn { display:none !important; }
-        .bottom-action-card.edit-mode .action-btn.edit-highlight { display:flex !important; flex:0 0 auto; padding:8px 28px; background:transparent !important; border-radius:var(--radius-md); }
-        .bottom-action-card.edit-mode .action-btn.edit-highlight .icon-wrap { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.08); }
-        .bottom-action-card.edit-mode .action-btn.edit-highlight .label { color:rgba(255,255,255,0.75); }
-        .bottom-action-card.edit-mode .action-btn::after { display:none !important; }
+        .bottom-action-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .action-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 6px 4px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border: none;
+            background: transparent;
+            color: #ffffff;
+            position: relative;
+            border-radius: var(--radius-md);
+            min-height: 52px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .action-btn:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .action-btn:active {
+            background: rgba(255, 255, 255, 0.06);
+            transform: scale(0.96);
+        }
+        .action-btn .icon-wrap {
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #ffffff;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: background 0.2s;
+            will-change: transform;
+            pointer-events: none;
+        }
+        @keyframes iconPop {
+            0% { transform: scale(1); }
+            35% { transform: scale(1.3); }
+            60% { transform: scale(0.92); }
+            100% { transform: scale(1); }
+        }
+        .action-btn .icon-wrap.pop {
+            animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .action-btn .label {
+            font-size: 10px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .bottom-action-card.edit-mode .action-btn {
+            display: none !important;
+        }
+        .bottom-action-card.edit-mode .action-btn.edit-highlight {
+            display: flex !important;
+            flex: 0 0 auto;
+            padding: 8px 28px;
+            background: transparent !important;
+            border-radius: var(--radius-md);
+        }
+        .bottom-action-card.edit-mode .action-btn.edit-highlight .icon-wrap {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .bottom-action-card.edit-mode .action-btn.edit-highlight .label {
+            color: rgba(255, 255, 255, 0.75);
+        }
+        .bottom-action-card.edit-mode .action-btn::after {
+            display: none !important;
+        }
 
+        /* ===== 模态框 ===== */
         .modal-overlay {
-            display:none;
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,0.25);
-            backdrop-filter:blur(16px);
-            -webkit-backdrop-filter:blur(16px);
-            justify-content:center;
-            align-items:center;
-            z-index:999;
-            padding:0;
-            box-sizing:border-box;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .modal-overlay.active { display:flex; }
-        .add-modal .add-content, .backup-modal .backup-content { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px 24px; width:100%; height:100%; max-width:100%; max-height:100%; background:rgba(255,255,255,0.06); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border-radius:0; border:none; box-shadow:none; position:relative; }
-        .add-modal .add-content h2, .backup-modal .backup-content h2 { font-size:22px; font-weight:700; color:#0b1a33; display:flex; align-items:center; gap:8px; margin-bottom:0px; }
-        .add-modal .add-content h2 i, .backup-modal .backup-content h2 i { color:#0b1a33; }
-        .sub-placeholder { height:24px; flex-shrink:0; }
-        .add-modal .add-content .input-group { width:100%; display:flex; flex-direction:column; gap:12px; margin-bottom:16px; }
-        .add-modal .add-content .input-group input { width:100%; padding:12px 16px; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.12); backdrop-filter:blur(4px); font-size:15px; color:#ffffff; outline:none; transition:0.15s; -webkit-appearance:none; }
-        .add-modal .add-content .input-group input::placeholder { color:rgba(255,255,255,0.4); font-weight:400; font-size:14px; }
-        .add-modal .add-content .input-group input:focus { border-color:rgba(255,255,255,0.5); background:rgba(255,255,255,0.2); }
-        .add-modal .add-content .auto-fill-info { width:100%; background:rgba(255,255,255,0.1); border-radius:var(--radius-md); padding:8px 14px; font-size:13px; color:rgba(255,255,255,0.85); border:1px solid rgba(255,255,255,0.1); display:none; margin-top:-6px; margin-bottom:2px; text-align:center; }
-        .add-modal .add-content .auto-fill-info.show { display:block; }
-        .add-modal .add-content .modal-actions { display:flex; gap:12px; width:100%; justify-content:center; margin-top:12px; }
-        .add-modal .add-content .modal-actions button { flex:1; padding:12px 16px; border-radius:var(--radius-md); font-size:15px; font-weight:600; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:0.15s; background:rgba(255,255,255,0.15); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); color:#ffffff; }
-        .add-modal .add-content .modal-actions button:active { background:rgba(255,255,255,0.25); transform:scale(0.96); }
-        .add-modal .add-content .modal-actions .btn-cancel { background:rgba(255,255,255,0.15); color:#ffffff; border:1px solid rgba(255,255,255,0.1); }
-        .add-modal .add-content .modal-actions .btn-confirm:disabled { opacity:0.4; cursor:not-allowed; }
-        .backup-modal .backup-actions { display:flex; flex-direction:column; gap:10px; width:100%; }
-        .backup-modal .backup-actions button, .backup-modal .backup-actions .file-input-wrap { width:100%; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.15); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; gap:6px; text-align:center; line-height:1.3; transition:0.15s; cursor:pointer; padding:14px 16px; font-size:16px; font-weight:600; color:#ffffff; }
-        .backup-modal .backup-actions .file-input-wrap { padding:0; position:relative; overflow:hidden; }
-        .backup-modal .backup-actions .file-input-wrap button { width:100%; height:100%; padding:14px 16px; font-size:16px; font-weight:600; color:#ffffff; background:transparent; border:none; backdrop-filter:none; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; }
-        .backup-modal .backup-actions .file-input-wrap input[type="file"] { position:absolute; left:0; top:0; opacity:0; width:100%; height:100%; cursor:pointer; }
-        .backup-modal .backup-actions button:active, .backup-modal .backup-actions .file-input-wrap:active { background:rgba(255,255,255,0.25); transform:scale(0.96); }
-        .modal-close-btn { position:absolute; bottom:48px; left:50%; transform:translateX(-50%); width:48px; height:48px; border-radius:var(--radius-full); background:rgba(255,255,255,0.15); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:0.2s; color:rgba(255,255,255,0.7); font-size:18px; z-index:10; }
-        .modal-close-btn:active { transform:translateX(-50%) scale(0.88); background:rgba(255,255,255,0.25); }
-        .modal-close-btn svg { width:24px; height:24px; stroke:rgba(255,255,255,0.7); stroke-width:2; fill:none; }
-        .prompt-modal .prompt-content { display:flex; flex-direction:column; align-items:center; text-align:center; padding:24px; width:100%; max-width:340px; background:rgba(255,255,255,0.08); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-radius:var(--radius-md); border:none; }
-        .prompt-modal .prompt-content h2 { font-size:18px; font-weight:700; color:#ffffff; margin-bottom:6px; }
-        .prompt-modal .prompt-content .prompt-message { font-size:15px; color:rgba(255,255,255,0.85); line-height:1.5; margin-bottom:18px; }
-        .prompt-modal .prompt-content .modal-actions { display:flex; gap:10px; width:100%; justify-content:center; }
-        .prompt-modal .prompt-content .modal-actions button { flex:1; padding:12px; border-radius:var(--radius-md); font-size:15px; font-weight:600; border:none; cursor:pointer; transition:0.15s; max-width:140px; }
-        .prompt-modal .prompt-content .modal-actions .btn-cancel { background:rgba(255,255,255,0.15); color:#ffffff; border:1px solid rgba(255,255,255,0.1); }
-        .prompt-modal .prompt-content .modal-actions .btn-cancel:active { background:rgba(255,255,255,0.25); }
-        .prompt-modal .prompt-content .modal-actions .btn-confirm { background:#ffffff; color:#0b1a33; }
-        .prompt-modal .prompt-content .modal-actions .btn-confirm:active { background:#e8edf5; }
-        .prompt-modal .prompt-content .modal-actions .btn-danger { background:var(--color-positive); color:#ffffff; }
-        .prompt-modal .prompt-content .modal-actions .btn-danger:active { background:#c92a3a; }
-        .refresh-loading { pointer-events:none; opacity:0.6; }
-        .refresh-loading i { animation:spin 1s infinite linear; }
-        @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
-        .check-pop { position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0); width:80px; height:80px; background:linear-gradient(145deg,#0b1a33,#132b4a); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform 0.35s ease-out; z-index:200; pointer-events:none; box-shadow:0 6px 24px rgba(11,26,51,0.3); }
-        .check-pop.show { transform:translate(-50%, -50%) scale(1); }
-        .check-pop svg { width:44px; height:44px; stroke:white; stroke-width:3; fill:none; }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .add-modal .add-content,
+        .backup-modal .backup-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px 24px;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            position: relative;
+        }
+        .add-modal .add-content h2,
+        .backup-modal .backup-content h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0b1a33;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0px;
+        }
+        .add-modal .add-content h2 i,
+        .backup-modal .backup-content h2 i {
+            color: #0b1a33;
+        }
+        .sub-placeholder {
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .add-modal .add-content .input-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .add-modal .add-content .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(4px);
+            font-size: 15px;
+            color: #ffffff;
+            outline: none;
+            transition: 0.15s;
+            -webkit-appearance: none;
+        }
+        .add-modal .add-content .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+            font-size: 14px;
+        }
+        .add-modal .add-content .input-group input:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .add-modal .add-content .auto-fill-info {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 8px 14px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+            margin-top: -6px;
+            margin-bottom: 2px;
+            text-align: center;
+        }
+        .add-modal .add-content .auto-fill-info.show {
+            display: block;
+        }
+        .add-modal .add-content .modal-actions {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .add-modal .add-content .modal-actions button {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: 0.15s;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            color: #ffffff;
+        }
+        .add-modal .add-content .modal-actions button:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.96);
+        }
+        .add-modal .add-content .modal-actions .btn-cancel {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .add-modal .add-content .modal-actions .btn-confirm:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .backup-modal .backup-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .backup-modal .backup-actions button,
+        .backup-modal .backup-actions .file-input-wrap {
+            width: 100%;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            line-height: 1.3;
+            transition: 0.15s;
+            cursor: pointer;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .backup-modal .backup-actions .file-input-wrap {
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .backup-modal .backup-actions .file-input-wrap button {
+            width: 100%;
+            height: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .backup-modal .backup-actions .file-input-wrap input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .backup-modal .backup-actions button:active,
+        .backup-modal .backup-actions .file-input-wrap:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.96);
+        }
+        .modal-close-btn {
+            position: absolute;
+            bottom: 48px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            z-index: 10;
+        }
+        .modal-close-btn:active {
+            transform: translateX(-50%) scale(0.88);
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .modal-close-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: rgba(255, 255, 255, 0.7);
+            stroke-width: 2;
+            fill: none;
+        }
+        .prompt-modal .prompt-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 24px;
+            width: 100%;
+            max-width: 340px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius-md);
+            border: none;
+        }
+        .prompt-modal .prompt-content h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+        .prompt-modal .prompt-content .prompt-message {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+        .prompt-modal .prompt-content .modal-actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        .prompt-modal .prompt-content .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+            max-width: 140px;
+        }
+        .prompt-modal .prompt-content .modal-actions .btn-cancel {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prompt-modal .prompt-content .modal-actions .btn-cancel:active {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .prompt-modal .prompt-content .modal-actions .btn-confirm {
+            background: #ffffff;
+            color: #0b1a33;
+        }
+        .prompt-modal .prompt-content .modal-actions .btn-confirm:active {
+            background: #e8edf5;
+        }
+        .prompt-modal .prompt-content .modal-actions .btn-danger {
+            background: var(--color-positive);
+            color: #ffffff;
+        }
+        .prompt-modal .prompt-content .modal-actions .btn-danger:active {
+            background: #c92a3a;
+        }
+        .refresh-loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .refresh-loading i {
+            animation: spin 1s infinite linear;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .check-pop {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #0b1a33, #132b4a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.35s ease-out;
+            z-index: 200;
+            pointer-events: none;
+            box-shadow: 0 6px 24px rgba(11, 26, 51, 0.3);
+        }
+        .check-pop.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .check-pop svg {
+            width: 44px;
+            height: 44px;
+            stroke: white;
+            stroke-width: 3;
+            fill: none;
+        }
 
-        @media (max-width:420px) {
-            .app-container { padding:10px 12px 10px 12px; }
-            .summary-card { padding:8px 12px 6px 12px; }
-            .summary-today .today-value { font-size:20px; }
-            .summary-today .today-label { font-size:12px; }
-            .summary-stat-item .stat-number { font-size:13px; }
-            .summary-stat-item .stat-label { font-size:9px; }
-            .fund-card { padding:8px 10px 10px 10px; gap:6px; }
-            .fund-row-top { height:26px; padding-left:6px; }
-            .fund-name { font-size:13px; }
-            .fund-code-standalone { font-size:9px; padding:0 6px; }
-            .fund-market-value { font-size:12px; }
-            .coin-icon { font-size:11px; }
-            .fund-row-metrics { padding-left:6px; height:36px; }
-            .metric-item .metric-label { font-size:8px; }
-            .metric-item .metric-value { font-size:11px; }
-            .fund-edit-area { padding:6px 0 2px 6px; }
-            .edit-row .edit-input { height:34px; font-size:12px; padding:4px 8px; border-radius:var(--radius-sm); }
-            .edit-row .edit-delete-btn { height:34px; padding:0 10px; font-size:11px; border-radius:var(--radius-sm); }
-            .edit-hint { font-size:10px; }
-            .bottom-action-card { padding:8px 4px; min-height:62px; }
-            .action-btn { min-height:46px; padding:4px 2px; gap:1px; }
-            .action-btn .icon-wrap { width:24px; height:24px; font-size:12px; }
-            .action-btn .label { font-size:9px; }
-            .bottom-action-card.edit-mode .action-btn.edit-highlight { padding:6px 20px; }
-            .add-modal .add-content, .backup-modal .backup-content { padding:24px 16px; }
-            .add-modal .add-content .input-group input { font-size:14px; padding:10px 14px; }
-            .add-modal .add-content .input-group input::placeholder { font-size:13px; }
-            .add-modal .add-content .modal-actions button { font-size:14px; padding:10px 14px; }
-            .backup-modal .backup-actions button, .backup-modal .backup-actions .file-input-wrap button { font-size:14px; padding:12px 14px; }
-            .modal-close-btn { width:40px; height:40px; bottom:40px; font-size:16px; }
-            .modal-close-btn svg { width:20px; height:20px; }
-            .data-timestamp { font-size:9px; }
+        @media (max-width: 420px) {
+            .app-container { padding: 10px 12px 10px 12px; gap: 14px; }
+            .summary-card { padding: 8px 12px 6px 12px; }
+            .summary-today .today-value { font-size: 20px; }
+            .summary-today .today-label { font-size: 12px; }
+            .summary-stat-item .stat-number { font-size: 13px; }
+            .summary-stat-item .stat-label { font-size: 9px; }
+            .fund-card { padding: 8px 10px 10px 10px; gap: 6px; }
+            .fund-row-top { height: 26px; padding-left: 6px; }
+            .fund-name { font-size: 13px; }
+            .fund-code-standalone { font-size: 9px; padding: 0 6px; }
+            .fund-market-value { font-size: 12px; }
+            .coin-icon { font-size: 11px; }
+            .fund-row-metrics { padding-left: 6px; height: 36px; }
+            .metric-item .metric-label { font-size: 9px; }
+            .metric-item .metric-value { font-size: 11px; }
+            .fund-edit-area { padding: 6px 0 2px 6px; }
+            .edit-row .edit-input { height: 32px; font-size: 11px; padding: 3px 6px; border-radius: var(--radius-sm); }
+            .edit-row .edit-delete-btn { height: 32px; padding: 0 8px; font-size: 10px; border-radius: var(--radius-sm);
+                flex: 0 0 50px; }
+            .edit-hint { font-size: 9px; }
+            .bottom-action-card { padding: 8px 4px; min-height: 62px; }
+            .action-btn { min-height: 46px; padding: 4px 2px; gap: 1px; }
+            .action-btn .icon-wrap { width: 24px; height: 24px; font-size: 12px; }
+            .action-btn .label { font-size: 9px; }
+            .bottom-action-card.edit-mode .action-btn.edit-highlight { padding: 6px 20px; }
+            .add-modal .add-content,
+            .backup-modal .backup-content { padding: 24px 16px; }
+            .add-modal .add-content .input-group input { font-size: 14px; padding: 10px 14px; }
+            .add-modal .add-content .input-group input::placeholder { font-size: 13px; }
+            .add-modal .add-content .modal-actions button { font-size: 14px; padding: 10px 14px; }
+            .backup-modal .backup-actions button,
+            .backup-modal .backup-actions .file-input-wrap button { font-size: 14px; padding: 12px 14px; }
+            .modal-close-btn { width: 40px; height: 40px; bottom: 40px; font-size: 16px; }
+            .modal-close-btn svg { width: 20px; height: 20px; }
+            .data-timestamp { font-size: 9px; }
+            .card-block { padding: 12px; }
+            .chart-container { height: 150px; }
+            .trend-wrapper { height: 130px; }
+            .pie-chart-container { height: 170px; }
         }
-        @media (max-width:360px) {
-            .fund-name { font-size:12px; max-width:100px; }
-            .fund-market-value { font-size:11px; }
-            .metric-item .metric-value { font-size:10px; }
+        @media (max-width: 360px) {
+            .fund-name { font-size: 12px; max-width: 100px; }
+            .fund-market-value { font-size: 11px; }
+            .metric-item .metric-value { font-size: 10px; }
+            .card-block { padding: 10px; }
+            .chart-container { height: 130px; }
+            .trend-wrapper { height: 110px; }
+            .pie-chart-container { height: 150px; }
+            .edit-row .edit-delete-btn { flex: 0 0 44px; font-size: 9px; }
         }
     </style>
 </head>
 <body>
     <div class="app-container" id="app">
+
+        <!-- ===== 下拉刷新指示器 ===== -->
+        <div id="pullIndicator">
+            <span class="arrow" id="pullArrow">↓</span>
+            <span class="status-text" id="pullStatus">下拉刷新</span>
+            <span class="spinner" id="pullSpinner"></span>
+        </div>
+
+        <!-- ===== 顶部摘要 ===== -->
         <section class="summary-card" id="summaryCard">
             <div class="summary-today">
                 <span class="today-label" id="todayLabel">
@@ -280,8 +1138,28 @@
             <div class="data-timestamp" id="dataTimestamp">净值日期：--</div>
         </section>
 
-        <div class="fund-list" id="fundList"><div class="empty-state"><i class="fas fa-inbox"></i><p>还没有持仓基金</p><div class="sub">点击底部「添加持仓」</div></div></div>
+        <!-- ===== 持仓列表 ===== -->
+        <div class="fund-list" id="fundList">
+            <div class="empty-state"><i class="fas fa-inbox"></i><p>还没有持仓基金</p><div class="sub">点击底部「添加持仓」</div></div>
+        </div>
 
+        <!-- ===== 柱状图卡片 ===== -->
+        <div class="card-block" id="chartBlock">
+            <div class="chart-container" id="chartContainer">
+                <div id="chartEmpty" class="chart-empty">暂无收益数据</div>
+                <canvas id="profitChartCanvas" style="display:none;"></canvas>
+            </div>
+        </div>
+
+        <!-- ===== 持仓分析卡片（饼图 · 海洋渐变 · 图例左侧） ===== -->
+        <div class="card-block" id="analysisBlock">
+            <div class="pie-chart-container" id="pieChartContainer">
+                <canvas id="pieChartCanvas"></canvas>
+            </div>
+            <div id="analysisEmpty" class="analysis-empty" style="display:none;">暂无持仓数据</div>
+        </div>
+
+        <!-- ===== 底部操作栏 ===== -->
         <div class="bottom-action-card" id="bottomActions">
             <div class="action-btn" id="openAddModalBtn"><div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span></div>
             <div class="action-btn" id="batchEditBtn"><div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span></div>
@@ -290,7 +1168,7 @@
         </div>
     </div>
 
-    <!-- 添加基金 -->
+    <!-- ===== 添加基金模态框 ===== -->
     <div class="modal-overlay add-modal" id="modalOverlay">
         <div class="add-content">
             <h2><i class="fas fa-coins"></i> 添加基金</h2>
@@ -300,13 +1178,14 @@
                 <div class="auto-fill-info" id="autoFillInfo"><i class="fas fa-check-circle"></i> <span id="autoFillText">已识别：易方达蓝筹精选</span></div>
                 <input type="number" id="fundCostInput" step="0.0001" inputmode="decimal" placeholder="成本价 (¥) 例如 1.1000">
                 <input type="number" id="fundSharesInput" step="0.01" inputmode="decimal" placeholder="持有份额 例如 1500.00">
+                <input type="text" id="fundIndustryInput" maxlength="20" placeholder="行业标签（必填） 例如 白酒">
             </div>
             <div class="modal-actions"><button class="btn-cancel" id="closeModalBtn">取消</button><button class="btn-cancel" id="confirmAddBtn" disabled>确认添加</button></div>
             <button class="modal-close-btn" id="closeModalBtnCircle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
         </div>
     </div>
 
-    <!-- 数据管理 -->
+    <!-- ===== 数据管理模态框 ===== -->
     <div class="modal-overlay backup-modal" id="backupModalOverlay">
         <div class="backup-content">
             <h2><i class="fas fa-database"></i> 数据管理</h2>
@@ -321,98 +1200,133 @@
         </div>
     </div>
 
-    <!-- 提示 -->
+    <!-- ===== 提示模态框 ===== -->
     <div class="modal-overlay prompt-modal" id="promptModalOverlay">
         <div class="prompt-content"><h2 id="promptTitle">提示</h2><div class="prompt-message" id="promptMessage">消息内容</div><div class="modal-actions" id="promptActions"></div></div>
     </div>
 
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <div class="check-pop" id="checkPop"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
 
     <script>
+        // ================================================================
+        // 完整 JavaScript（柱状图空状态改用 HTML 元素）
+        // ================================================================
         (function() {
+            'use strict';
+
             const STORAGE_H = 'fund_holdings';
             const STORAGE_C = 'fund_data_cache';
+            const STORAGE_A = 'account_profit_history';
+            const STORAGE_T = 'fund_industry_tags';
+
+            const OCEAN_COLORS = ['#1A3A4A', '#2A5F6F', '#3D7A8C', '#5A9AAA', '#7AB8C8', '#A8D0D8'];
+
             let holdings = {};
             let fundDataCache = {};
+            let accountProfitHistory = [];
+            let industryTags = {};
             let editMode = false;
             let privacyMode = false;
             let isUpdating = false;
-            const pendingRequests = new Set();
+            let trendCharts = {};
+            let profitChart = null;
+            let pieChart = null;
+            let currentExpandedCode = null;
+            let isRefreshing = false;
 
+            // ===== 工具函数 =====
             function getToday() { return new Date().toISOString().slice(0, 10); }
-            function isTradingDay(d) { d = d || new Date(); const day = d.getDay(); return day !== 0 && day !== 6; }
-            function getNextTradingDay(date) {
-                const d = new Date(date);
-                d.setDate(d.getDate() + 1);
-                while (!isTradingDay(d)) { d.setDate(d.getDate() + 1); }
-                return d;
+
+            function formatMoney(v) {
+                if (v === undefined || v === null || isNaN(v)) return '--';
+                return (v >= 0 ? '+' : '') + v.toFixed(2);
             }
-            function isDataValid(dataDate) {
-                if (!dataDate) return false;
-                const now = new Date();
-                const today = getToday();
-                if (dataDate === today) return true;
-                const nextTrading = getNextTradingDay(new Date(dataDate));
-                const expireTime = new Date(nextTrading);
-                expireTime.setHours(9, 0, 0, 0);
-                return now < expireTime;
+
+            function round4(v) { return Math.round(v * 10000) / 10000; }
+
+            function escapeHTML(str) {
+                if (!str) return '';
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
             }
-            function isInDeepColorPeriod(navDateStr) {
-                if (!navDateStr) return false;
-                const navDate = new Date(navDateStr + 'T00:00:00');
-                const now = new Date();
-                const nextTradeDay = getNextTradingDay(navDate);
-                const deadline = new Date(nextTradeDay);
-                deadline.setHours(9, 0, 0, 0);
-                return now >= navDate && now <= deadline;
+
+            function isTradingDay(d) {
+                const day = d.getDay();
+                return day !== 0 && day !== 6;
             }
+
             function getValidName(name, code) {
                 if (name && typeof name === 'string' && name.trim().length >= 2) return name.trim();
                 return code;
             }
 
+            // ===== 数据持久化 =====
             function loadData() {
                 try { holdings = JSON.parse(localStorage.getItem(STORAGE_H)) || {}; } catch (e) { holdings = {}; }
                 try { fundDataCache = JSON.parse(localStorage.getItem(STORAGE_C)) || {}; } catch (e) { fundDataCache = {}; }
+                try { accountProfitHistory = JSON.parse(localStorage.getItem(STORAGE_A)) || []; } catch (e) { accountProfitHistory = []; }
+                try { industryTags = JSON.parse(localStorage.getItem(STORAGE_T)) || {}; } catch (e) { industryTags = {}; }
             }
-            function saveAll() {
-                try { localStorage.setItem(STORAGE_H, JSON.stringify(holdings)); localStorage.setItem(STORAGE_C, JSON.stringify(fundDataCache)); }
-                catch (e) { showAlert('数据保存失败，请检查存储空间'); }
-            }
-            loadData();
 
-            function fetchTencent(code) {
+            function saveAll() {
+                localStorage.setItem(STORAGE_H, JSON.stringify(holdings));
+                localStorage.setItem(STORAGE_C, JSON.stringify(fundDataCache));
+                localStorage.setItem(STORAGE_A, JSON.stringify(accountProfitHistory));
+                localStorage.setItem(STORAGE_T, JSON.stringify(industryTags));
+            }
+
+            function hardReset() {
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.startsWith('fund_')) localStorage.removeItem(key);
+                });
+                loadData();
+                renderAll();
+            }
+
+            // ===== API：腾讯净值 =====
+            function fetchTxFund(code) {
                 return new Promise((resolve, reject) => {
                     const varName = 'v_jj' + code;
                     if (window[varName] && typeof window[varName] === 'string') {
-                        const data = parseTencentData(window[varName]);
+                        const data = parseTxData(window[varName]);
                         if (data) { resolve(data); return; }
                     }
                     const script = document.createElement('script');
                     script.src = 'https://qt.gtimg.cn/q=jj' + code;
                     script.async = true;
-                    const tid = setTimeout(() => { cleanup(); reject(new Error('腾讯接口超时')); }, 8000);
+                    const tid = setTimeout(() => { cleanup();
+                        reject(new Error('腾讯接口超时')); }, 8000);
+
                     function cleanup() {
                         clearTimeout(tid);
                         if (script.parentNode) script.parentNode.removeChild(script);
                     }
+
                     script.onload = function() {
                         clearTimeout(tid);
                         try {
                             const raw = window[varName];
                             if (raw && typeof raw === 'string') {
-                                const data = parseTencentData(raw);
-                                if (data) { cleanup(); resolve(data); return; }
+                                const data = parseTxData(raw);
+                                if (data) { cleanup();
+                                    resolve(data); return; }
                             }
-                            cleanup(); reject(new Error('无法解析腾讯数据'));
-                        } catch (e) { cleanup(); reject(e); }
+                            cleanup();
+                            reject(new Error('无法解析腾讯数据'));
+                        } catch (e) { cleanup();
+                            reject(e); }
                     };
-                    script.onerror = function() { cleanup(); reject(new Error('腾讯接口请求失败')); };
+                    script.onerror = function() { cleanup();
+                        reject(new Error('腾讯接口请求失败')); };
                     document.head.appendChild(script);
                 });
             }
-            function parseTencentData(raw) {
+
+            function parseTxData(raw) {
                 if (typeof raw !== 'string') return null;
                 const parts = raw.split('~');
                 if (parts.length < 9) return null;
@@ -423,58 +1337,80 @@
                 return { fundcode: parts[0], name: parts[1], dwjz: nav, gszzl: rate, jzrq: date };
             }
 
+            // ===== 天天基金历史净值（趋势图） =====
+            function fetchTrendData(code) {
+                return new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    const timer = setTimeout(() => { if (script.parentNode) script.remove();
+                        resolve(null); }, 10000);
+                    script.src = 'https://fund.eastmoney.com/pingzhongdata/' + code + '.js';
+                    script.onload = function() {
+                        clearTimeout(timer);
+                        const raw = window.Data_netWorthTrend;
+                        if (raw && raw.length > 0) {
+                            const recent = raw.slice(-30);
+                            const dates = [];
+                            const navs = [];
+                            for (let i = 0; i < recent.length; i++) {
+                                const d = new Date(recent[i].x);
+                                dates.push((d.getMonth() + 1) + '/' + d.getDate());
+                                navs.push(recent[i].y);
+                            }
+                            resolve({ dates, navs });
+                        } else { resolve(null); }
+                        if (script.parentNode) script.remove();
+                        delete window.Data_netWorthTrend;
+                    };
+                    script.onerror = function() { clearTimeout(timer);
+                        if (script.parentNode) script.remove();
+                        resolve(null); };
+                    document.head.appendChild(script);
+                });
+            }
+
             async function fetchFundDataOnly(code) {
-                if (pendingRequests.has(code)) {
-                    return new Promise((resolve) => {
-                        const check = () => {
-                            if (!pendingRequests.has(code)) {
-                                const cache = fundDataCache[code];
-                                if (cache && cache.nav && cache.date && isDataValid(cache.date))
-                                    resolve({ nav: cache.nav, rate: cache.rate || 0, date: cache.date });
-                                else resolve(null);
-                            } else setTimeout(check, 200);
-                        };
-                        setTimeout(check, 100);
-                    });
-                }
-                pendingRequests.add(code);
                 try {
-                    const qt = await fetchTencent(code);
-                    if (qt && qt.dwjz > 0) {
-                        const name = getValidName(qt.name, code);
-                        fundDataCache[code] = { name, nav: qt.dwjz, rate: qt.gszzl, date: qt.jzrq, updateDate: getToday() };
+                    const tx = await fetchTxFund(code);
+                    if (tx && tx.dwjz > 0) {
+                        const name = getValidName(tx.name, code);
+                        fundDataCache[code] = { name, nav: tx.dwjz, rate: tx.gszzl, date: tx.jzrq, updateDate: getToday() };
                         saveAll();
-                        return { nav: qt.dwjz, rate: qt.gszzl, date: qt.jzrq };
+                        return true;
                     }
-                } catch (e) { console.warn(`基金 ${code} 接口请求失败:`, e.message); }
-                finally { pendingRequests.delete(code); }
-                const cache = fundDataCache[code];
-                if (cache && cache.nav && cache.date && isDataValid(cache.date))
-                    return { nav: cache.nav, rate: cache.rate || 0, date: cache.date };
-                return null;
+                } catch (e) { console.warn('fetch error', code, e.message); }
+                return false;
             }
 
             function getDisplayData(code) {
-                const cache = fundDataCache[code];
-                if (cache && cache.nav && cache.date && isDataValid(cache.date))
-                    return { nav: cache.nav, rate: cache.rate || 0, date: cache.date };
+                const cache = fundDataCache[code] || {};
+                if (cache.nav && cache.date) return { nav: cache.nav, rate: cache.rate || 0, date: cache.date };
                 return { nav: 0, rate: 0, date: '' };
             }
 
-            async function batchUpdate(codes) {
-                if (!codes.length) return;
-                const batchSize = 5;
-                for (let i = 0; i < codes.length; i += batchSize) {
-                    const batch = codes.slice(i, i + batchSize);
-                    await Promise.allSettled(batch.map(code => fetchFundDataOnly(code)));
-                }
-                renderAll();
+            function getCardData(code) {
+                const h = holdings[code];
+                if (!h) return null;
+                const cost = parseFloat(h.cost) || 0;
+                const shares = parseFloat(h.shares) || 0;
+                const display = getDisplayData(code);
+                const nav = display.nav || cost;
+                const rate = display.rate || 0;
+                const prev = rate !== 0 ? nav / (1 + rate / 100) : nav;
+                const marketValue = nav * shares;
+                const dayProfit = (nav - prev) * shares;
+                const dayRate = rate;
+                const holdProfit = (nav - cost) * shares;
+                const holdYield = cost > 0 ? ((nav - cost) / cost * 100) : 0;
+                const name = h.name || code;
+                return { name, code, marketValue, dayRate, dayProfit, holdProfit, holdYield, cost, shares };
             }
 
             function computeSummary() {
                 const codes = Object.keys(holdings);
                 if (!codes.length) return { totalAsset: 0, todayProfit: 0, totalProfit: 0, totalYield: 0 };
-                let totalCost = 0, totalMV = 0, todayProfit = 0;
+                let totalCost = 0,
+                    totalMV = 0,
+                    totalPrev = 0;
                 codes.forEach(code => {
                     const h = holdings[code];
                     const cost = parseFloat(h.cost) || 0;
@@ -485,185 +1421,781 @@
                     const rate = display.rate || 0;
                     const prev = rate !== 0 ? nav / (1 + rate / 100) : nav;
                     totalMV += nav * shares;
-                    todayProfit += (nav - prev) * shares;
+                    totalPrev += prev * shares;
                 });
                 const totalProfit = totalMV - totalCost;
+                const todayProfit = totalMV - totalPrev;
                 const totalYield = totalCost > 0 ? (totalProfit / totalCost * 100) : 0;
-                return { totalAsset: totalMV, todayProfit, totalProfit, totalYield };
+                return { totalAsset: round4(totalMV), todayProfit: round4(todayProfit), totalProfit: round4(
+                        totalProfit), totalYield: round4(totalYield) };
             }
 
+            function getTodayProfit() { return computeSummary().todayProfit; }
+
+            // ===== 柱状图快照 =====
+            function saveTodaySnapshot() {
+                const today = getToday();
+                const codes = Object.keys(holdings);
+
+                let hasTodayData = false;
+                for (let code of codes) {
+                    const d = getDisplayData(code);
+                    if (d.date === today && d.nav > 0) {
+                        hasTodayData = true;
+                        break;
+                    }
+                }
+                if (!hasTodayData) return;
+
+                const profit = getTodayProfit();
+                const existing = accountProfitHistory.findIndex(item => item.date === today);
+                if (existing >= 0) {
+                    accountProfitHistory[existing].profit = round4(profit);
+                } else {
+                    accountProfitHistory.push({ date: today, profit: round4(profit) });
+                }
+                accountProfitHistory.sort((a, b) => a.date.localeCompare(b.date));
+                if (accountProfitHistory.length > 30) {
+                    accountProfitHistory = accountProfitHistory.slice(-30);
+                }
+                saveAll();
+            }
+
+            function backfillProfitHistory() {
+                const codes = Object.keys(holdings);
+                if (!codes.length) return;
+                let hasValidData = false;
+                codes.forEach(code => {
+                    const d = getDisplayData(code);
+                    if (d.nav > 0 && d.date) hasValidData = true;
+                });
+                if (!hasValidData) return;
+                const existingDates = new Set(accountProfitHistory.map(item => item.date));
+                let lastDate = null;
+                if (accountProfitHistory.length > 0) {
+                    const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
+                    lastDate = sorted[sorted.length - 1].date;
+                }
+                let startDate = lastDate ? new Date(lastDate) : new Date();
+                startDate.setDate(startDate.getDate() + 1);
+                const endDate = new Date();
+                endDate.setDate(endDate.getDate() - 1);
+                let daysToBackfill = 0;
+                const maxBackfill = 30;
+                const toFill = [];
+                let current = new Date(startDate);
+                while (current <= endDate && daysToBackfill < maxBackfill) {
+                    const dateStr = current.toISOString().slice(0, 10);
+                    if (!existingDates.has(dateStr) && isTradingDay(current)) {
+                        toFill.push(dateStr);
+                    }
+                    current.setDate(current.getDate() + 1);
+                    daysToBackfill++;
+                }
+                if (toFill.length > 0) {
+                    const currentProfit = getTodayProfit();
+                    toFill.forEach(dateStr => {
+                        const existing = accountProfitHistory.findIndex(item => item.date === dateStr);
+                        if (existing < 0) {
+                            accountProfitHistory.push({ date: dateStr, profit: round4(currentProfit),
+                                estimated: true });
+                        }
+                    });
+                    accountProfitHistory.sort((a, b) => a.date.localeCompare(b.date));
+                    if (accountProfitHistory.length > 30) {
+                        accountProfitHistory = accountProfitHistory.slice(-30);
+                    }
+                    saveAll();
+                }
+            }
+
+            // ===== 下拉刷新 =====
+            function initPullToRefresh() {
+                const container = document.getElementById('app');
+                const indicator = document.getElementById('pullIndicator');
+                const arrow = document.getElementById('pullArrow');
+                const status = document.getElementById('pullStatus');
+                const spinner = document.getElementById('pullSpinner');
+                let startY = 0;
+                let isPulling = false;
+                let pullHeight = 0;
+
+                container.addEventListener('touchstart', function(e) {
+                    if (window.scrollY > 5) return;
+                    const touch = e.touches[0];
+                    startY = touch.clientY;
+                    isPulling = false;
+                    pullHeight = 0;
+                }, { passive: true });
+
+                container.addEventListener('touchmove', function(e) {
+                    if (isRefreshing) return;
+                    if (window.scrollY > 5) {
+                        if (isPulling) {
+                            isPulling = false;
+                            indicator.classList.remove('show');
+                            container.style.transform = '';
+                        }
+                        return;
+                    }
+                    const touch = e.touches[0];
+                    const deltaY = touch.clientY - startY;
+                    if (deltaY > 0 && deltaY < 120) {
+                        isPulling = true;
+                        pullHeight = Math.min(deltaY * 0.4, 60);
+                        container.style.transform = 'translateY(' + pullHeight + 'px)';
+                        indicator.classList.add('show');
+                        if (pullHeight > 30) {
+                            arrow.classList.add('flip');
+                            status.textContent = '释放刷新';
+                        } else {
+                            arrow.classList.remove('flip');
+                            status.textContent = '下拉刷新';
+                        }
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+
+                container.addEventListener('touchend', function(e) {
+                    if (!isPulling || isRefreshing) {
+                        container.style.transform = '';
+                        indicator.classList.remove('show');
+                        return;
+                    }
+                    isPulling = false;
+                    if (pullHeight > 30) {
+                        isRefreshing = true;
+                        arrow.classList.remove('flip');
+                        arrow.style.display = 'none';
+                        spinner.classList.add('active');
+                        status.textContent = '刷新中...';
+                        container.style.transform = 'translateY(36px)';
+                        refreshData().then(function() {
+                            isRefreshing = false;
+                            arrow.style.display = 'inline';
+                            spinner.classList.remove('active');
+                            status.textContent = '刷新完成';
+                            container.style.transform = '';
+                            setTimeout(function() { indicator.classList.remove('show'); }, 600);
+                        }).catch(function() {
+                            isRefreshing = false;
+                            arrow.style.display = 'inline';
+                            spinner.classList.remove('active');
+                            status.textContent = '刷新失败';
+                            container.style.transform = '';
+                            setTimeout(function() { indicator.classList.remove('show'); }, 800);
+                        });
+                    } else {
+                        container.style.transform = '';
+                        indicator.classList.remove('show');
+                    }
+                    pullHeight = 0;
+                }, { passive: true });
+            }
+
+            // ===== 渲染：顶部摘要 =====
             function renderSummary() {
-                if (privacyMode) return;
+                if (privacyMode) {
+                    ['todayProfitBig', 'totalAssets', 'totalProfit', 'totalReturn'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) { el.textContent = '***';
+                            el.className = 'stat-number privacy'; }
+                    });
+                    document.getElementById('dataTimestamp').textContent = '净值日期：--';
+                    return;
+                }
                 const codes = Object.keys(holdings);
                 const s = computeSummary();
                 const todayEl = document.getElementById('todayProfitBig');
-                const labelEl = document.getElementById('todayLabel');
                 const tsEl = document.getElementById('dataTimestamp');
                 if (!codes.length) {
-                    todayEl.textContent = '+0.00'; todayEl.className = 'today-value neutral';
-                    labelEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg> 最新盈亏';
-                    document.getElementById('totalAssets').textContent = '0.00'; document.getElementById('totalAssets').className = 'stat-number neutral';
-                    document.getElementById('totalProfit').textContent = '+0.00'; document.getElementById('totalProfit').className = 'stat-number neutral';
-                    document.getElementById('totalReturn').textContent = '0.00%'; document.getElementById('totalReturn').className = 'stat-number neutral';
-                    tsEl.textContent = '净值日期：--'; return;
-                }
-                let latestDate = '', hasValid = false;
-                codes.forEach(code => { const d = getDisplayData(code); if (d.date && d.nav > 0) { hasValid = true; if (d.date > latestDate) latestDate = d.date; } });
-                const val = s.todayProfit;
-                if (!hasValid) {
-                    todayEl.textContent = '--'; todayEl.className = 'today-value neutral';
-                    labelEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg> 数据更新中...';
+                    todayEl.textContent = '+0.00';
+                    todayEl.className = 'today-value neutral';
+                    document.getElementById('totalAssets').textContent = '0.00';
+                    document.getElementById('totalAssets').className = 'stat-number neutral';
+                    document.getElementById('totalProfit').textContent = '+0.00';
+                    document.getElementById('totalProfit').className = 'stat-number neutral';
+                    document.getElementById('totalReturn').textContent = '0.00%';
+                    document.getElementById('totalReturn').className = 'stat-number neutral';
                     tsEl.textContent = '净值日期：--';
-                } else {
-                    todayEl.textContent = (val >= 0 ? '+' : '') + val.toFixed(2);
-                    todayEl.className = 'today-value ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
-                    labelEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg> 最新盈亏';
-                    tsEl.textContent = `净值日期：${latestDate}`;
+                    return;
                 }
+                const val = s.todayProfit;
+                todayEl.textContent = (val >= 0 ? '+' : '') + val.toFixed(2);
+                todayEl.className = 'today-value ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
+
                 function setStat(id, val, isPct) {
                     const el = document.getElementById(id);
-                    if (isPct && val === 0) { el.textContent = '0.00%'; el.className = 'stat-number neutral'; return; }
-                    const prefix = !isPct && val >= 0 ? '+' : '';
-                    el.textContent = prefix + val.toFixed(2) + (isPct ? '%' : '');
-                    el.className = 'stat-number ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
+                    if (isPct) {
+                        el.textContent = val.toFixed(2) + '%';
+                        el.className = 'stat-number ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
+                    } else {
+                        const prefix = val >= 0 ? '+' : '';
+                        el.textContent = prefix + val.toFixed(2);
+                        el.className = 'stat-number ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
+                    }
                 }
                 setStat('totalAssets', s.totalAsset, false);
                 setStat('totalProfit', s.totalProfit, false);
                 setStat('totalReturn', s.totalYield, true);
+                let latestDate = '';
+                codes.forEach(code => {
+                    const d = getDisplayData(code);
+                    if (d.date && d.nav > 0 && d.date > latestDate) latestDate = d.date;
+                });
+                tsEl.textContent = '净值日期：' + (latestDate || '--');
             }
 
+            // ===== 渲染：持仓列表 =====
             function renderFundList() {
                 const container = document.getElementById('fundList');
                 const codes = Object.keys(holdings);
                 if (!codes.length) {
                     container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>还没有持仓基金</p><div class="sub">点击底部「添加持仓」</div></div>';
-                    if (editMode) { editMode = false; updateBottomBar(); }
+                    if (editMode) { editMode = false;
+                        updateBottomBar(); }
                     return;
                 }
                 const sorted = codes.slice().sort((a, b) => {
-                    const hA = holdings[a], hB = holdings[b];
-                    const dA = getDisplayData(a), dB = getDisplayData(b);
+                    const hA = holdings[a],
+                        hB = holdings[b];
+                    const dA = getDisplayData(a),
+                        dB = getDisplayData(b);
                     const mvA = (dA.nav || parseFloat(hA.cost) || 0) * (parseFloat(hA.shares) || 0);
                     const mvB = (dB.nav || parseFloat(hB.cost) || 0) * (parseFloat(hB.shares) || 0);
                     return mvB - mvA;
                 });
-                const today = getToday();
                 let html = '';
                 sorted.forEach(code => {
-                    const h = holdings[code];
-                    const d = fundDataCache[code] || {};
-                    const display = getDisplayData(code);
-                    const cost = parseFloat(h.cost) || 0;
-                    const shares = parseFloat(h.shares) || 0;
-                    const currentNav = display.nav || cost;
-                    const rate = display.rate || 0;
-                    const prevNav = rate !== 0 ? currentNav / (1 + rate / 100) : currentNav;
-                    const marketValue = currentNav * shares;
-                    const todayProfit = (currentNav - prevNav) * shares;
-                    const todayProfitRate = prevNav !== 0 ? (todayProfit / (prevNav * shares)) * 100 : 0;
-                    const holdReturn = cost > 0 ? ((currentNav - cost) / cost) * 100 : 0;
-                    const holdProfit = (currentNav - cost) * shares;
-                    let name = getValidName(d.name, code);
-                    if (!name || name === code) name = h.name || code;
-                    const displayName = name.length > 14 ? name.slice(0, 14) + '…' : name;
+                    const data = getCardData(code);
+                    if (!data) return;
+                    const dayRateStr = data.dayRate !== null ? (data.dayRate >= 0 ? '+' : '') + data.dayRate.toFixed(
+                        2) + '%' : '--';
+                    const dayProfitStr = formatMoney(data.dayProfit);
+                    const holdProfitStr = formatMoney(data.holdProfit);
+                    const holdYieldStr = data.holdYield !== null ? (data.holdYield >= 0 ? '+' : '') + data
+                        .holdYield.toFixed(2) + '%' : '--';
+                    const cls = data.dayRate > 0 ? 'positive' : (data.dayRate < 0 ? 'negative' : 'neutral');
+                    const displayName = data.name.length > 14 ? data.name.slice(0, 14) + '…' : data.name;
                     let decorClass = 'decor-old';
-                    if (display.date && display.nav > 0 && isInDeepColorPeriod(display.date)) {
-                        decorClass = 'decor-today';
+                    const display = getDisplayData(code);
+                    if (display.date && display.nav > 0) {
+                        const navDate = new Date(display.date + 'T00:00:00');
+                        const now = new Date();
+                        const nextTradeDay = new Date(navDate);
+                        nextTradeDay.setDate(nextTradeDay.getDate() + 1);
+                        while (!isTradingDay(nextTradeDay)) { nextTradeDay.setDate(nextTradeDay.getDate() + 1); }
+                        nextTradeDay.setHours(9, 0, 0, 0);
+                        if (now >= navDate && now <= nextTradeDay) decorClass = 'decor-today';
                     }
-                    const metrics = [
-                        { label: '最新收益率', value: todayProfitRate, pct: true },
-                        { label: '最新盈亏', value: todayProfit, pct: false },
-                        { label: '持有收益率', value: holdReturn, pct: true },
-                        { label: '持有盈亏', value: holdProfit, pct: false }
-                    ];
-                    const metricHtml = metrics.map(m => {
-                        const val = m.value;
-                        const sign = val >= 0 ? '+' : '';
-                        const displayVal = isNaN(val) ? '0.00' : sign + val.toFixed(2) + (m.pct ? '%' : '');
-                        const cls = val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral';
-                        return `<div class="metric-item"><span class="metric-label">${m.label}</span><span class="metric-value ${cls}">${displayVal}</span></div>`;
-                    }).join('');
-                    const editAreaClass = 'fund-edit-area' + (editMode ? ' active' : '');
-                    const editHtml = `<div class="${editAreaClass}" data-code="${code}">
-                        <div class="edit-row">
-                            <input type="number" class="edit-input" id="editCost_${code}" value="${cost.toFixed(4)}" step="any" inputmode="decimal" placeholder="成本">
-                            <input type="number" class="edit-input" id="editShares_${code}" value="${shares.toFixed(2)}" step="any" inputmode="decimal" placeholder="份额">
-                            <button class="edit-delete-btn" data-code="${code}">删除</button>
-                        </div>
-                        <div class="edit-hint"><span class="current-cost">当前成本: ${cost.toFixed(4)}</span><span class="hint-tip">💡 修改后持有收益将重新计算</span></div>
-                    </div>`;
-                    html += `<div class="fund-card ${decorClass}${editMode ? ' edit-mode' : ''}" data-code="${code}">
+                    const clickAttr = editMode ? '' : `onclick="window.toggleTrend('${code}')"`;
+                    html += `<div class="fund-card ${decorClass}${editMode ? ' edit-mode' : ''}" data-code="${code}" ${clickAttr}>
                         <div class="fund-content">
                             <div class="fund-row fund-row-top">
-                                <div class="fund-name-wrap"><span class="fund-name" title="${escapeHtml(name)}">${escapeHtml(displayName)}</span></div>
+                                <div class="fund-name-wrap"><span class="fund-name">${escapeHTML(displayName)}</span></div>
                                 <div class="fund-code-wrap"><span class="fund-code-standalone">${code}</span></div>
                                 <div class="fund-right-actions">
                                     <span class="fund-market-value">
-                                        <i class="fas fa-coins coin-icon"></i> ¥${marketValue.toFixed(2)}
+                                        <i class="fas fa-coins coin-icon"></i> ¥${data.marketValue.toFixed(2)}
                                     </span>
                                 </div>
                             </div>
-                            <div class="fund-row-metrics">${metricHtml}</div>
-                            ${editHtml}
+                            <div class="fund-row-metrics">
+                                <div class="metric-item"><span class="metric-label">最新收益率</span><span class="metric-value ${cls}">${dayRateStr}</span></div>
+                                <div class="metric-item"><span class="metric-label">最新盈亏</span><span class="metric-value ${data.dayProfit > 0 ? 'positive' : data.dayProfit < 0 ? 'negative' : 'neutral'}">${dayProfitStr}</span></div>
+                                <div class="metric-item"><span class="metric-label">持有收益率</span><span class="metric-value ${data.holdYield > 0 ? 'positive' : data.holdYield < 0 ? 'negative' : 'neutral'}">${holdYieldStr}</span></div>
+                                <div class="metric-item"><span class="metric-label">持有盈亏</span><span class="metric-value ${data.holdProfit > 0 ? 'positive' : data.holdProfit < 0 ? 'negative' : 'neutral'}">${holdProfitStr}</span></div>
+                            </div>
+                            <div class="trend-wrapper" id="trend-${code}" style="${editMode ? 'display:none;' : ''}">
+                                <div class="trend-loading" id="trendLoading-${code}">加载中...</div>
+                                <canvas id="trendCanvas-${code}" style="display:none;"></canvas>
+                            </div>
+                            <div class="fund-edit-area ${editMode ? 'active' : ''}" data-code="${code}">
+                                <div class="edit-row">
+                                    <input type="number" class="edit-input" id="editCost_${code}" value="${data.cost.toFixed(4)}" step="any" inputmode="decimal" placeholder="成本">
+                                    <input type="number" class="edit-input" id="editShares_${code}" value="${data.shares.toFixed(2)}" step="any" inputmode="decimal" placeholder="份额">
+                                    <input type="text" class="edit-input" id="editTag_${code}" value="${escapeHTML(industryTags[code] || '')}" placeholder="行业标签">
+                                    <button class="edit-delete-btn" data-code="${code}">删除</button>
+                                </div>
+                                <div class="edit-hint">
+                                    <span class="current-cost">当前成本: ${data.cost.toFixed(4)}</span>
+                                    <span class="hint-tip">💡 修改后持有收益将重新计算</span>
+                                </div>
+                            </div>
                         </div>
                     </div>`;
                 });
                 container.innerHTML = html;
                 if (editMode) {
                     container.querySelectorAll('.edit-delete-btn').forEach(btn => {
-                        btn.addEventListener('click', function() { deleteFund(this.getAttribute('data-code')); });
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            deleteFund(this.getAttribute('data-code'));
+                        });
                     });
-                    const first = container.querySelector('.edit-input');
-                    if (first) setTimeout(() => first.focus(), 100);
+                }
+                updateBottomBar();
+            }
+
+            // ===== 趋势图切换 =====
+            window.toggleTrend = function(code) {
+                if (editMode) return;
+                const wrapper = document.getElementById('trend-' + code);
+                if (!wrapper) return;
+                if (currentExpandedCode === code) {
+                    wrapper.classList.remove('expanded');
+                    const canvas = document.getElementById('trendCanvas-' + code);
+                    if (canvas) canvas.style.display = 'none';
+                    const loading = document.getElementById('trendLoading-' + code);
+                    if (loading) loading.style.display = 'block';
+                    if (trendCharts[code]) {
+                        trendCharts[code].destroy();
+                        delete trendCharts[code];
+                    }
+                    currentExpandedCode = null;
+                    return;
+                }
+                if (currentExpandedCode) {
+                    const oldWrapper = document.getElementById('trend-' + currentExpandedCode);
+                    if (oldWrapper) {
+                        oldWrapper.classList.remove('expanded');
+                        const oldCanvas = document.getElementById('trendCanvas-' + currentExpandedCode);
+                        if (oldCanvas) oldCanvas.style.display = 'none';
+                        const oldLoading = document.getElementById('trendLoading-' + currentExpandedCode);
+                        if (oldLoading) oldLoading.style.display = 'block';
+                        if (trendCharts[currentExpandedCode]) {
+                            trendCharts[currentExpandedCode].destroy();
+                            delete trendCharts[currentExpandedCode];
+                        }
+                    }
+                }
+                wrapper.classList.add('expanded');
+                const loading = document.getElementById('trendLoading-' + code);
+                const canvas = document.getElementById('trendCanvas-' + code);
+                if (loading) loading.style.display = 'block';
+                if (canvas) canvas.style.display = 'none';
+                currentExpandedCode = code;
+
+                fetchTrendData(code).then(data => {
+                    if (!data || !data.navs || data.navs.length < 2) {
+                        if (loading) {
+                            loading.innerHTML =
+                                '暂无历史数据<div class="trend-retry-btn" onclick="window.toggleTrend(\'' +
+                                code + '\')">重试</div>';
+                        }
+                        return;
+                    }
+                    if (loading) loading.style.display = 'none';
+                    if (canvas) {
+                        canvas.style.display = 'block';
+                        const ctx = canvas.getContext('2d');
+                        const lineColor = '#3D7A8C';
+                        const grad = ctx.createLinearGradient(0, 0, 0, 150);
+                        grad.addColorStop(0, 'rgba(61, 122, 140, 0.40)');
+                        grad.addColorStop(0.5, 'rgba(61, 122, 140, 0.15)');
+                        grad.addColorStop(1, 'rgba(61, 122, 140, 0.03)');
+
+                        if (trendCharts[code]) {
+                            trendCharts[code].destroy();
+                            delete trendCharts[code];
+                        }
+
+                        trendCharts[code] = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.dates,
+                                datasets: [{
+                                    data: data.navs,
+                                    borderColor: lineColor,
+                                    backgroundColor: grad,
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointRadius: 0,
+                                    pointHoverRadius: 4,
+                                    pointBackgroundColor: lineColor,
+                                    borderWidth: 1.8
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                interaction: { intersect: false, mode: 'index' },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(255,255,255,0.95)',
+                                        titleColor: '#0b1a33',
+                                        bodyColor: '#0b1a33',
+                                        borderColor: 'rgba(0,0,0,0.06)',
+                                        borderWidth: 1,
+                                        cornerRadius: 10,
+                                        padding: 8,
+                                        callbacks: {
+                                            label: function(context) {
+                                                return '净值: ' + context.parsed.y.toFixed(4);
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        ticks: { color: '#94a3b8', font: { size: 7 },
+                                        maxTicksLimit: 8 },
+                                        grid: { display: false }
+                                    },
+                                    y: {
+                                        ticks: { color: '#94a3b8', font: { size: 7 },
+                                            count: 4 },
+                                        grid: { color: 'rgba(0,0,0,0.04)' }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }).catch(() => {
+                    if (loading) {
+                        loading.innerHTML =
+                            '加载失败<div class="trend-retry-btn" onclick="window.toggleTrend(\'' + code +
+                            '\')">重试</div>';
+                    }
+                });
+            };
+
+            // ===== 柱状图（空状态改用 HTML 元素） =====
+            function renderProfitChart() {
+                const canvas = document.getElementById('profitChartCanvas');
+                const emptyEl = document.getElementById('chartEmpty');
+                if (!canvas || !emptyEl) return;
+
+                if (profitChart) { profitChart.destroy();
+                    profitChart = null; }
+
+                if (accountProfitHistory.length === 0) {
+                    canvas.style.display = 'none';
+                    emptyEl.style.display = 'flex';
+                    return;
+                }
+
+                canvas.style.display = 'block';
+                emptyEl.style.display = 'none';
+
+                const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
+                const labels = sorted.map(item => item.date.slice(5));
+                const data = sorted.map(item => item.profit);
+                const colors = data.map(v => v >= 0 ? '#E05050' : '#2A9D8F');
+                const ctx = canvas.getContext('2d');
+
+                profitChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderRadius: 4,
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(255,255,255,0.95)',
+                                titleColor: '#0b1a33',
+                                bodyColor: '#0b1a33',
+                                borderColor: 'rgba(0,0,0,0.06)',
+                                borderWidth: 1,
+                                cornerRadius: 10,
+                                padding: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        return (context.parsed.y >= 0 ? '+' : '') + context.parsed.y
+                                            .toFixed(2) + ' 元';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#94a3b8', font: { size: 8 }, maxTicksLimit: 10 },
+                                grid: { color: 'rgba(0,0,0,0.04)' }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8', font: { size: 8 }, callback: function(v) {
+                                        return (v >= 0 ? '+' : '') + v.toFixed(0); } },
+                                grid: { color: 'rgba(0,0,0,0.04)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ===== 饼图 =====
+            function renderPieChart() {
+                const canvas = document.getElementById('pieChartCanvas');
+                const emptyEl = document.getElementById('analysisEmpty');
+                if (!canvas) return;
+
+                const codes = Object.keys(holdings);
+
+                if (!codes.length) {
+                    if (pieChart) { pieChart.destroy();
+                        pieChart = null; }
+                    canvas.style.display = 'none';
+                    if (emptyEl) emptyEl.style.display = 'block';
+                    return;
+                }
+
+                const industryMap = {};
+                let total = 0;
+                codes.forEach(code => {
+                    const data = getCardData(code);
+                    if (!data || data.marketValue <= 0) return;
+                    const tag = industryTags[code] || '未分类';
+                    industryMap[tag] = (industryMap[tag] || 0) + data.marketValue;
+                    total += data.marketValue;
+                });
+
+                if (total <= 0 || Object.keys(industryMap).length === 0) {
+                    if (pieChart) { pieChart.destroy();
+                        pieChart = null; }
+                    canvas.style.display = 'none';
+                    if (emptyEl) emptyEl.style.display = 'block';
+                    return;
+                }
+
+                canvas.style.display = 'block';
+                if (emptyEl) emptyEl.style.display = 'none';
+
+                const labels = Object.keys(industryMap);
+                const values = labels.map(k => industryMap[k]);
+                const colors = OCEAN_COLORS.slice(0, labels.length);
+
+                const ctx = canvas.getContext('2d');
+                if (pieChart) { pieChart.destroy();
+                    pieChart = null; }
+
+                pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: colors,
+                            borderColor: '#ffffff',
+                            borderWidth: 2.5,
+                            hoverOffset: 12
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                top: 4,
+                                bottom: 4,
+                                left: 4,
+                                right: 8
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'left',
+                                align: 'center',
+                                labels: {
+                                    padding: 10,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: { size: 11, weight: '500' },
+                                    color: '#0b1a33',
+                                    boxWidth: 10,
+                                    boxHeight: 10
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(255,255,255,0.95)',
+                                titleColor: '#0b1a33',
+                                bodyColor: '#0b1a33',
+                                borderColor: 'rgba(0,0,0,0.06)',
+                                borderWidth: 1,
+                                cornerRadius: 10,
+                                padding: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const pct = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': ' + pct + '%';
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '0%'
+                    }
+                });
+            }
+
+            // ===== 全部渲染 =====
+            function renderAll() {
+                renderSummary();
+                renderFundList();
+                renderProfitChart();
+                renderPieChart();
+                const chartBlock = document.getElementById('chartBlock');
+                const analysisBlock = document.getElementById('analysisBlock');
+                if (editMode) {
+                    chartBlock.classList.add('edit-hidden');
+                    analysisBlock.classList.add('edit-hidden');
+                } else {
+                    chartBlock.classList.remove('edit-hidden');
+                    analysisBlock.classList.remove('edit-hidden');
+                }
+                updateBottomBar();
+            }
+
+            // ===== 底部操作栏 =====
+            function updateBottomBar() {
+                const bar = document.getElementById('bottomActions');
+                const addBtn = document.getElementById('openAddModalBtn');
+                const batchBtn = document.getElementById('batchEditBtn');
+                const dataBtn = document.getElementById('openBackupModalBtn');
+                const refreshBtn = document.getElementById('refreshBtn');
+                if (editMode) {
+                    bar.classList.add('edit-mode');
+                    addBtn.style.display = 'none';
+                    dataBtn.style.display = 'none';
+                    refreshBtn.style.display = 'none';
+                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
+                    batchBtn.className = 'action-btn edit-highlight';
+                    batchBtn.style.display = 'flex';
+                    batchBtn.onclick = () => exitEditMode();
+                } else {
+                    bar.classList.remove('edit-mode');
+                    addBtn.style.display = 'flex';
+                    dataBtn.style.display = 'flex';
+                    refreshBtn.style.display = 'flex';
+                    batchBtn.style.display = 'flex';
+                    addBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
+                    addBtn.className = 'action-btn';
+                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
+                    batchBtn.className = 'action-btn';
+                    batchBtn.onclick = () => enterEditMode();
+                    dataBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
+                    dataBtn.className = 'action-btn';
+                    refreshBtn.onclick = function() {
+                        const icon = this.querySelector('.icon-wrap');
+                        if (icon) { icon.classList.remove('pop');
+                            void icon.offsetWidth;
+                            icon.classList.add('pop'); }
+                        refreshData();
+                    };
                 }
             }
 
-            function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
-
-            function renderAll() { renderSummary(); renderFundList(); updateBottomBar(); }
-
-            function showCheck() {
-                const el = document.getElementById('checkPop'); if (!el) return;
-                el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-                setTimeout(() => el.classList.remove('show'), 600);
-            }
-
+            // ===== 刷新数据 =====
             async function refreshData() {
                 if (isUpdating) return;
                 showCheck();
                 isUpdating = true;
-                const timeoutId = setTimeout(() => { if (isUpdating) { isUpdating = false; console.log('刷新超时，已解锁'); } }, 15000);
-                try { const codes = Object.keys(holdings); if (codes.length) await batchUpdate(codes); renderAll(); }
-                catch (e) { console.warn('刷新失败', e); showAlert('刷新失败，请检查网络后重试'); }
-                finally { clearTimeout(timeoutId); isUpdating = false; }
+                const timeoutId = setTimeout(() => { if (isUpdating) { isUpdating = false;
+                        console.log('刷新超时，已解锁'); } }, 15000);
+                try {
+                    const codes = Object.keys(holdings);
+                    if (codes.length) {
+                        for (let i = 0; i < codes.length; i++) {
+                            await fetchFundDataOnly(codes[i]);
+                        }
+                        saveTodaySnapshot();
+                    }
+                    renderAll();
+                } catch (e) {
+                    console.warn('刷新失败', e);
+                    showAlert('刷新失败，请检查网络后重试');
+                } finally {
+                    clearTimeout(timeoutId);
+                    isUpdating = false;
+                }
             }
 
-            function enterEditMode() { if (!Object.keys(holdings).length) { showAlert('暂无持仓'); return; } editMode = true; renderAll(); }
+            function showCheck() {
+                const el = document.getElementById('checkPop');
+                if (!el) return;
+                el.classList.remove('show');
+                void el.offsetWidth;
+                el.classList.add('show');
+                setTimeout(() => el.classList.remove('show'), 600);
+            }
+
+            // ===== 编辑模式 =====
+            function enterEditMode() {
+                if (!Object.keys(holdings).length) {
+                    showAlert('暂无持仓');
+                    return;
+                }
+                if (currentExpandedCode) {
+                    const wrapper = document.getElementById('trend-' + currentExpandedCode);
+                    if (wrapper) wrapper.classList.remove('expanded');
+                    const canvas = document.getElementById('trendCanvas-' + currentExpandedCode);
+                    if (canvas) canvas.style.display = 'none';
+                    const loading = document.getElementById('trendLoading-' + currentExpandedCode);
+                    if (loading) loading.style.display = 'block';
+                    if (trendCharts[currentExpandedCode]) {
+                        trendCharts[currentExpandedCode].destroy();
+                        delete trendCharts[currentExpandedCode];
+                    }
+                    currentExpandedCode = null;
+                }
+                editMode = true;
+                renderAll();
+            }
+
             function exitEditMode() {
                 const codes = Object.keys(holdings);
                 let changed = false;
                 codes.forEach(code => {
                     const ci = document.getElementById('editCost_' + code);
                     const si = document.getElementById('editShares_' + code);
+                    const ti = document.getElementById('editTag_' + code);
                     if (ci && si) {
-                        const nc = parseFloat(ci.value), ns = parseFloat(si.value);
+                        const nc = parseFloat(ci.value);
+                        const ns = parseFloat(si.value);
+                        const nt = ti ? ti.value.trim() : '';
                         if (!isNaN(nc) && nc > 0 && !isNaN(ns) && ns > 0) {
-                            if (holdings[code].cost !== nc || holdings[code].shares !== ns) { holdings[code].cost = nc; holdings[code].shares = ns; changed = true; }
+                            const roundedCost = round4(nc);
+                            const roundedShares = round4(ns);
+                            if (holdings[code].cost !== roundedCost || holdings[code].shares !== roundedShares) {
+                                holdings[code].cost = roundedCost;
+                                holdings[code].shares = roundedShares;
+                                changed = true;
+                            }
+                            if (industryTags[code] !== nt) {
+                                if (nt) { industryTags[code] = nt; } else { delete industryTags[code]; }
+                                changed = true;
+                            }
                         }
                     }
                 });
-                if (changed) { saveAll(); refreshData(); }
-                editMode = false; renderAll();
+                if (changed) { saveAll();
+                    refreshData(); }
+                editMode = false;
+                renderAll();
             }
+
             function deleteFund(code) {
                 showConfirm('确定删除 ' + code + ' 吗？').then(ok => {
                     if (!ok) return;
-                    delete holdings[code]; delete fundDataCache[code]; saveAll();
+                    delete holdings[code];
+                    delete fundDataCache[code];
+                    delete industryTags[code];
+                    saveAll();
                     if (Object.keys(holdings).length === 0 && editMode) editMode = false;
                     renderAll();
                 });
             }
 
+            // ===== 提示弹窗 =====
             const promptOverlay = document.getElementById('promptModalOverlay');
             const promptTitle = document.getElementById('promptTitle');
             const promptMessage = document.getElementById('promptMessage');
@@ -671,7 +2203,8 @@
             let promptResolve = null;
 
             function showPrompt(title, msg, btns) {
-                if (promptResolve) { promptResolve(null); promptResolve = null; }
+                if (promptResolve) { promptResolve(null);
+                    promptResolve = null; }
                 return new Promise(resolve => {
                     promptResolve = resolve;
                     promptTitle.textContent = title || '提示';
@@ -681,16 +2214,37 @@
                         const el = document.createElement('button');
                         el.textContent = b.text;
                         el.className = b.cls || 'btn-confirm';
-                        el.onclick = () => { promptOverlay.classList.remove('active'); const cb = promptResolve; promptResolve = null; if (cb) cb(b.value); };
+                        el.onclick = () => {
+                            promptOverlay.classList.remove('active');
+                            const cb = promptResolve;
+                            promptResolve = null;
+                            if (cb) cb(b.value);
+                        };
                         promptActions.appendChild(el);
                     });
                     promptOverlay.classList.add('active');
                 });
             }
-            function showAlert(msg) { return showPrompt('提示', msg, [{ text: '确定', cls: 'btn-confirm', value: true }]); }
-            function showConfirm(msg) { return showPrompt('确认', msg, [{ text: '取消', cls: 'btn-cancel', value: false }, { text: '确定', cls: 'btn-danger', value: true }]); }
-            promptOverlay.addEventListener('click', function(e) { if (e.target === promptOverlay && promptResolve) { promptOverlay.classList.remove('active'); const cb = promptResolve; promptResolve = null; if (cb) cb(null); } });
 
+            function showAlert(msg) { return showPrompt('提示', msg, [{ text: '确定', cls: 'btn-confirm', value: true }]); }
+
+            function showConfirm(msg) {
+                return showPrompt('确认', msg, [
+                    { text: '取消', cls: 'btn-cancel', value: false },
+                    { text: '确定', cls: 'btn-danger', value: true }
+                ]);
+            }
+
+            promptOverlay.addEventListener('click', function(e) {
+                if (e.target === promptOverlay && promptResolve) {
+                    promptOverlay.classList.remove('active');
+                    const cb = promptResolve;
+                    promptResolve = null;
+                    if (cb) cb(null);
+                }
+            });
+
+            // ===== 添加基金模态框 =====
             function setupModal() {
                 const overlay = document.getElementById('modalOverlay');
                 const closeBtn = document.getElementById('closeModalBtn');
@@ -699,6 +2253,7 @@
                 const codeInput = document.getElementById('fundCodeInput');
                 const costInput = document.getElementById('fundCostInput');
                 const sharesInput = document.getElementById('fundSharesInput');
+                const industryInput = document.getElementById('fundIndustryInput');
                 const closeCircle = document.getElementById('closeModalBtnCircle');
                 const infoBox = document.getElementById('autoFillInfo');
                 const infoText = document.getElementById('autoFillText');
@@ -708,14 +2263,25 @@
                 function openAddHandler() {
                     if (editMode) return;
                     const icon = openBtn.querySelector('.icon-wrap');
-                    if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
-                    confirmBtn.disabled = true; codeInput.value = ''; costInput.value = ''; sharesInput.value = ''; infoBox.classList.remove('show'); fetchName = '';
-                    overlay.classList.add('active'); setTimeout(() => codeInput.focus(), 300);
+                    if (icon) { icon.classList.remove('pop');
+                        void icon.offsetWidth;
+                        icon.classList.add('pop'); }
+                    confirmBtn.disabled = true;
+                    codeInput.value = '';
+                    costInput.value = '';
+                    sharesInput.value = '';
+                    industryInput.value = '';
+                    infoBox.classList.remove('show');
+                    fetchName = '';
+                    overlay.classList.add('active');
+                    setTimeout(() => codeInput.focus(), 300);
                 }
                 openBtn.addEventListener('click', openAddHandler);
 
-                function closeModal() { overlay.classList.remove('active'); fetchName = ''; }
-                closeBtn.onclick = closeModal; closeCircle.onclick = closeModal;
+                function closeModal() { overlay.classList.remove('active');
+                    fetchName = ''; }
+                closeBtn.onclick = closeModal;
+                closeCircle.onclick = closeModal;
                 overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
 
                 codeInput.addEventListener('input', function() {
@@ -723,12 +2289,28 @@
                     clearTimeout(identifyTimer);
                     if (code.length === 6 && /^\d{6}$/.test(code)) {
                         identifyTimer = setTimeout(() => {
-                            fetchTencent(code).then(data => {
-                                if (data && data.name) { fetchName = data.name; infoText.textContent = '已识别：' + data.name; infoBox.classList.add('show'); confirmBtn.disabled = false; }
-                                else { infoBox.classList.remove('show'); confirmBtn.disabled = true; fetchName = ''; }
-                            }).catch(() => { infoBox.classList.remove('show'); confirmBtn.disabled = true; fetchName = ''; });
+                            fetchTxFund(code).then(data => {
+                                if (data && data.name) {
+                                    fetchName = data.name;
+                                    infoText.textContent = '已识别：' + data.name;
+                                    infoBox.classList.add('show');
+                                    confirmBtn.disabled = false;
+                                } else {
+                                    infoBox.classList.remove('show');
+                                    confirmBtn.disabled = true;
+                                    fetchName = '';
+                                }
+                            }).catch(() => {
+                                infoBox.classList.remove('show');
+                                confirmBtn.disabled = true;
+                                fetchName = '';
+                            });
                         }, 400);
-                    } else { infoBox.classList.remove('show'); confirmBtn.disabled = true; fetchName = ''; }
+                    } else {
+                        infoBox.classList.remove('show');
+                        confirmBtn.disabled = true;
+                        fetchName = '';
+                    }
                 });
 
                 confirmBtn.addEventListener('click', async function() {
@@ -738,24 +2320,54 @@
                         const code = codeInput.value.trim();
                         const cost = parseFloat(costInput.value);
                         const shares = parseFloat(sharesInput.value);
-                        if (code.length !== 6 || !/^\d{6}$/.test(code)) { await showAlert('请输入6位数字代码'); return; }
-                        if (isNaN(cost) || cost <= 0) { await showAlert('请输入有效成本价'); return; }
-                        if (isNaN(shares) || shares <= 0) { await showAlert('请输入有效份额'); return; }
+                        const industry = industryInput.value.trim();
+                        if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+                            await showAlert('请输入6位数字代码');
+                            return;
+                        }
+                        if (isNaN(cost) || cost <= 0) {
+                            await showAlert('请输入有效成本价');
+                            return;
+                        }
+                        if (isNaN(shares) || shares <= 0) {
+                            await showAlert('请输入有效份额');
+                            return;
+                        }
+                        if (!industry) {
+                            await showAlert('请输入行业标签（必填）');
+                            return;
+                        }
                         let name = fetchName;
-                        if (!name) { try { const d = await fetchTencent(code); if (d && d.name) name = d.name; } catch (e) {} }
-                        if (!name) { await showAlert('未能识别基金代码，请检查网络后重试'); return; }
-                        if (holdings[code]) { const overwrite = await showConfirm('已存在 ' + name + '，是否覆盖？'); if (!overwrite) return; }
-                        holdings[code] = { cost, shares, name }; saveAll();
+                        if (!name) {
+                            try {
+                                const d = await fetchTxFund(code);
+                                if (d && d.name) name = d.name;
+                            } catch (e) {}
+                        }
+                        if (!name) {
+                            await showAlert('未能识别基金代码，请检查网络后重试');
+                            return;
+                        }
+                        if (holdings[code]) {
+                            const overwrite = await showConfirm('已存在 ' + name + '，是否覆盖？');
+                            if (!overwrite) return;
+                        }
+                        holdings[code] = { cost: round4(cost), shares: round4(shares), name };
+                        industryTags[code] = industry;
+                        saveAll();
                         closeModal();
                         await fetchFundDataOnly(code);
                         renderAll();
                     } catch (err) {
                         console.error('添加失败:', err);
                         await showAlert('添加失败，请重试');
-                    } finally { this.disabled = false; }
+                    } finally {
+                        this.disabled = false;
+                    }
                 });
             }
 
+            // ===== 数据管理 =====
             function setupBackup() {
                 const overlay = document.getElementById('backupModalOverlay');
                 const openBtn = document.getElementById('openBackupModalBtn');
@@ -768,7 +2380,9 @@
                 function openBackupHandler() {
                     if (editMode) { showAlert('请先完成编辑'); return; }
                     const icon = openBtn.querySelector('.icon-wrap');
-                    if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
+                    if (icon) { icon.classList.remove('pop');
+                        void icon.offsetWidth;
+                        icon.classList.add('pop'); }
                     overlay.classList.add('active');
                 }
                 openBtn.addEventListener('click', openBackupHandler);
@@ -779,56 +2393,88 @@
 
                 exportBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const data = JSON.stringify({ holdings, fundDataCache }, null, 2);
+                    const data = JSON.stringify({ holdings, fundDataCache, accountProfitHistory, industryTags },
+                        null, 2);
                     const blob = new Blob([data], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a'); a.href = url; a.download = 'iFunds_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-                    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'iFunds_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
                 });
+
                 importInput.addEventListener('change', async function(e) {
                     e.stopPropagation();
-                    const file = this.files[0]; if (!file) return;
+                    const file = this.files[0];
+                    if (!file) return;
                     const reader = new FileReader();
                     reader.onload = async function(ev) {
                         try {
                             const data = JSON.parse(ev.target.result);
-                            if (data.holdings && typeof data.holdings === 'object') {
-                                const count = Object.keys(data.holdings).length;
-                                const ok = await showConfirm('将导入 ' + count + ' 只基金，覆盖当前数据？');
-                                if (ok) { holdings = data.holdings || {}; fundDataCache = data.fundDataCache || {}; saveAll(); closeModal(); await refreshData(); }
-                            } else await showAlert('配置格式无效，缺少持仓数据');
+                            if (!data.holdings || typeof data.holdings !== 'object') {
+                                await showAlert('配置格式无效，缺少持仓数据');
+                                return;
+                            }
+                            const codes = Object.keys(data.holdings);
+                            let valid = true;
+                            for (let code of codes) {
+                                const h = data.holdings[code];
+                                if (!/^\d{6}$/.test(code) || typeof h.cost !== 'number' || h.cost <= 0 ||
+                                    typeof h.shares !== 'number' || h.shares <= 0) {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+                            if (!valid) {
+                                await showAlert('导入数据格式错误：请确保每个基金有6位数字代码、正数成本和份额');
+                                return;
+                            }
+                            const count = codes.length;
+                            const ok = await showConfirm('将导入 ' + count + ' 只基金，覆盖当前数据？');
+                            if (ok) {
+                                holdings = data.holdings || {};
+                                fundDataCache = data.fundDataCache || {};
+                                accountProfitHistory = data.accountProfitHistory || [];
+                                industryTags = data.industryTags || {};
+                                saveAll();
+                                closeModal();
+                                await refreshData();
+                            }
                         } catch (_) { await showAlert('文件解析失败，请确认是有效的JSON文件'); }
                     };
-                    reader.readAsText(file); this.value = '';
+                    reader.readAsText(file);
+                    this.value = '';
                 });
-                clearCacheBtn.addEventListener('click', async function(e) { e.stopPropagation(); const ok = await showConfirm('清除所有缓存数据？（持仓配置保留）'); if (ok) { fundDataCache = {}; saveAll(); closeModal(); await refreshData(); await showAlert('缓存已清除'); } });
-                hardResetBtn.addEventListener('click', async function(e) { e.stopPropagation(); const ok = await showConfirm('⚠️ 硬重置将清除所有数据并重新加载页面，确定吗？'); if (ok) { localStorage.clear(); location.reload(true); } });
+
+                clearCacheBtn.addEventListener('click', async function(e) {
+                    e.stopPropagation();
+                    const ok = await showConfirm('清除所有缓存数据？（持仓配置保留）');
+                    if (ok) {
+                        fundDataCache = {};
+                        saveAll();
+                        closeModal();
+                        await refreshData();
+                        await showAlert('缓存已清除');
+                    }
+                });
+
+                hardResetBtn.addEventListener('click', async function(e) {
+                    e.stopPropagation();
+                    const ok = await showConfirm('⚠️ 硬重置将清除所有基金数据并重新加载页面，确定吗？');
+                    if (ok) {
+                        hardReset();
+                        location.reload(true);
+                    }
+                });
             }
 
-            function updateBottomBar() {
-                const bar = document.getElementById('bottomActions');
-                const addBtn = document.getElementById('openAddModalBtn');
-                const batchBtn = document.getElementById('batchEditBtn');
-                const dataBtn = document.getElementById('openBackupModalBtn');
-                const refreshBtn = document.getElementById('refreshBtn');
-                if (editMode) {
-                    bar.classList.add('edit-mode');
-                    addBtn.style.display = 'none'; dataBtn.style.display = 'none'; refreshBtn.style.display = 'none';
-                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
-                    batchBtn.className = 'action-btn edit-highlight'; batchBtn.style.display = 'flex';
-                    batchBtn.onclick = () => exitEditMode();
-                } else {
-                    bar.classList.remove('edit-mode');
-                    addBtn.style.display = 'flex'; dataBtn.style.display = 'flex'; refreshBtn.style.display = 'flex'; batchBtn.style.display = 'flex';
-                    addBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>'; addBtn.className = 'action-btn';
-                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>'; batchBtn.className = 'action-btn';
-                    batchBtn.onclick = () => enterEditMode();
-                    dataBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>'; dataBtn.className = 'action-btn';
-                    refreshBtn.onclick = function() { const icon = this.querySelector('.icon-wrap'); if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); } refreshData(); };
-                }
-            }
+            // ===== 隐私模式 =====
+            let clickCount = 0,
+                clickTimer = null;
 
-            let clickCount = 0, clickTimer = null;
             function setupPrivacy() {
                 document.getElementById('summaryCard').addEventListener('click', function(e) {
                     if (e.target.closest('button')) return;
@@ -837,34 +2483,54 @@
                     clickTimer = setTimeout(() => {
                         if (clickCount >= 3) {
                             privacyMode = !privacyMode;
-                            const els = ['todayProfitBig', 'totalAssets', 'totalProfit', 'totalReturn'];
-                            els.forEach(id => { const el = document.getElementById(id); if (privacyMode) { el.classList.add('privacy'); el.textContent = '***'; } else el.classList.remove('privacy'); });
-                            if (!privacyMode) renderAll();
+                            if (privacyMode) {
+                                ['todayProfitBig', 'totalAssets', 'totalProfit', 'totalReturn'].forEach(
+                                id => {
+                                    const el = document.getElementById(id);
+                                    if (el) { el.textContent = '***';
+                                        el.className = 'stat-number privacy'; }
+                                });
+                                document.getElementById('dataTimestamp').textContent = '净值日期：--';
+                            } else { renderSummary(); }
                             clickCount = 0;
                         }
                     }, 400);
                 });
             }
 
+            // ===== Service Worker =====
             function registerSW() {
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW 注册成功', reg.scope)).catch(err => console.warn('SW 注册失败:', err.message));
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(reg => console.log('SW 注册成功', reg.scope))
+                        .catch(err => console.warn('SW 注册失败:', err.message));
                 }
             }
 
+            // ===== 初始化 =====
             function init() {
                 loadData();
+                if (Object.keys(holdings).length > 0) {
+                    backfillProfitHistory();
+                }
                 setupPrivacy();
                 renderAll();
                 if (Object.keys(holdings).length) refreshData();
                 setupModal();
                 setupBackup();
+                initPullToRefresh();
                 registerSW();
-                console.log('✅ iFunds 最终优化版');
+
+                console.log('✅ iFunds 最终版 · 柱状图空状态改用 HTML 元素');
             }
-            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-            else init();
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else { init(); }
+
             window.deleteFund = deleteFund;
+            window.toggleTrend = toggleTrend;
+
         })();
     </script>
 </body>
