@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <style>
-        /* ===== 完整样式 ===== */
+        /* ===== 完整样式（与前一次一致） ===== */
         :root {
             --radius-top: 22px;
             --radius-md: 20px;
@@ -29,8 +29,8 @@
             --color-text-secondary: #6b7d98;
             --color-text-light: #94a3b8;
             --color-border: #e2e8f0;
-            --color-positive: #E05050;
-            --color-negative: #2A9D8F;
+            --color-positive: #D96060;
+            --color-negative: #3AAD9F;
             --color-neutral: #94a3b8;
             --color-edit-border: #d0d8e0;
             --color-edit-bg: #f8fafc;
@@ -580,7 +580,7 @@
             height: 100% !important;
         }
 
-        /* ===== 柱状图空状态 ===== */
+        /* ===== 空状态（柱状图 & 饼图统一字重） ===== */
         .chart-empty {
             display: flex;
             align-items: center;
@@ -588,6 +588,13 @@
             height: 100%;
             color: var(--color-text-secondary);
             font-size: 14px;
+            font-weight: 500;
+        }
+        .analysis-empty {
+            font-size: 13px;
+            color: var(--color-text-light);
+            text-align: center;
+            padding: 30px 0;
             font-weight: 500;
         }
 
@@ -602,12 +609,6 @@
         .pie-chart-container canvas {
             width: 100% !important;
             height: 100% !important;
-        }
-        .analysis-empty {
-            font-size: 13px;
-            color: var(--color-text-light);
-            text-align: center;
-            padding: 30px 0;
         }
 
         /* ===== 底部操作栏 ===== */
@@ -1151,7 +1152,7 @@
             </div>
         </div>
 
-        <!-- ===== 持仓分析卡片（饼图 · 海洋渐变 · 图例左侧） ===== -->
+        <!-- ===== 持仓分析卡片 ===== -->
         <div class="card-block" id="analysisBlock">
             <div class="pie-chart-container" id="pieChartContainer">
                 <canvas id="pieChartCanvas"></canvas>
@@ -1168,7 +1169,7 @@
         </div>
     </div>
 
-    <!-- ===== 添加基金模态框 ===== -->
+    <!-- ===== 模态框 ===== -->
     <div class="modal-overlay add-modal" id="modalOverlay">
         <div class="add-content">
             <h2><i class="fas fa-coins"></i> 添加基金</h2>
@@ -1185,7 +1186,6 @@
         </div>
     </div>
 
-    <!-- ===== 数据管理模态框 ===== -->
     <div class="modal-overlay backup-modal" id="backupModalOverlay">
         <div class="backup-content">
             <h2><i class="fas fa-database"></i> 数据管理</h2>
@@ -1200,18 +1200,16 @@
         </div>
     </div>
 
-    <!-- ===== 提示模态框 ===== -->
     <div class="modal-overlay prompt-modal" id="promptModalOverlay">
         <div class="prompt-content"><h2 id="promptTitle">提示</h2><div class="prompt-message" id="promptMessage">消息内容</div><div class="modal-actions" id="promptActions"></div></div>
     </div>
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <div class="check-pop" id="checkPop"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
 
     <script>
         // ================================================================
-        // 完整 JavaScript（柱状图空状态改用 HTML 元素）
+        // 完整 JavaScript（底部按钮修复：改用 addEventListener）
         // ================================================================
         (function() {
             'use strict';
@@ -1337,7 +1335,7 @@
                 return { fundcode: parts[0], name: parts[1], dwjz: nav, gszzl: rate, jzrq: date };
             }
 
-            // ===== 天天基金历史净值（趋势图） =====
+            // ===== 天天基金历史净值 =====
             function fetchTrendData(code) {
                 return new Promise((resolve) => {
                     const script = document.createElement('script');
@@ -1791,9 +1789,10 @@
                         const ctx = canvas.getContext('2d');
                         const lineColor = '#3D7A8C';
                         const grad = ctx.createLinearGradient(0, 0, 0, 150);
-                        grad.addColorStop(0, 'rgba(61, 122, 140, 0.40)');
-                        grad.addColorStop(0.5, 'rgba(61, 122, 140, 0.15)');
-                        grad.addColorStop(1, 'rgba(61, 122, 140, 0.03)');
+                        grad.addColorStop(0, 'rgba(61, 122, 140, 0.35)');
+                        grad.addColorStop(0.3, 'rgba(61, 122, 140, 0.20)');
+                        grad.addColorStop(0.7, 'rgba(61, 122, 140, 0.08)');
+                        grad.addColorStop(1, 'rgba(61, 122, 140, 0.02)');
 
                         if (trendCharts[code]) {
                             trendCharts[code].destroy();
@@ -1841,12 +1840,14 @@
                                     x: {
                                         ticks: { color: '#94a3b8', font: { size: 7 },
                                         maxTicksLimit: 8 },
-                                        grid: { display: false }
+                                        grid: { color: 'rgba(0, 0, 0, 0.06)',
+                                        drawBorder: false }
                                     },
                                     y: {
                                         ticks: { color: '#94a3b8', font: { size: 7 },
                                             count: 4 },
-                                        grid: { color: 'rgba(0,0,0,0.04)' }
+                                        grid: { color: 'rgba(0, 0, 0, 0.06)',
+                                            drawBorder: false }
                                     }
                                 }
                             }
@@ -1861,7 +1862,7 @@
                 });
             };
 
-            // ===== 柱状图（空状态改用 HTML 元素） =====
+            // ===== 柱状图 =====
             function renderProfitChart() {
                 const canvas = document.getElementById('profitChartCanvas');
                 const emptyEl = document.getElementById('chartEmpty');
@@ -1882,7 +1883,7 @@
                 const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
                 const labels = sorted.map(item => item.date.slice(5));
                 const data = sorted.map(item => item.profit);
-                const colors = data.map(v => v >= 0 ? '#E05050' : '#2A9D8F');
+                const colors = data.map(v => v >= 0 ? '#D96060' : '#3AAD9F');
                 const ctx = canvas.getContext('2d');
 
                 profitChart = new Chart(ctx, {
@@ -1921,12 +1922,12 @@
                         scales: {
                             x: {
                                 ticks: { color: '#94a3b8', font: { size: 8 }, maxTicksLimit: 10 },
-                                grid: { color: 'rgba(0,0,0,0.04)' }
+                                grid: { color: 'rgba(0, 0, 0, 0.06)', drawBorder: false }
                             },
                             y: {
                                 ticks: { color: '#94a3b8', font: { size: 8 }, callback: function(v) {
                                         return (v >= 0 ? '+' : '') + v.toFixed(0); } },
-                                grid: { color: 'rgba(0,0,0,0.04)' }
+                                grid: { color: 'rgba(0, 0, 0, 0.06)', drawBorder: false }
                             }
                         }
                     }
@@ -1945,7 +1946,7 @@
                     if (pieChart) { pieChart.destroy();
                         pieChart = null; }
                     canvas.style.display = 'none';
-                    if (emptyEl) emptyEl.style.display = 'block';
+                    emptyEl.style.display = 'block';
                     return;
                 }
 
@@ -1963,12 +1964,12 @@
                     if (pieChart) { pieChart.destroy();
                         pieChart = null; }
                     canvas.style.display = 'none';
-                    if (emptyEl) emptyEl.style.display = 'block';
+                    emptyEl.style.display = 'block';
                     return;
                 }
 
                 canvas.style.display = 'block';
-                if (emptyEl) emptyEl.style.display = 'none';
+                emptyEl.style.display = 'none';
 
                 const labels = Object.keys(industryMap);
                 const values = labels.map(k => industryMap[k]);
@@ -2055,42 +2056,85 @@
                 updateBottomBar();
             }
 
-            // ===== 底部操作栏 =====
+            // ===== ★★★ 底部操作栏（改用 addEventListener 修复按钮失灵） ★★★ =====
             function updateBottomBar() {
                 const bar = document.getElementById('bottomActions');
                 const addBtn = document.getElementById('openAddModalBtn');
                 const batchBtn = document.getElementById('batchEditBtn');
                 const dataBtn = document.getElementById('openBackupModalBtn');
                 const refreshBtn = document.getElementById('refreshBtn');
+
+                // 清除所有已有的事件监听（避免重复绑定）
+                const newAddBtn = addBtn.cloneNode(true);
+                const newBatchBtn = batchBtn.cloneNode(true);
+                const newDataBtn = dataBtn.cloneNode(true);
+                const newRefreshBtn = refreshBtn.cloneNode(true);
+                addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+                batchBtn.parentNode.replaceChild(newBatchBtn, batchBtn);
+                dataBtn.parentNode.replaceChild(newDataBtn, dataBtn);
+                refreshBtn.parentNode.replaceChild(newRefreshBtn, refreshBtn);
+
+                const addBtnNew = document.getElementById('openAddModalBtn');
+                const batchBtnNew = document.getElementById('batchEditBtn');
+                const dataBtnNew = document.getElementById('openBackupModalBtn');
+                const refreshBtnNew = document.getElementById('refreshBtn');
+
                 if (editMode) {
                     bar.classList.add('edit-mode');
-                    addBtn.style.display = 'none';
-                    dataBtn.style.display = 'none';
-                    refreshBtn.style.display = 'none';
-                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
-                    batchBtn.className = 'action-btn edit-highlight';
-                    batchBtn.style.display = 'flex';
-                    batchBtn.onclick = () => exitEditMode();
+                    addBtnNew.style.display = 'none';
+                    dataBtnNew.style.display = 'none';
+                    refreshBtnNew.style.display = 'none';
+                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
+                    batchBtnNew.className = 'action-btn edit-highlight';
+                    batchBtnNew.style.display = 'flex';
+                    batchBtnNew.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        exitEditMode();
+                    });
                 } else {
                     bar.classList.remove('edit-mode');
-                    addBtn.style.display = 'flex';
-                    dataBtn.style.display = 'flex';
-                    refreshBtn.style.display = 'flex';
-                    batchBtn.style.display = 'flex';
-                    addBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
-                    addBtn.className = 'action-btn';
-                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
-                    batchBtn.className = 'action-btn';
-                    batchBtn.onclick = () => enterEditMode();
-                    dataBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
-                    dataBtn.className = 'action-btn';
-                    refreshBtn.onclick = function() {
+                    addBtnNew.style.display = 'flex';
+                    dataBtnNew.style.display = 'flex';
+                    refreshBtnNew.style.display = 'flex';
+                    batchBtnNew.style.display = 'flex';
+                    addBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
+                    addBtnNew.className = 'action-btn';
+                    addBtnNew.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (editMode) return;
+                        const icon = this.querySelector('.icon-wrap');
+                        if (icon) { icon.classList.remove('pop');
+                            void icon.offsetWidth;
+                            icon.classList.add('pop'); }
+                        document.getElementById('modalOverlay').classList.add('active');
+                    });
+                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
+                    batchBtnNew.className = 'action-btn';
+                    batchBtnNew.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        enterEditMode();
+                    });
+                    dataBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
+                    dataBtnNew.className = 'action-btn';
+                    dataBtnNew.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (editMode) { showAlert('请先完成编辑'); return; }
+                        const icon = this.querySelector('.icon-wrap');
+                        if (icon) { icon.classList.remove('pop');
+                            void icon.offsetWidth;
+                            icon.classList.add('pop'); }
+                        document.getElementById('backupModalOverlay').classList.add('active');
+                    });
+                    refreshBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span>';
+                    refreshBtnNew.className = 'action-btn';
+                    refreshBtnNew.addEventListener('click', function(e) {
+                        e.stopPropagation();
                         const icon = this.querySelector('.icon-wrap');
                         if (icon) { icon.classList.remove('pop');
                             void icon.offsetWidth;
                             icon.classList.add('pop'); }
                         refreshData();
-                    };
+                    });
                 }
             }
 
@@ -2249,7 +2293,6 @@
                 const overlay = document.getElementById('modalOverlay');
                 const closeBtn = document.getElementById('closeModalBtn');
                 const confirmBtn = document.getElementById('confirmAddBtn');
-                const openBtn = document.getElementById('openAddModalBtn');
                 const codeInput = document.getElementById('fundCodeInput');
                 const costInput = document.getElementById('fundCostInput');
                 const sharesInput = document.getElementById('fundSharesInput');
@@ -2262,7 +2305,7 @@
 
                 function openAddHandler() {
                     if (editMode) return;
-                    const icon = openBtn.querySelector('.icon-wrap');
+                    const icon = document.querySelector('#openAddModalBtn .icon-wrap');
                     if (icon) { icon.classList.remove('pop');
                         void icon.offsetWidth;
                         icon.classList.add('pop'); }
@@ -2276,7 +2319,7 @@
                     overlay.classList.add('active');
                     setTimeout(() => codeInput.focus(), 300);
                 }
-                openBtn.addEventListener('click', openAddHandler);
+                document.getElementById('openAddModalBtn').addEventListener('click', openAddHandler);
 
                 function closeModal() { overlay.classList.remove('active');
                     fetchName = ''; }
@@ -2370,22 +2413,20 @@
             // ===== 数据管理 =====
             function setupBackup() {
                 const overlay = document.getElementById('backupModalOverlay');
-                const openBtn = document.getElementById('openBackupModalBtn');
                 const exportBtn = document.getElementById('exportBtn');
                 const importInput = document.getElementById('importFileInput');
                 const clearCacheBtn = document.getElementById('clearCacheBtn');
                 const hardResetBtn = document.getElementById('hardResetBtn');
                 const closeCircle = document.getElementById('closeBackupModalBtnCircle');
 
-                function openBackupHandler() {
+                document.getElementById('openBackupModalBtn').addEventListener('click', function() {
                     if (editMode) { showAlert('请先完成编辑'); return; }
-                    const icon = openBtn.querySelector('.icon-wrap');
+                    const icon = this.querySelector('.icon-wrap');
                     if (icon) { icon.classList.remove('pop');
                         void icon.offsetWidth;
                         icon.classList.add('pop'); }
                     overlay.classList.add('active');
-                }
-                openBtn.addEventListener('click', openBackupHandler);
+                });
 
                 function closeModal() { overlay.classList.remove('active'); }
                 closeCircle.onclick = closeModal;
@@ -2521,7 +2562,7 @@
                 initPullToRefresh();
                 registerSW();
 
-                console.log('✅ iFunds 最终版 · 柱状图空状态改用 HTML 元素');
+                console.log('✅ iFunds 高级图表版 · 底部按钮已修复');
             }
 
             if (document.readyState === 'loading') {
