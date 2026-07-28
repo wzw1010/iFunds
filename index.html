@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <style>
-        /* ===== 完整样式（与前一次一致） ===== */
+        /* ===== iFunds 最终版样式 ===== */
         :root {
             --radius-top: 22px;
             --radius-md: 20px;
@@ -580,7 +580,7 @@
             height: 100% !important;
         }
 
-        /* ===== 空状态（柱状图 & 饼图统一字重） ===== */
+        /* ===== 空状态 ===== */
         .chart-empty {
             display: flex;
             align-items: center;
@@ -598,7 +598,7 @@
             font-weight: 500;
         }
 
-        /* ===== 持仓分析（饼图 · 海洋渐变 · 图例左侧） ===== */
+        /* ===== 持仓分析 ===== */
         .pie-chart-container {
             height: 200px;
             position: relative;
@@ -1209,7 +1209,7 @@
 
     <script>
         // ================================================================
-        // 完整 JavaScript（底部按钮修复：改用 addEventListener）
+        // 完整 JavaScript（方案一：刷新时强制从接口拉取最新净值）
         // ================================================================
         (function() {
             'use strict';
@@ -1366,12 +1366,41 @@
                 });
             }
 
+            // ===== ★★★ 强制刷新：不检查缓存，直接调用接口 ★★★ =====
+            async function fetchFundDataOnlyForce(code) {
+                try {
+                    const tx = await fetchTxFund(code);
+                    if (tx && tx.dwjz > 0) {
+                        const name = getValidName(tx.name, code);
+                        fundDataCache[code] = {
+                            name,
+                            nav: tx.dwjz,
+                            rate: tx.gszzl,
+                            date: tx.jzrq,
+                            updateDate: getToday()
+                        };
+                        saveAll();
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('强制刷新失败', code, e.message);
+                }
+                return false;
+            }
+
+            // ===== 普通获取（用于添加基金时获取名称，不强制） =====
             async function fetchFundDataOnly(code) {
                 try {
                     const tx = await fetchTxFund(code);
                     if (tx && tx.dwjz > 0) {
                         const name = getValidName(tx.name, code);
-                        fundDataCache[code] = { name, nav: tx.dwjz, rate: tx.gszzl, date: tx.jzrq, updateDate: getToday() };
+                        fundDataCache[code] = {
+                            name,
+                            nav: tx.dwjz,
+                            rate: tx.gszzl,
+                            date: tx.jzrq,
+                            updateDate: getToday()
+                        };
                         saveAll();
                         return true;
                     }
@@ -1568,6 +1597,7 @@
                         spinner.classList.add('active');
                         status.textContent = '刷新中...';
                         container.style.transform = 'translateY(36px)';
+                        // ★★★ 使用强制刷新 ★★★
                         refreshData().then(function() {
                             isRefreshing = false;
                             arrow.style.display = 'inline';
@@ -2056,7 +2086,7 @@
                 updateBottomBar();
             }
 
-            // ===== ★★★ 底部操作栏（改用 addEventListener 修复按钮失灵） ★★★ =====
+            // ===== 底部操作栏 =====
             function updateBottomBar() {
                 const bar = document.getElementById('bottomActions');
                 const addBtn = document.getElementById('openAddModalBtn');
@@ -2064,7 +2094,7 @@
                 const dataBtn = document.getElementById('openBackupModalBtn');
                 const refreshBtn = document.getElementById('refreshBtn');
 
-                // 清除所有已有的事件监听（避免重复绑定）
+                // 清除所有已有的事件监听
                 const newAddBtn = addBtn.cloneNode(true);
                 const newBatchBtn = batchBtn.cloneNode(true);
                 const newDataBtn = dataBtn.cloneNode(true);
@@ -2138,7 +2168,7 @@
                 }
             }
 
-            // ===== 刷新数据 =====
+            // ===== ★★★ 刷新数据（强制刷新 ★★★ =====
             async function refreshData() {
                 if (isUpdating) return;
                 showCheck();
@@ -2149,7 +2179,8 @@
                     const codes = Object.keys(holdings);
                     if (codes.length) {
                         for (let i = 0; i < codes.length; i++) {
-                            await fetchFundDataOnly(codes[i]);
+                            // ★★★ 强制刷新：不检查缓存，直接从接口拉取 ★★★
+                            await fetchFundDataOnlyForce(codes[i]);
                         }
                         saveTodaySnapshot();
                     }
@@ -2562,7 +2593,7 @@
                 initPullToRefresh();
                 registerSW();
 
-                console.log('✅ iFunds 高级图表版 · 底部按钮已修复');
+                console.log('✅ iFunds 方案一：刷新时强制从接口拉取最新净值');
             }
 
             if (document.readyState === 'loading') {
