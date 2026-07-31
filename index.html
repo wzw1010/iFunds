@@ -1,2608 +1,865 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>iFunds</title>
-    <link rel="manifest" href="./manifest.json" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="iFunds" />
-    <link rel="apple-touch-icon" href="./icon-1024.png" />
-    <meta name="theme-color" content="#0b1a33" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>iFamily</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="icon-1024.png">
+    <link rel="apple-touch-icon-precomposed" href="icon-1024.png">
+    <meta name="theme-color" content="#FDF3E5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        /* ===== iFunds 最终版样式 ===== */
+        /* ========== 基础变量（默认枫叶红主题，底色已微调） ========== */
         :root {
-            --radius-top: 22px;
-            --radius-md: 20px;
-            --radius-bottom: 18px;
-            --radius-sm: 12px;
-            --radius-xs: 6px;
-            --radius-full: 50%;
-            --color-bg: #f2f5fc;
-            --color-card-bg: #ffffff;
-            --color-primary: #0b1a33;
-            --color-primary-light: #132b4a;
-            --color-text: #0b1a33;
-            --color-text-secondary: #6b7d98;
-            --color-text-light: #94a3b8;
-            --color-border: #e2e8f0;
-            --color-positive: #D96060;
-            --color-negative: #3AAD9F;
-            --color-neutral: #94a3b8;
-            --color-edit-border: #d0d8e0;
-            --color-edit-bg: #f8fafc;
-            --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
-            --shadow-summary: 0 6px 24px rgba(0, 0, 0, 0.12);
-            --decor-today: #0b1a33;
-            --decor-old: #b8c8d8;
-            --chart-grid: #eef2f8;
-            --chart-text: #6b7d98;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --color-deep: #912130;
+            --color-mid1: #D95662;
+            --color-mid2: #F48D8E;
+            --color-light1: #F8E6DC; /* 原 #FDF3E5，加深了一点 */
+            --color-light2: #F6DAC8;
+            --card-bg: rgba(255, 255, 255, 0.72);
+            --card-bg-hover: rgba(255, 255, 255, 0.85);
+            --text-primary: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --text-tertiary: #aeaeb2;
+            --ring-color: #D95662;
+            --bg-color: #F2F2F7;
+            --modal-bg: #ffffff;
+            --modal-border: rgba(255, 255, 255, 0.3);
+            --input-bg: #f5f5f7;
+            --input-border: #e5e5ea;
+            --btn-cancel-bg: rgba(145, 33, 48, 0.06);
+            --card-shadow: 0 2px 16px rgba(145, 33, 48, 0.06);
+            --badge-passed-bg: rgba(224, 141, 142, 0.18);
+            --badge-remain-bg: rgba(244, 141, 142, 0.18);
+            --empty-illustration-stroke: var(--color-mid1);
         }
 
-        html,
-        body {
-            width: 100%;
-            min-height: 100vh;
-            background: var(--color-bg);
-            display: flex;
-            justify-content: center;
-            padding: 4px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+        /* 克莱因蓝 */
+        body[data-theme="klein"] {
+            --color-deep: #002FA7; --color-mid1: #0057B7; --color-mid2: #7FAED4;
+            --color-light1: #E9EEF8; /* 原 #F0F4FF */
+            --color-light2: #D0DFFF; --ring-color: #0057B7; --bg-color: #F2F5FF;
+            --btn-cancel-bg: rgba(0,47,167,0.06); --card-shadow: 0 2px 16px rgba(0,47,167,0.08);
+            --badge-passed-bg: rgba(0,87,183,0.12); --badge-remain-bg: rgba(0,87,183,0.18);
         }
-        body::-webkit-scrollbar {
-            display: none;
+        body[data-theme="peach"] {
+            --color-deep: #C8655A; --color-mid1: #E69D8C; --color-mid2: #F4C4B8;
+            --color-light1: #FDE9E4; /* 原 #FFF2EF */
+            --color-light2: #FDE4DC; --ring-color: #E69D8C; --bg-color: #FFF5F3;
+            --btn-cancel-bg: rgba(200,101,90,0.06); --card-shadow: 0 2px 16px rgba(200,101,90,0.08);
+            --badge-passed-bg: rgba(230,157,140,0.15); --badge-remain-bg: rgba(230,157,140,0.2);
         }
-
-        .app-container {
-            max-width: 480px;
-            width: 100%;
-            background: #ffffff;
-            border-radius: var(--radius-md);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-            padding: 14px 14px 10px 14px;
-            display: flex;
-            flex-direction: column;
-            align-self: flex-start;
-            gap: 16px;
-            transition: transform 0.3s ease;
+        body[data-theme="brown"] {
+            --color-deep: #6B4B3E; --color-mid1: #B68B7E; --color-mid2: #D4B5A8;
+            --color-light1: #F5EDE7; /* 原 #FAF6F3 */
+            --color-light2: #EFE5DE; --ring-color: #B68B7E; --bg-color: #F7F4F1;
+            --btn-cancel-bg: rgba(107,75,62,0.06); --card-shadow: 0 2px 16px rgba(107,75,62,0.08);
+            --badge-passed-bg: rgba(182,139,126,0.15); --badge-remain-bg: rgba(182,139,126,0.2);
         }
-
-        /* ===== 下拉刷新指示器 ===== */
-        #pullIndicator {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 6px 0 2px;
-            font-size: 12px;
-            color: var(--color-text-light);
-            opacity: 0;
-            height: 0;
-            overflow: hidden;
-            transition: opacity 0.2s ease, height 0.2s ease;
+        body[data-theme="grey"] {
+            --color-deep: #4A4A4A; --color-mid1: #8E8E93; --color-mid2: #B0B0B5;
+            --color-light1: #EBEAE5; /* 原 #F5F5F0 */
+            --color-light2: #E0E0DB; --ring-color: #8E8E93; --bg-color: #F2F2F0;
+            --btn-cancel-bg: rgba(74,74,74,0.06); --card-shadow: 0 2px 16px rgba(74,74,74,0.08);
+            --badge-passed-bg: rgba(142,142,147,0.12); --badge-remain-bg: rgba(142,142,147,0.18);
         }
-        #pullIndicator.show {
-            display: flex;
-            opacity: 1;
-            height: 36px;
+        body[data-theme="ice"] {
+            --color-deep: #1D7874; --color-mid1: #4ECDC4; --color-mid2: #8FE0D8;
+            --color-light1: #E6F5F3; /* 原 #F0FCFB */
+            --color-light2: #D4F7F4; --ring-color: #4ECDC4; --bg-color: #F2FAF9;
+            --btn-cancel-bg: rgba(29,120,116,0.06); --card-shadow: 0 2px 16px rgba(29,120,116,0.08);
+            --badge-passed-bg: rgba(78,205,196,0.15); --badge-remain-bg: rgba(78,205,196,0.22);
         }
-        #pullIndicator .arrow {
-            display: inline-block;
-            font-size: 16px;
-            transition: transform 0.3s ease;
+        body[data-theme="violet"] {
+            --color-deep: #3A2C4F; --color-mid1: #8B6BB3; --color-mid2: #B79FE0;
+            --color-light1: #EDE8F5; /* 原 #F4F1FA */
+            --color-light2: #E2D9F3; --ring-color: #8B6BB3; --bg-color: #F6F4FA;
+            --btn-cancel-bg: rgba(58,44,79,0.06); --card-shadow: 0 2px 16px rgba(58,44,79,0.08);
+            --badge-passed-bg: rgba(139,107,179,0.15); --badge-remain-bg: rgba(139,107,179,0.2);
         }
-        #pullIndicator .arrow.flip {
-            transform: rotate(180deg);
+        body[data-theme="ocean"] {
+            --color-deep: #1D4E89; --color-mid1: #4A7FB5; --color-mid2: #7FAED4;
+            --color-light1: #DEE8F2; /* 原 #E8F1F8 */
+            --color-light2: #C5D9EC; --ring-color: #4A7FB5; --bg-color: #F2F5F8;
+            --btn-cancel-bg: rgba(29,78,137,0.06); --card-shadow: 0 2px 16px rgba(29,78,137,0.06);
+            --badge-passed-bg: rgba(74,127,181,0.15); --badge-remain-bg: rgba(74,127,181,0.2);
         }
-        #pullIndicator .status-text {
-            font-weight: 500;
-            font-size: 12px;
+        body[data-theme="forest"] {
+            --color-deep: #2D6A4F; --color-mid1: #52B788; --color-mid2: #95D5B2;
+            --color-light1: #E6F0E9; /* 原 #F0F7F4 */
+            --color-light2: #D8EFE4; --ring-color: #52B788; --bg-color: #F2F7F4;
+            --btn-cancel-bg: rgba(45,106,79,0.06); --card-shadow: 0 2px 16px rgba(45,106,79,0.06);
+            --badge-passed-bg: rgba(82,183,136,0.15); --badge-remain-bg: rgba(82,183,136,0.2);
         }
-        #pullIndicator .spinner {
-            display: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--color-border);
-            border-top-color: var(--color-primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        #pullIndicator .spinner.active {
-            display: inline-block;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        body[data-theme="orange"] {
+            --color-deep: #C85A17; --color-mid1: #E67E22; --color-mid2: #F0A04B;
+            --color-light1: #FDEBDE; /* 原 #FFF6ED */
+            --color-light2: #FDE4CE; --ring-color: #E67E22; --bg-color: #FDF8F3;
+            --btn-cancel-bg: rgba(200,90,23,0.06); --card-shadow: 0 2px 16px rgba(200,90,23,0.06);
+            --badge-passed-bg: rgba(230,126,34,0.15); --badge-remain-bg: rgba(230,126,34,0.2);
         }
 
-        /* ===== 顶部摘要 ===== */
-        .summary-card {
-            background: linear-gradient(145deg, var(--color-primary), var(--color-primary-light));
-            border-radius: var(--radius-top);
-            padding: 10px 14px 8px 14px;
-            color: white;
-            flex-shrink: 0;
-            box-shadow: var(--shadow-summary);
-        }
-        .summary-today {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-        .summary-today .today-label {
-            font-size: 13px;
-            font-weight: 500;
-            opacity: 0.7;
-            letter-spacing: 0.3px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .summary-today .today-label svg {
-            width: 16px;
-            height: 16px;
-            stroke: rgba(255, 255, 255, 0.7);
-            stroke-width: 2;
-            fill: none;
-        }
-        .summary-today .today-value {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
-            margin-top: 0px;
-        }
-        .summary-today .today-value.positive {
-            color: var(--color-positive);
-        }
-        .summary-today .today-value.negative {
-            color: var(--color-negative);
-        }
-        .summary-today .today-value.neutral {
-            color: var(--color-text-light);
-        }
-        .summary-today .today-value.privacy {
-            color: var(--color-text-light);
-            letter-spacing: 4px;
-        }
-        .summary-divider {
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.10);
-            margin: 0 0 6px 0;
-        }
-        .summary-stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .summary-stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-            position: relative;
-            gap: 2px;
-        }
-        .summary-stat-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 15%;
-            height: 70%;
-            width: 1px;
-            background: rgba(255, 255, 255, 0.12);
-        }
-        .summary-stat-item .stat-label-wrap {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .summary-stat-item .stat-label {
-            font-size: 10px;
-            opacity: 0.5;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-        .summary-stat-item .stat-number {
-            font-size: 14px;
-            font-weight: 600;
-            line-height: 1.3;
-        }
-        .summary-stat-item .stat-number.privacy {
-            letter-spacing: 3px;
-            color: var(--color-text-light) !important;
-        }
-        .stat-number.positive {
-            color: var(--color-positive);
-        }
-        .stat-number.negative {
-            color: var(--color-negative);
-        }
-        .stat-number.neutral {
-            color: var(--color-text-light);
-        }
-        .data-timestamp {
-            font-size: 10px;
-            opacity: 0.5;
-            text-align: center;
-            margin-top: 4px;
-            letter-spacing: 0.3px;
-        }
+        /* ========== 全局样式 ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', sans-serif; -webkit-font-smoothing: antialiased; height: 100%; background-color: var(--bg-color); }
+        body { background-color: var(--bg-color); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 0; position: relative; overflow-x: hidden; -webkit-user-select: none; user-select: none; overscroll-behavior: none; transition: background-color 0.4s ease; }
+        .app-container { width: 100%; max-width: 393px; padding: 18px 16px 0; display: flex; flex-direction: column; gap: 12px; background-color: var(--bg-color); min-height: 100vh; transition: background-color 0.4s ease; }
+        .header { padding: 4px 2px 2px; padding-top: calc(4px + env(safe-area-inset-top, 0px)); display: flex; align-items: center; justify-content: space-between; }
+        .header-left { display: flex; flex-direction: column; }
+        .header-brand { font-weight: 600; font-size: 24px; line-height: 1.2; color: var(--color-deep); letter-spacing: -0.02em; cursor: pointer; user-select: none; transition: color 0.4s ease, opacity 0.15s; }
+        .header-brand.pressed { opacity: 0.5; }
+        .header-subtitle { font-weight: 400; font-size: 12px; color: var(--text-tertiary); margin-top: 2px; transition: color 0.4s ease; }
+        .header-add-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--color-deep); color: var(--color-light1); border: none; font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s, background-color 0.4s; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        .header-add-btn:active { transform: scale(0.9); }
+        .empty-mode .header-add-btn { display: none; }
 
-        /* ===== 基金列表 ===== */
-        .fund-list {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            flex: 1;
-        }
+        .hero-card { background: var(--card-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-radius: 20px; padding: 14px 18px 16px; box-shadow: var(--card-shadow); border: 1px solid var(--modal-border); display: none; flex-direction: column; gap: 8px; cursor: pointer; transition: background-color 0.4s, border-color 0.4s; }
+        .hero-card:active { transform: scale(0.985); }
+        .hero-card.long-press-hint { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2); }
+        .hero-card .event-name { font-weight: 600; font-size: 15px; color: var(--color-deep); }
+        .hero-card .event-date-sub { font-size: 13px; color: var(--text-secondary); }
+        .hero-days-row { display: flex; gap: 16px; padding-top: 2px; }
+        .hero-days-item { flex: 1; }
+        .hero-days-num { font-weight: 200; font-size: 30px; color: var(--color-deep); }
+        .hero-days-num.today-num { color: var(--color-mid1); animation: todayPulse 2s ease-in-out infinite; }
+        .hero-days-num.future-num { color: var(--text-tertiary); font-size: 24px; }
+        @keyframes todayPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+        .hero-days-label { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
 
-        .fund-card {
-            background: var(--color-card-bg);
-            border-radius: var(--radius-md);
-            padding: 10px 14px 12px 14px;
-            border: 1px solid var(--color-border);
-            box-shadow: var(--shadow-card);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex-shrink: 0;
-            transition: box-shadow 0.2s, border-color 0.3s;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        .fund-card:active {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            background: #fafcff;
-        }
-        .fund-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            border-radius: 0;
-            transition: background 0.4s ease;
-        }
-        .fund-card.decor-today::before {
-            background: var(--decor-today);
-        }
-        .fund-card.decor-old::before {
-            background: var(--decor-old);
-        }
-        .fund-card.flash-update {
-            animation: flashCard 0.6s ease;
-        }
-        @keyframes flashCard {
-            0% { background: #f0f7ff; }
-            50% { background: #e0edf9; }
-            100% { background: var(--color-card-bg); }
-        }
+        .empty-state { flex: 0 1 auto; display: none; flex-direction: column; align-items: center; padding: 10px 12px; max-width: 200px; margin: 0 auto; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid var(--modal-border); }
+        .empty-state.show { display: flex; }
+        .empty-illustration { margin-bottom: 12px; width: 60px; height: 60px; opacity: 0.6; }
+        .empty-illustration svg { width: 100%; height: 100%; fill: none; stroke: var(--empty-illustration-stroke); stroke-width: 1.5; }
+        .empty-text { font-weight: 600; font-size: 14px; color: var(--color-deep); margin-bottom: 2px; }
+        .empty-sub { font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px; }
+        .empty-tap-hint { background: var(--color-deep); color: var(--color-light1); border-radius: 9999px; padding: 8px 16px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; transition: transform 0.15s, background-color 0.4s; }
+        .empty-tap-hint:active { transform: scale(0.94); }
 
-        .fund-row-top {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            align-items: center;
-            height: 30px;
-            padding-left: 10px;
-            column-gap: 0;
-        }
-        .fund-name-wrap {
-            grid-column: 1 / 3;
-            min-width: 0;
-            overflow: hidden;
-            padding-right: 4px;
-        }
-        .fund-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--color-text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: block;
-        }
-        .fund-code-wrap {
-            grid-column: 3;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .fund-code-standalone {
-            display: inline-block;
-            font-weight: 400;
-            font-size: 10px;
-            color: var(--color-text-secondary);
-            background: #f0f4fc;
-            padding: 0 8px;
-            border-radius: var(--radius-md);
-            line-height: 18px;
-            text-align: center;
-        }
-        .fund-right-actions {
-            grid-column: 4;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            white-space: nowrap;
-        }
-        .fund-market-value {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--color-text);
-            display: flex;
-            align-items: center;
-            gap: 3px;
-        }
-        .coin-icon {
-            font-size: 12px;
-            color: var(--color-text-secondary);
-            opacity: 0.7;
-        }
+        .swipe-wrapper { position: relative; overflow: hidden; border-radius: 16px; touch-action: pan-y; margin-top: 6px; height: 60px; }
+        .swipe-wrapper:not(:last-child)::after { content: ''; position: absolute; bottom: -6px; left: 14px; right: 14px; height: 1px; background: rgba(0,0,0,0.04); z-index: 2; pointer-events: none; }
+        .swipe-inner { display: flex; width: 100%; height: 100%; will-change: transform; transition: transform .28s cubic-bezier(.25,.8,.25,1.2); }
+        .swipe-wrapper.open .swipe-inner { transform: translateX(-72px); }
+        .card-content { flex: 0 0 100%; padding: 0 14px; display: flex; align-items: center; gap: 12px; background: var(--card-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--modal-border); cursor: pointer; transition: background-color 0.4s; }
+        .card-content:active { background: var(--card-bg-hover); }
+        .swipe-delete { flex: 0 0 72px; display: flex; align-items: center; justify-content: center; }
+        .swipe-delete .delete-circle { width: 48px; height: 48px; border-radius: 50%; background: var(--color-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: transform 0.15s, background-color 0.4s; box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+        .swipe-delete:active .delete-circle { transform: scale(0.9); background: var(--color-mid1); }
+        .swipe-delete .delete-circle svg { width: 20px; height: 20px; fill: #fff; }
+        .swipe-delete .delete-label { font-weight: 600; font-size: 10px; color: #fff; }
 
-        .fund-row-metrics {
-            display: flex;
-            align-items: stretch;
-            padding-left: 10px;
-            height: 40px;
-            position: relative;
-        }
-        .edit-mode .fund-row-metrics {
-            display: none;
-        }
-        .metric-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2px 0;
-            position: relative;
-            min-width: 0;
-        }
-        .metric-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 10%;
-            height: 80%;
-            width: 1px;
-            background: #e0e5ed;
-        }
-        .metric-item .metric-label {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--color-text-light);
-            letter-spacing: 0.2px;
-            line-height: 1.2;
-        }
-        .metric-item .metric-value {
-            font-size: 12px;
-            font-weight: 600;
-            line-height: 1.3;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .metric-item .metric-value.positive {
-            color: var(--color-positive);
-        }
-        .metric-item .metric-value.negative {
-            color: var(--color-negative);
-        }
-        .metric-item .metric-value.neutral {
-            color: var(--color-text-light);
-        }
+        .card-ring { flex-shrink: 0; width: 34px; height: 34px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .card-ring svg { width: 34px; height: 34px; transform: rotate(-90deg); }
+        .card-ring .ring-bg { fill: none; stroke: var(--color-light2); stroke-width: 5; }
+        .card-ring .ring-fg { fill: none; stroke: var(--ring-color); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-center { flex: 1; min-width: 0; }
+        .card-center .card-name { font-weight: 600; font-size: 15px; color: var(--color-deep); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-center .card-date { font-size: 13px; color: var(--text-tertiary); margin-top: 1px; }
+        .card-right { display: flex; gap: 8px; flex-shrink: 0; }
+        .badge { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 64px; padding: 4px 4px 5px; border-radius: 8px; transition: background-color 0.4s; }
+        .badge .badge-label { font-size: 9px; color: var(--text-tertiary); letter-spacing: 0.04em; text-transform: uppercase; }
+        .badge .badge-number { font-weight: 200; font-size: 20px; color: var(--text-primary); }
+        .badge.passed-badge { background: var(--badge-passed-bg); }
+        .badge.passed-badge .badge-number { color: var(--color-mid1); }
+        .badge.passed-badge .badge-number.future-badge-number { color: var(--text-tertiary); font-size: 20px; }
+        .badge.remain-badge { background: var(--badge-remain-bg); }
+        .badge.remain-badge .badge-number { color: var(--color-mid1); }
+        .badge.today-badge { background: var(--color-deep); animation: todayBadgeGlow 2.5s ease-in-out infinite; }
+        @keyframes todayBadgeGlow { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0.15)} 50%{box-shadow:0 0 0 8px rgba(0,0,0,0.05)} }
+        .badge.today-badge .badge-label { color: var(--color-light1); }
+        .badge.today-badge .badge-number { color: var(--color-light1); font-size: 18px; }
 
-        /* ===== 趋势图展开 ===== */
-        .trend-wrapper {
-            display: none;
-            padding-top: 10px;
-            margin-top: 4px;
-            border-top: 1px solid var(--color-border);
-            height: 150px;
-            position: relative;
-        }
-        .trend-wrapper.expanded {
-            display: block;
-        }
-        .trend-wrapper canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        .trend-loading {
-            text-align: center;
-            color: var(--color-text-light);
-            font-size: 12px;
-            padding: 30px 0;
-        }
-        .trend-error {
-            text-align: center;
-            color: var(--color-text-light);
-            font-size: 12px;
-            padding: 30px 0;
-        }
-        .trend-retry-btn {
-            display: block;
-            margin: 8px auto 0;
-            padding: 4px 16px;
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            background: var(--color-card-bg);
-            color: var(--color-text-secondary);
-            font-size: 11px;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        .trend-retry-btn:active {
-            transform: scale(0.96);
-            opacity: 0.6;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s; padding: 20px; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-glass { width: 100%; max-width: 360px; background: var(--modal-bg); border-radius: 20px; padding: 20px 16px 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: 1px solid var(--modal-border); transform: scale(0.9); transition: transform .38s cubic-bezier(.25,.8,.25,1.15), background-color 0.4s; position: relative; }
+        .modal-overlay.active .modal-glass { transform: scale(1); }
+        .modal-close-btn { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.05); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .modal-close-btn svg { width: 16px; height: 16px; stroke: var(--text-secondary); fill: none; stroke-width: 2; }
+        .modal-title, .calendar-glass .cal-title { font-weight: 600; font-size: 18px; color: var(--color-deep); text-align: center; margin-bottom: 22px; margin-top: 4px; }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { font-weight: 600; font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .modal-glass input[type="text"] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--input-border); border-radius: 12px; font-size: 15px; background: var(--input-bg); color: var(--text-primary); outline: none; transition: border 0.2s; }
+        .modal-glass input[type="text"]:focus { border-color: var(--color-deep); background: #fff; }
+        .date-trigger { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--input-bg); border: 1.5px solid var(--input-border); border-radius: 12px; cursor: pointer; }
+        .date-trigger .label-text { font-size: 13px; color: var(--text-tertiary); }
+        .date-trigger .value { font-size: 15px; color: var(--color-deep); }
+        .btn-submit { width: 100%; padding: 13px; background: var(--color-deep); color: var(--color-light1); border: none; border-radius: 9999px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 16px; transition: transform 0.12s, background-color 0.4s; }
+        .btn-submit:active { transform: scale(0.97); }
 
-        /* ===== 编辑区域 ===== */
-        .fund-edit-area {
-            display: none;
-            padding: 8px 0 2px 10px;
-            border-top: 1px dashed var(--color-border);
-            flex-direction: column;
-            gap: 6px;
-        }
-        .fund-edit-area.active {
-            display: flex;
-        }
-        .edit-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            width: 100%;
-            flex-wrap: nowrap;
-        }
-        .edit-row .edit-input {
-            flex: 1;
-            min-width: 0;
-            height: 36px;
-            padding: 4px 8px;
-            font-size: 12px;
-            font-family: inherit;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--color-edit-border);
-            background: var(--color-edit-bg);
-            color: var(--color-text);
-            outline: none;
-            transition: border 0.2s ease;
-            -webkit-appearance: none;
-            text-align: center;
-        }
-        .edit-row .edit-input:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 2px rgba(11, 26, 51, 0.08);
-        }
-        .edit-row .edit-input::placeholder {
-            color: var(--color-text-light);
-            opacity: 0.6;
-            text-align: center;
-        }
-        .edit-row .edit-delete-btn {
-            flex: 0 0 60px;
-            height: 36px;
-            padding: 0 12px;
-            font-size: 11px;
-            font-weight: 600;
-            font-family: inherit;
-            border: none;
-            border-radius: var(--radius-sm);
-            background: var(--color-positive);
-            color: #fff;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-            white-space: nowrap;
-        }
-        .edit-row .edit-delete-btn:active {
-            opacity: 0.6;
-            transform: scale(0.96);
-        }
-        .edit-hint {
-            font-size: 10px;
-            color: var(--color-text-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2px;
-        }
-        .edit-hint .current-cost {
-            font-weight: 500;
-            color: var(--color-text-secondary);
-        }
+        .cal-overlay { z-index: 1100; }
+        .calendar-glass { width: 100%; max-width: 360px; background: var(--modal-bg); border-radius: 20px; padding: 20px 16px 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); border: 1px solid var(--modal-border); transform: scale(0.9); transition: transform .38s cubic-bezier(.25,.8,.25,1.15), background-color 0.4s; display: flex; flex-direction: column; align-items: center; }
+        .cal-overlay.active .calendar-glass { transform: scale(1); }
+        .picker-row { display: flex; margin-bottom: 18px; width: 100%; }
+        .picker-col { flex: 1; display: flex; flex-direction: column; gap: 4px; height: 200px; border-right: 1px solid rgba(0,0,0,0.05); }
+        .picker-col:last-child { border-right: none; }
+        .picker-col label { font-weight: 600; font-size: 9px; color: var(--text-tertiary); text-align: center; }
+        .picker-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: y mandatory; background: transparent; border: none; margin: 0 2px; overscroll-behavior: none; }
+        .picker-scroll::-webkit-scrollbar { display: none; }
+        .picker-option { padding: 8px 4px; text-align: center; font-size: 15px; color: var(--text-secondary); cursor: pointer; margin: 1px 0; border-radius: 6px; scroll-snap-align: center; height: 36px; display: flex; align-items: center; justify-content: center; }
+        .picker-option.selected { color: var(--color-deep); font-weight: 600; background: rgba(0,0,0,0.02); }
+        .picker-spacer { height: 82px; scroll-snap-align: none; pointer-events: none; flex-shrink: 0; }
+        .btn-row { display: flex; gap: 8px; margin-top: 12px; width: 100%; }
+        .btn { flex: 1; padding: 11px; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .btn-cancel { background: var(--btn-cancel-bg); color: var(--text-secondary); }
+        .btn-confirm { background: var(--color-deep); color: var(--color-light1); }
 
-        /* ===== 空状态 ===== */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--color-text-secondary);
-        }
-        .empty-state i {
-            font-size: 36px;
-            color: #d5dde8;
-            margin-bottom: 6px;
-        }
-        .empty-state p {
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .empty-state .sub {
-            font-size: 12px;
-            opacity: 0.6;
-            margin-top: 2px;
-        }
+        .confirm-modal .modal-glass { max-width: 300px; text-align: center; padding: 22px 18px 18px; border-radius: 20px; background: var(--modal-bg); transform: scale(0.9); transition: transform .38s cubic-bezier(.25,.8,.25,1.15), background-color 0.4s; }
+        .confirm-modal.active .modal-glass { transform: scale(1); }
+        .confirm-modal .modal-body { font-size: 13px; color: var(--text-secondary); margin: 4px 0 14px; }
+        .confirm-modal .modal-footer { display: flex; gap: 8px; }
+        .confirm-modal .modal-footer button { flex: 1; padding: 11px; border: none; border-radius: 9999px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .btn-cancel-confirm { background: var(--btn-cancel-bg); color: var(--text-secondary); }
+        .btn-danger { background: var(--color-deep); color: #fff; }
 
-        /* ===== 卡片区块 ===== */
-        .card-block {
-            background: var(--color-card-bg);
-            border-radius: var(--radius-md);
-            padding: 14px;
-            border: 1px solid var(--color-border);
-            box-shadow: var(--shadow-card);
-            transition: opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
-            overflow: hidden;
-        }
-        .card-block.edit-hidden {
-            opacity: 0;
-            max-height: 0;
-            padding: 0 14px;
-            border: none;
-            margin: 0;
-            pointer-events: none;
-        }
-        .chart-container {
-            height: 170px;
-            position: relative;
-        }
-        .chart-container canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
 
-        /* ===== 空状态 ===== */
-        .chart-empty {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--color-text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .analysis-empty {
-            font-size: 13px;
-            color: var(--color-text-light);
-            text-align: center;
-            padding: 30px 0;
-            font-weight: 500;
-        }
-
-        /* ===== 持仓分析 ===== */
-        .pie-chart-container {
-            height: 200px;
-            position: relative;
-            width: 100%;
-            display: flex;
-            align-items: center;
-        }
-        .pie-chart-container canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* ===== 底部操作栏 ===== */
-        .bottom-action-card {
-            background: linear-gradient(145deg, var(--color-primary), var(--color-primary-light));
-            border-radius: var(--radius-bottom);
-            padding: 10px 6px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-            display: flex;
-            align-items: stretch;
-            position: relative;
-            overflow: hidden;
-            flex-shrink: 0;
-            margin-top: 1px;
-            transition: all 0.3s ease;
-            justify-content: center;
-            min-height: 72px;
-        }
-        .bottom-action-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
-            pointer-events: none;
-        }
-        .action-btn {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            padding: 6px 4px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            border: none;
-            background: transparent;
-            color: #ffffff;
-            position: relative;
-            border-radius: var(--radius-md);
-            min-height: 52px;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none;
-        }
-        .action-btn:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 15%;
-            height: 70%;
-            width: 1px;
-            background: rgba(255, 255, 255, 0.12);
-        }
-        .action-btn:active {
-            background: rgba(255, 255, 255, 0.06);
-            transform: scale(0.96);
-        }
-        .action-btn .icon-wrap {
-            width: 28px;
-            height: 28px;
-            border-radius: var(--radius-full);
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #ffffff;
-            flex-shrink: 0;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: background 0.2s;
-            will-change: transform;
-            pointer-events: none;
-        }
-        @keyframes iconPop {
-            0% { transform: scale(1); }
-            35% { transform: scale(1.3); }
-            60% { transform: scale(0.92); }
-            100% { transform: scale(1); }
-        }
-        .action-btn .icon-wrap.pop {
-            animation: iconPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .action-btn .label {
-            font-size: 10px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.75);
-            letter-spacing: 0.2px;
-            white-space: nowrap;
-            pointer-events: none;
-        }
-        .bottom-action-card.edit-mode .action-btn {
-            display: none !important;
-        }
-        .bottom-action-card.edit-mode .action-btn.edit-highlight {
-            display: flex !important;
-            flex: 0 0 auto;
-            padding: 8px 28px;
-            background: transparent !important;
-            border-radius: var(--radius-md);
-        }
-        .bottom-action-card.edit-mode .action-btn.edit-highlight .icon-wrap {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.08);
-        }
-        .bottom-action-card.edit-mode .action-btn.edit-highlight .label {
-            color: rgba(255, 255, 255, 0.75);
-        }
-        .bottom-action-card.edit-mode .action-btn::after {
-            display: none !important;
-        }
-
-        /* ===== 模态框 ===== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .add-modal .add-content,
-        .backup-modal .backup-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 32px 24px;
-            width: 100%;
-            height: 100%;
-            max-width: 100%;
-            max-height: 100%;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 0;
-            border: none;
-            box-shadow: none;
-            position: relative;
-        }
-        .add-modal .add-content h2,
-        .backup-modal .backup-content h2 {
-            font-size: 22px;
-            font-weight: 700;
-            color: #0b1a33;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 0px;
-        }
-        .add-modal .add-content h2 i,
-        .backup-modal .backup-content h2 i {
-            color: #0b1a33;
-        }
-        .sub-placeholder {
-            height: 24px;
-            flex-shrink: 0;
-        }
-        .add-modal .add-content .input-group {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .add-modal .add-content .input-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(4px);
-            font-size: 15px;
-            color: #ffffff;
-            outline: none;
-            transition: 0.15s;
-            -webkit-appearance: none;
-        }
-        .add-modal .add-content .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-            font-weight: 400;
-            font-size: 14px;
-        }
-        .add-modal .add-content .input-group input:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .add-modal .add-content .auto-fill-info {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-md);
-            padding: 8px 14px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
-            margin-top: -6px;
-            margin-bottom: 2px;
-            text-align: center;
-        }
-        .add-modal .add-content .auto-fill-info.show {
-            display: block;
-        }
-        .add-modal .add-content .modal-actions {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            justify-content: center;
-            margin-top: 12px;
-        }
-        .add-modal .add-content .modal-actions button {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            font-size: 15px;
-            font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            transition: 0.15s;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            color: #ffffff;
-        }
-        .add-modal .add-content .modal-actions button:active {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(0.96);
-        }
-        .add-modal .add-content .modal-actions .btn-cancel {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .add-modal .add-content .modal-actions .btn-confirm:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .backup-modal .backup-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-        .backup-modal .backup-actions button,
-        .backup-modal .backup-actions .file-input-wrap {
-            width: 100%;
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            text-align: center;
-            line-height: 1.3;
-            transition: 0.15s;
-            cursor: pointer;
-            padding: 14px 16px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-        .backup-modal .backup-actions .file-input-wrap {
-            padding: 0;
-            position: relative;
-            overflow: hidden;
-        }
-        .backup-modal .backup-actions .file-input-wrap button {
-            width: 100%;
-            height: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-            background: transparent;
-            border: none;
-            backdrop-filter: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-        .backup-modal .backup-actions .file-input-wrap input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-        .backup-modal .backup-actions button:active,
-        .backup-modal .backup-actions .file-input-wrap:active {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(0.96);
-        }
-        .modal-close-btn {
-            position: absolute;
-            bottom: 48px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-full);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 18px;
-            z-index: 10;
-        }
-        .modal-close-btn:active {
-            transform: translateX(-50%) scale(0.88);
-            background: rgba(255, 255, 255, 0.25);
-        }
-        .modal-close-btn svg {
-            width: 24px;
-            height: 24px;
-            stroke: rgba(255, 255, 255, 0.7);
-            stroke-width: 2;
-            fill: none;
-        }
-        .prompt-modal .prompt-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 24px;
-            width: 100%;
-            max-width: 340px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: var(--radius-md);
-            border: none;
-        }
-        .prompt-modal .prompt-content h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 6px;
-        }
-        .prompt-modal .prompt-content .prompt-message {
-            font-size: 15px;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.5;
-            margin-bottom: 18px;
-        }
-        .prompt-modal .prompt-content .modal-actions {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            justify-content: center;
-        }
-        .prompt-modal .prompt-content .modal-actions button {
-            flex: 1;
-            padding: 12px;
-            border-radius: var(--radius-md);
-            font-size: 15px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: 0.15s;
-            max-width: 140px;
-        }
-        .prompt-modal .prompt-content .modal-actions .btn-cancel {
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .prompt-modal .prompt-content .modal-actions .btn-cancel:active {
-            background: rgba(255, 255, 255, 0.25);
-        }
-        .prompt-modal .prompt-content .modal-actions .btn-confirm {
-            background: #ffffff;
-            color: #0b1a33;
-        }
-        .prompt-modal .prompt-content .modal-actions .btn-confirm:active {
-            background: #e8edf5;
-        }
-        .prompt-modal .prompt-content .modal-actions .btn-danger {
-            background: var(--color-positive);
-            color: #ffffff;
-        }
-        .prompt-modal .prompt-content .modal-actions .btn-danger:active {
-            background: #c92a3a;
-        }
-        .refresh-loading {
-            pointer-events: none;
-            opacity: 0.6;
-        }
-        .refresh-loading i {
-            animation: spin 1s infinite linear;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .check-pop {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(145deg, #0b1a33, #132b4a);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.35s ease-out;
-            z-index: 200;
-            pointer-events: none;
-            box-shadow: 0 6px 24px rgba(11, 26, 51, 0.3);
-        }
-        .check-pop.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-        .check-pop svg {
-            width: 44px;
-            height: 44px;
-            stroke: white;
-            stroke-width: 3;
-            fill: none;
-        }
-
-        @media (max-width: 420px) {
-            .app-container { padding: 10px 12px 10px 12px; gap: 14px; }
-            .summary-card { padding: 8px 12px 6px 12px; }
-            .summary-today .today-value { font-size: 20px; }
-            .summary-today .today-label { font-size: 12px; }
-            .summary-stat-item .stat-number { font-size: 13px; }
-            .summary-stat-item .stat-label { font-size: 9px; }
-            .fund-card { padding: 8px 10px 10px 10px; gap: 6px; }
-            .fund-row-top { height: 26px; padding-left: 6px; }
-            .fund-name { font-size: 13px; }
-            .fund-code-standalone { font-size: 9px; padding: 0 6px; }
-            .fund-market-value { font-size: 12px; }
-            .coin-icon { font-size: 11px; }
-            .fund-row-metrics { padding-left: 6px; height: 36px; }
-            .metric-item .metric-label { font-size: 9px; }
-            .metric-item .metric-value { font-size: 11px; }
-            .fund-edit-area { padding: 6px 0 2px 6px; }
-            .edit-row .edit-input { height: 32px; font-size: 11px; padding: 3px 6px; border-radius: var(--radius-sm); }
-            .edit-row .edit-delete-btn { height: 32px; padding: 0 8px; font-size: 10px; border-radius: var(--radius-sm);
-                flex: 0 0 50px; }
-            .edit-hint { font-size: 9px; }
-            .bottom-action-card { padding: 8px 4px; min-height: 62px; }
-            .action-btn { min-height: 46px; padding: 4px 2px; gap: 1px; }
-            .action-btn .icon-wrap { width: 24px; height: 24px; font-size: 12px; }
-            .action-btn .label { font-size: 9px; }
-            .bottom-action-card.edit-mode .action-btn.edit-highlight { padding: 6px 20px; }
-            .add-modal .add-content,
-            .backup-modal .backup-content { padding: 24px 16px; }
-            .add-modal .add-content .input-group input { font-size: 14px; padding: 10px 14px; }
-            .add-modal .add-content .input-group input::placeholder { font-size: 13px; }
-            .add-modal .add-content .modal-actions button { font-size: 14px; padding: 10px 14px; }
-            .backup-modal .backup-actions button,
-            .backup-modal .backup-actions .file-input-wrap button { font-size: 14px; padding: 12px 14px; }
-            .modal-close-btn { width: 40px; height: 40px; bottom: 40px; font-size: 16px; }
-            .modal-close-btn svg { width: 20px; height: 20px; }
-            .data-timestamp { font-size: 9px; }
-            .card-block { padding: 12px; }
-            .chart-container { height: 150px; }
-            .trend-wrapper { height: 130px; }
-            .pie-chart-container { height: 170px; }
-        }
         @media (max-width: 360px) {
-            .fund-name { font-size: 12px; max-width: 100px; }
-            .fund-market-value { font-size: 11px; }
-            .metric-item .metric-value { font-size: 10px; }
-            .card-block { padding: 10px; }
-            .chart-container { height: 130px; }
-            .trend-wrapper { height: 110px; }
-            .pie-chart-container { height: 150px; }
-            .edit-row .edit-delete-btn { flex: 0 0 44px; font-size: 9px; }
+            .app-container { padding: 12px 10px 0; gap: 10px; }
+            .hero-card { padding: 12px 14px 14px; }
+            .swipe-wrapper { height: 54px; }
+            .modal-glass, .calendar-glass { max-width: 100%; }
         }
     </style>
 </head>
 <body>
-    <div class="app-container" id="app">
-
-        <!-- ===== 下拉刷新指示器 ===== -->
-        <div id="pullIndicator">
-            <span class="arrow" id="pullArrow">↓</span>
-            <span class="status-text" id="pullStatus">下拉刷新</span>
-            <span class="spinner" id="pullSpinner"></span>
+    <div class="app-container" id="appContainer">
+        <div class="header">
+            <div class="header-left">
+                <div class="header-brand" id="headerBrand">iFamily</div>
+                <div class="header-subtitle">珍藏每一个重要时刻</div>
+            </div>
+            <button class="header-add-btn" id="headerAddBtn" title="添加纪念日" aria-label="添加纪念日">
+                <span>+</span>
+            </button>
         </div>
 
-        <!-- ===== 顶部摘要 ===== -->
-        <section class="summary-card" id="summaryCard">
-            <div class="summary-today">
-                <span class="today-label" id="todayLabel">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
-                    最新盈亏
-                </span>
-                <span class="today-value" id="todayProfitBig">+0.00</span>
-            </div>
-            <hr class="summary-divider">
-            <div class="summary-stats">
-                <div class="summary-stat-item"><div class="stat-label-wrap"><span class="stat-label">总资产</span></div><div class="stat-number neutral" id="totalAssets">0.00</div></div>
-                <div class="summary-stat-item"><div class="stat-label-wrap"><span class="stat-label">持有收益</span></div><div class="stat-number neutral" id="totalProfit">+0.00</div></div>
-                <div class="summary-stat-item"><div class="stat-label-wrap"><span class="stat-label">总收益率</span></div><div class="stat-number neutral" id="totalReturn">0.00%</div></div>
-            </div>
-            <div class="data-timestamp" id="dataTimestamp">净值日期：--</div>
-        </section>
-
-        <!-- ===== 持仓列表 ===== -->
-        <div class="fund-list" id="fundList">
-            <div class="empty-state"><i class="fas fa-inbox"></i><p>还没有持仓基金</p><div class="sub">点击底部「添加持仓」</div></div>
-        </div>
-
-        <!-- ===== 柱状图卡片 ===== -->
-        <div class="card-block" id="chartBlock">
-            <div class="chart-container" id="chartContainer">
-                <div id="chartEmpty" class="chart-empty">暂无收益数据</div>
-                <canvas id="profitChartCanvas" style="display:none;"></canvas>
+        <div class="hero-card" id="heroCard">
+            <div class="event-name" id="heroName"></div>
+            <div class="event-date-sub" id="heroDateSub"></div>
+            <div class="hero-days-row">
+                <div class="hero-days-item">
+                    <div class="hero-days-num" id="heroDaysPassed">—</div>
+                    <div class="hero-days-label" id="heroDaysPassedLabel">已过天数</div>
+                </div>
+                <div class="hero-days-item">
+                    <div class="hero-days-num" id="heroDaysRemain">—</div>
+                    <div class="hero-days-label" id="heroDaysRemainLabel">剩余天数</div>
+                </div>
             </div>
         </div>
 
-        <!-- ===== 持仓分析卡片 ===== -->
-        <div class="card-block" id="analysisBlock">
-            <div class="pie-chart-container" id="pieChartContainer">
-                <canvas id="pieChartCanvas"></canvas>
-            </div>
-            <div id="analysisEmpty" class="analysis-empty" style="display:none;">暂无持仓数据</div>
-        </div>
+        <div id="eventList" role="list" aria-live="polite" aria-label="纪念日列表"></div>
 
-        <!-- ===== 底部操作栏 ===== -->
-        <div class="bottom-action-card" id="bottomActions">
-            <div class="action-btn" id="openAddModalBtn"><div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span></div>
-            <div class="action-btn" id="batchEditBtn"><div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span></div>
-            <div class="action-btn" id="openBackupModalBtn"><div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span></div>
-            <div class="action-btn hide-in-edit" id="refreshBtn"><div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span></div>
+        <div class="empty-state" id="emptyState">
+            <div class="empty-illustration">
+                <svg viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="28" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <path d="M40 12 L40 68 M12 40 L68 40" stroke="currentColor" stroke-width="1.5" opacity="0.25"/>
+                    <circle cx="40" cy="40" r="5" fill="currentColor" opacity="0.35"/>
+                    <path d="M30 30 L36 36 M50 30 L44 36 M30 50 L36 44 M50 50 L44 44" stroke="currentColor" stroke-width="1.2" opacity="0.35"/>
+                </svg>
+            </div>
+            <div class="empty-text">开始记录吧</div>
+            <div class="empty-sub">还没有纪念日，点击下方按钮记录你的第一个重要时刻吧。</div>
+            <button class="empty-tap-hint" id="emptyTapHint">📝 添加第一个纪念日</button>
         </div>
     </div>
 
-    <!-- ===== 模态框 ===== -->
-    <div class="modal-overlay add-modal" id="modalOverlay">
-        <div class="add-content">
-            <h2><i class="fas fa-coins"></i> 添加基金</h2>
-            <div class="sub-placeholder"></div>
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-glass">
+            <button class="modal-close-btn" id="addCloseBtn" aria-label="关闭">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div class="modal-title" id="addModalTitle">记录纪念日</div>
             <div class="input-group">
-                <input type="text" id="fundCodeInput" maxlength="6" inputmode="decimal" placeholder="基金代码（6位）">
-                <div class="auto-fill-info" id="autoFillInfo"><i class="fas fa-check-circle"></i> <span id="autoFillText">已识别：易方达蓝筹精选</span></div>
-                <input type="number" id="fundCostInput" step="0.0001" inputmode="decimal" placeholder="成本价 (¥) 例如 1.1000">
-                <input type="number" id="fundSharesInput" step="0.01" inputmode="decimal" placeholder="持有份额 例如 1500.00">
-                <input type="text" id="fundIndustryInput" maxlength="20" placeholder="行业标签（必填） 例如 白酒">
+                <label>名称</label>
+                <input type="text" id="addName" placeholder="例如：结婚纪念日" maxlength="30" autocomplete="off" enterkeyhint="done">
             </div>
-            <div class="modal-actions"><button class="btn-cancel" id="closeModalBtn">取消</button><button class="btn-cancel" id="confirmAddBtn" disabled>确认添加</button></div>
-            <button class="modal-close-btn" id="closeModalBtnCircle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
+            <div class="input-group">
+                <label>日期</label>
+                <div class="date-trigger" id="dateTrigger" tabindex="0" role="button" aria-label="选择日期">
+                    <span class="label-text">点击选择</span>
+                    <span class="value" id="selectedDateText"></span>
+                </div>
+            </div>
+            <button class="btn-submit" id="addSubmit">保存</button>
         </div>
     </div>
 
-    <div class="modal-overlay backup-modal" id="backupModalOverlay">
-        <div class="backup-content">
-            <h2><i class="fas fa-database"></i> 数据管理</h2>
-            <div class="sub-placeholder"></div>
-            <div class="backup-actions">
-                <button id="exportBtn"><i class="fas fa-download"></i> 导出配置</button>
-                <div class="file-input-wrap"><button class="primary"><i class="fas fa-upload"></i> 导入配置</button><input type="file" id="importFileInput" accept=".json"></div>
-                <button id="clearCacheBtn"><i class="fas fa-trash-alt"></i> 清除缓存</button>
-                <button id="hardResetBtn" style="background:rgba(255,50,50,0.3);border:1px solid rgba(255,50,50,0.2);"><i class="fas fa-power-off"></i> 硬重置</button>
+    <div class="modal-overlay cal-overlay" id="calendarModal">
+        <div class="calendar-glass">
+            <div class="cal-title">选择日期</div>
+            <div class="picker-row">
+                <div class="picker-col"><label>年</label><div class="picker-scroll" id="pickerYear"></div></div>
+                <div class="picker-col"><label>月</label><div class="picker-scroll" id="pickerMonth"></div></div>
+                <div class="picker-col"><label>日</label><div class="picker-scroll" id="pickerDay"></div></div>
             </div>
-            <button class="modal-close-btn" id="closeBackupModalBtnCircle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
+            <div class="btn-row">
+                <button class="btn btn-cancel" id="calCancel">取消</button>
+                <button class="btn btn-confirm" id="calConfirm">确定</button>
+            </div>
         </div>
     </div>
 
-    <div class="modal-overlay prompt-modal" id="promptModalOverlay">
-        <div class="prompt-content"><h2 id="promptTitle">提示</h2><div class="prompt-message" id="promptMessage">消息内容</div><div class="modal-actions" id="promptActions"></div></div>
+    <div class="modal-overlay confirm-modal" id="confirmModal">
+        <div class="modal-glass">
+            <div class="modal-title">确认删除</div>
+            <div class="modal-body" id="confirmMessage">确定要删除这条记录吗？</div>
+            <div class="modal-footer">
+                <button class="btn-cancel-confirm" id="confirmCancel">取消</button>
+                <button class="btn-danger" id="confirmOk">删除</button>
+            </div>
+        </div>
     </div>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <div class="check-pop" id="checkPop"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
 
     <script>
-        // ================================================================
-        // 完整 JavaScript（方案一：刷新时强制从接口拉取最新净值）
-        // ================================================================
         (function() {
-            'use strict';
+            const SWIPE_DIST = 72;
+            const SWIPE_THRESHOLD = 30;
+            const LONG_PRESS_DURATION = 600;
+            const THEME_PRESS_DURATION = 500;
+            const SCROLL_SNAP_DELAY = 80;
+            const PICKER_START_YEAR = 1980;
+            const PICKER_END_YEAR = 2050;
+            const STORAGE_KEY = 'myfamily_v53';
+            const THEME_KEY = 'ifamily_theme';
 
-            const STORAGE_H = 'fund_holdings';
-            const STORAGE_C = 'fund_data_cache';
-            const STORAGE_A = 'account_profit_history';
-            const STORAGE_T = 'fund_industry_tags';
+            const themes = ['default', 'klein', 'peach', 'brown', 'grey', 'ice', 'violet', 'ocean', 'forest', 'orange'];
 
-            const OCEAN_COLORS = ['#1A3A4A', '#2A5F6F', '#3D7A8C', '#5A9AAA', '#7AB8C8', '#A8D0D8'];
-
-            let holdings = {};
-            let fundDataCache = {};
-            let accountProfitHistory = [];
-            let industryTags = {};
-            let editMode = false;
-            let privacyMode = false;
-            let isUpdating = false;
-            let trendCharts = {};
-            let profitChart = null;
-            let pieChart = null;
-            let currentExpandedCode = null;
-            let isRefreshing = false;
-
-            // ===== 工具函数 =====
-            function getToday() { return new Date().toISOString().slice(0, 10); }
-
-            function formatMoney(v) {
-                if (v === undefined || v === null || isNaN(v)) return '--';
-                return (v >= 0 ? '+' : '') + v.toFixed(2);
-            }
-
-            function round4(v) { return Math.round(v * 10000) / 10000; }
-
-            function escapeHTML(str) {
-                if (!str) return '';
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            function isTradingDay(d) {
-                const day = d.getDay();
-                return day !== 0 && day !== 6;
-            }
-
-            function getValidName(name, code) {
-                if (name && typeof name === 'string' && name.trim().length >= 2) return name.trim();
-                return code;
-            }
-
-            // ===== 数据持久化 =====
-            function loadData() {
-                try { holdings = JSON.parse(localStorage.getItem(STORAGE_H)) || {}; } catch (e) { holdings = {}; }
-                try { fundDataCache = JSON.parse(localStorage.getItem(STORAGE_C)) || {}; } catch (e) { fundDataCache = {}; }
-                try { accountProfitHistory = JSON.parse(localStorage.getItem(STORAGE_A)) || []; } catch (e) { accountProfitHistory = []; }
-                try { industryTags = JSON.parse(localStorage.getItem(STORAGE_T)) || {}; } catch (e) { industryTags = {}; }
-            }
-
-            function saveAll() {
-                localStorage.setItem(STORAGE_H, JSON.stringify(holdings));
-                localStorage.setItem(STORAGE_C, JSON.stringify(fundDataCache));
-                localStorage.setItem(STORAGE_A, JSON.stringify(accountProfitHistory));
-                localStorage.setItem(STORAGE_T, JSON.stringify(industryTags));
-            }
-
-            function hardReset() {
-                const keys = Object.keys(localStorage);
-                keys.forEach(key => {
-                    if (key.startsWith('fund_')) localStorage.removeItem(key);
-                });
-                loadData();
-                renderAll();
-            }
-
-            // ===== API：腾讯净值 =====
-            function fetchTxFund(code) {
-                return new Promise((resolve, reject) => {
-                    const varName = 'v_jj' + code;
-                    if (window[varName] && typeof window[varName] === 'string') {
-                        const data = parseTxData(window[varName]);
-                        if (data) { resolve(data); return; }
-                    }
-                    const script = document.createElement('script');
-                    script.src = 'https://qt.gtimg.cn/q=jj' + code;
-                    script.async = true;
-                    const tid = setTimeout(() => { cleanup();
-                        reject(new Error('腾讯接口超时')); }, 8000);
-
-                    function cleanup() {
-                        clearTimeout(tid);
-                        if (script.parentNode) script.parentNode.removeChild(script);
-                    }
-
-                    script.onload = function() {
-                        clearTimeout(tid);
-                        try {
-                            const raw = window[varName];
-                            if (raw && typeof raw === 'string') {
-                                const data = parseTxData(raw);
-                                if (data) { cleanup();
-                                    resolve(data); return; }
-                            }
-                            cleanup();
-                            reject(new Error('无法解析腾讯数据'));
-                        } catch (e) { cleanup();
-                            reject(e); }
-                    };
-                    script.onerror = function() { cleanup();
-                        reject(new Error('腾讯接口请求失败')); };
-                    document.head.appendChild(script);
-                });
-            }
-
-            function parseTxData(raw) {
-                if (typeof raw !== 'string') return null;
-                const parts = raw.split('~');
-                if (parts.length < 9) return null;
-                const nav = parseFloat(parts[5]) || 0;
-                const rate = parseFloat(parts[7]) || 0;
-                const date = parts[8] || '';
-                if (nav <= 0 || !date) return null;
-                return { fundcode: parts[0], name: parts[1], dwjz: nav, gszzl: rate, jzrq: date };
-            }
-
-            // ===== 天天基金历史净值 =====
-            function fetchTrendData(code) {
-                return new Promise((resolve) => {
-                    const script = document.createElement('script');
-                    const timer = setTimeout(() => { if (script.parentNode) script.remove();
-                        resolve(null); }, 10000);
-                    script.src = 'https://fund.eastmoney.com/pingzhongdata/' + code + '.js';
-                    script.onload = function() {
-                        clearTimeout(timer);
-                        const raw = window.Data_netWorthTrend;
-                        if (raw && raw.length > 0) {
-                            const recent = raw.slice(-30);
-                            const dates = [];
-                            const navs = [];
-                            for (let i = 0; i < recent.length; i++) {
-                                const d = new Date(recent[i].x);
-                                dates.push((d.getMonth() + 1) + '/' + d.getDate());
-                                navs.push(recent[i].y);
-                            }
-                            resolve({ dates, navs });
-                        } else { resolve(null); }
-                        if (script.parentNode) script.remove();
-                        delete window.Data_netWorthTrend;
-                    };
-                    script.onerror = function() { clearTimeout(timer);
-                        if (script.parentNode) script.remove();
-                        resolve(null); };
-                    document.head.appendChild(script);
-                });
-            }
-
-            // ===== ★★★ 强制刷新：不检查缓存，直接调用接口 ★★★ =====
-            async function fetchFundDataOnlyForce(code) {
-                try {
-                    const tx = await fetchTxFund(code);
-                    if (tx && tx.dwjz > 0) {
-                        const name = getValidName(tx.name, code);
-                        fundDataCache[code] = {
-                            name,
-                            nav: tx.dwjz,
-                            rate: tx.gszzl,
-                            date: tx.jzrq,
-                            updateDate: getToday()
-                        };
-                        saveAll();
-                        return true;
-                    }
-                } catch (e) {
-                    console.warn('强制刷新失败', code, e.message);
-                }
-                return false;
-            }
-
-            // ===== 普通获取（用于添加基金时获取名称，不强制） =====
-            async function fetchFundDataOnly(code) {
-                try {
-                    const tx = await fetchTxFund(code);
-                    if (tx && tx.dwjz > 0) {
-                        const name = getValidName(tx.name, code);
-                        fundDataCache[code] = {
-                            name,
-                            nav: tx.dwjz,
-                            rate: tx.gszzl,
-                            date: tx.jzrq,
-                            updateDate: getToday()
-                        };
-                        saveAll();
-                        return true;
-                    }
-                } catch (e) { console.warn('fetch error', code, e.message); }
-                return false;
-            }
-
-            function getDisplayData(code) {
-                const cache = fundDataCache[code] || {};
-                if (cache.nav && cache.date) return { nav: cache.nav, rate: cache.rate || 0, date: cache.date };
-                return { nav: 0, rate: 0, date: '' };
-            }
-
-            function getCardData(code) {
-                const h = holdings[code];
-                if (!h) return null;
-                const cost = parseFloat(h.cost) || 0;
-                const shares = parseFloat(h.shares) || 0;
-                const display = getDisplayData(code);
-                const nav = display.nav || cost;
-                const rate = display.rate || 0;
-                const prev = rate !== 0 ? nav / (1 + rate / 100) : nav;
-                const marketValue = nav * shares;
-                const dayProfit = (nav - prev) * shares;
-                const dayRate = rate;
-                const holdProfit = (nav - cost) * shares;
-                const holdYield = cost > 0 ? ((nav - cost) / cost * 100) : 0;
-                const name = h.name || code;
-                return { name, code, marketValue, dayRate, dayProfit, holdProfit, holdYield, cost, shares };
-            }
-
-            function computeSummary() {
-                const codes = Object.keys(holdings);
-                if (!codes.length) return { totalAsset: 0, todayProfit: 0, totalProfit: 0, totalYield: 0 };
-                let totalCost = 0,
-                    totalMV = 0,
-                    totalPrev = 0;
-                codes.forEach(code => {
-                    const h = holdings[code];
-                    const cost = parseFloat(h.cost) || 0;
-                    const shares = parseFloat(h.shares) || 0;
-                    totalCost += cost * shares;
-                    const display = getDisplayData(code);
-                    const nav = display.nav || cost;
-                    const rate = display.rate || 0;
-                    const prev = rate !== 0 ? nav / (1 + rate / 100) : nav;
-                    totalMV += nav * shares;
-                    totalPrev += prev * shares;
-                });
-                const totalProfit = totalMV - totalCost;
-                const todayProfit = totalMV - totalPrev;
-                const totalYield = totalCost > 0 ? (totalProfit / totalCost * 100) : 0;
-                return { totalAsset: round4(totalMV), todayProfit: round4(todayProfit), totalProfit: round4(
-                        totalProfit), totalYield: round4(totalYield) };
-            }
-
-            function getTodayProfit() { return computeSummary().todayProfit; }
-
-            // ===== 柱状图快照 =====
-            function saveTodaySnapshot() {
-                const today = getToday();
-                const codes = Object.keys(holdings);
-
-                let hasTodayData = false;
-                for (let code of codes) {
-                    const d = getDisplayData(code);
-                    if (d.date === today && d.nav > 0) {
-                        hasTodayData = true;
-                        break;
-                    }
-                }
-                if (!hasTodayData) return;
-
-                const profit = getTodayProfit();
-                const existing = accountProfitHistory.findIndex(item => item.date === today);
-                if (existing >= 0) {
-                    accountProfitHistory[existing].profit = round4(profit);
-                } else {
-                    accountProfitHistory.push({ date: today, profit: round4(profit) });
-                }
-                accountProfitHistory.sort((a, b) => a.date.localeCompare(b.date));
-                if (accountProfitHistory.length > 30) {
-                    accountProfitHistory = accountProfitHistory.slice(-30);
-                }
-                saveAll();
-            }
-
-            function backfillProfitHistory() {
-                const codes = Object.keys(holdings);
-                if (!codes.length) return;
-                let hasValidData = false;
-                codes.forEach(code => {
-                    const d = getDisplayData(code);
-                    if (d.nav > 0 && d.date) hasValidData = true;
-                });
-                if (!hasValidData) return;
-                const existingDates = new Set(accountProfitHistory.map(item => item.date));
-                let lastDate = null;
-                if (accountProfitHistory.length > 0) {
-                    const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
-                    lastDate = sorted[sorted.length - 1].date;
-                }
-                let startDate = lastDate ? new Date(lastDate) : new Date();
-                startDate.setDate(startDate.getDate() + 1);
-                const endDate = new Date();
-                endDate.setDate(endDate.getDate() - 1);
-                let daysToBackfill = 0;
-                const maxBackfill = 30;
-                const toFill = [];
-                let current = new Date(startDate);
-                while (current <= endDate && daysToBackfill < maxBackfill) {
-                    const dateStr = current.toISOString().slice(0, 10);
-                    if (!existingDates.has(dateStr) && isTradingDay(current)) {
-                        toFill.push(dateStr);
-                    }
-                    current.setDate(current.getDate() + 1);
-                    daysToBackfill++;
-                }
-                if (toFill.length > 0) {
-                    const currentProfit = getTodayProfit();
-                    toFill.forEach(dateStr => {
-                        const existing = accountProfitHistory.findIndex(item => item.date === dateStr);
-                        if (existing < 0) {
-                            accountProfitHistory.push({ date: dateStr, profit: round4(currentProfit),
-                                estimated: true });
-                        }
-                    });
-                    accountProfitHistory.sort((a, b) => a.date.localeCompare(b.date));
-                    if (accountProfitHistory.length > 30) {
-                        accountProfitHistory = accountProfitHistory.slice(-30);
-                    }
-                    saveAll();
-                }
-            }
-
-            // ===== 下拉刷新 =====
-            function initPullToRefresh() {
-                const container = document.getElementById('app');
-                const indicator = document.getElementById('pullIndicator');
-                const arrow = document.getElementById('pullArrow');
-                const status = document.getElementById('pullStatus');
-                const spinner = document.getElementById('pullSpinner');
-                let startY = 0;
-                let isPulling = false;
-                let pullHeight = 0;
-
-                container.addEventListener('touchstart', function(e) {
-                    if (window.scrollY > 5) return;
-                    const touch = e.touches[0];
-                    startY = touch.clientY;
-                    isPulling = false;
-                    pullHeight = 0;
-                }, { passive: true });
-
-                container.addEventListener('touchmove', function(e) {
-                    if (isRefreshing) return;
-                    if (window.scrollY > 5) {
-                        if (isPulling) {
-                            isPulling = false;
-                            indicator.classList.remove('show');
-                            container.style.transform = '';
-                        }
-                        return;
-                    }
-                    const touch = e.touches[0];
-                    const deltaY = touch.clientY - startY;
-                    if (deltaY > 0 && deltaY < 120) {
-                        isPulling = true;
-                        pullHeight = Math.min(deltaY * 0.4, 60);
-                        container.style.transform = 'translateY(' + pullHeight + 'px)';
-                        indicator.classList.add('show');
-                        if (pullHeight > 30) {
-                            arrow.classList.add('flip');
-                            status.textContent = '释放刷新';
-                        } else {
-                            arrow.classList.remove('flip');
-                            status.textContent = '下拉刷新';
-                        }
-                        e.preventDefault();
-                    }
-                }, { passive: false });
-
-                container.addEventListener('touchend', function(e) {
-                    if (!isPulling || isRefreshing) {
-                        container.style.transform = '';
-                        indicator.classList.remove('show');
-                        return;
-                    }
-                    isPulling = false;
-                    if (pullHeight > 30) {
-                        isRefreshing = true;
-                        arrow.classList.remove('flip');
-                        arrow.style.display = 'none';
-                        spinner.classList.add('active');
-                        status.textContent = '刷新中...';
-                        container.style.transform = 'translateY(36px)';
-                        // ★★★ 使用强制刷新 ★★★
-                        refreshData().then(function() {
-                            isRefreshing = false;
-                            arrow.style.display = 'inline';
-                            spinner.classList.remove('active');
-                            status.textContent = '刷新完成';
-                            container.style.transform = '';
-                            setTimeout(function() { indicator.classList.remove('show'); }, 600);
-                        }).catch(function() {
-                            isRefreshing = false;
-                            arrow.style.display = 'inline';
-                            spinner.classList.remove('active');
-                            status.textContent = '刷新失败';
-                            container.style.transform = '';
-                            setTimeout(function() { indicator.classList.remove('show'); }, 800);
-                        });
-                    } else {
-                        container.style.transform = '';
-                        indicator.classList.remove('show');
-                    }
-                    pullHeight = 0;
-                }, { passive: true });
-            }
-
-            // ===== 渲染：顶部摘要 =====
-            function renderSummary() {
-                if (privacyMode) {
-                    ['todayProfitBig', 'totalAssets', 'totalProfit', 'totalReturn'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) { el.textContent = '***';
-                            el.className = 'stat-number privacy'; }
-                    });
-                    document.getElementById('dataTimestamp').textContent = '净值日期：--';
-                    return;
-                }
-                const codes = Object.keys(holdings);
-                const s = computeSummary();
-                const todayEl = document.getElementById('todayProfitBig');
-                const tsEl = document.getElementById('dataTimestamp');
-                if (!codes.length) {
-                    todayEl.textContent = '+0.00';
-                    todayEl.className = 'today-value neutral';
-                    document.getElementById('totalAssets').textContent = '0.00';
-                    document.getElementById('totalAssets').className = 'stat-number neutral';
-                    document.getElementById('totalProfit').textContent = '+0.00';
-                    document.getElementById('totalProfit').className = 'stat-number neutral';
-                    document.getElementById('totalReturn').textContent = '0.00%';
-                    document.getElementById('totalReturn').className = 'stat-number neutral';
-                    tsEl.textContent = '净值日期：--';
-                    return;
-                }
-                const val = s.todayProfit;
-                todayEl.textContent = (val >= 0 ? '+' : '') + val.toFixed(2);
-                todayEl.className = 'today-value ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
-
-                function setStat(id, val, isPct) {
-                    const el = document.getElementById(id);
-                    if (isPct) {
-                        el.textContent = val.toFixed(2) + '%';
-                        el.className = 'stat-number ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
-                    } else {
-                        const prefix = val >= 0 ? '+' : '';
-                        el.textContent = prefix + val.toFixed(2);
-                        el.className = 'stat-number ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
-                    }
-                }
-                setStat('totalAssets', s.totalAsset, false);
-                setStat('totalProfit', s.totalProfit, false);
-                setStat('totalReturn', s.totalYield, true);
-                let latestDate = '';
-                codes.forEach(code => {
-                    const d = getDisplayData(code);
-                    if (d.date && d.nav > 0 && d.date > latestDate) latestDate = d.date;
-                });
-                tsEl.textContent = '净值日期：' + (latestDate || '--');
-            }
-
-            // ===== 渲染：持仓列表 =====
-            function renderFundList() {
-                const container = document.getElementById('fundList');
-                const codes = Object.keys(holdings);
-                if (!codes.length) {
-                    container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>还没有持仓基金</p><div class="sub">点击底部「添加持仓」</div></div>';
-                    if (editMode) { editMode = false;
-                        updateBottomBar(); }
-                    return;
-                }
-                const sorted = codes.slice().sort((a, b) => {
-                    const hA = holdings[a],
-                        hB = holdings[b];
-                    const dA = getDisplayData(a),
-                        dB = getDisplayData(b);
-                    const mvA = (dA.nav || parseFloat(hA.cost) || 0) * (parseFloat(hA.shares) || 0);
-                    const mvB = (dB.nav || parseFloat(hB.cost) || 0) * (parseFloat(hB.shares) || 0);
-                    return mvB - mvA;
-                });
-                let html = '';
-                sorted.forEach(code => {
-                    const data = getCardData(code);
-                    if (!data) return;
-                    const dayRateStr = data.dayRate !== null ? (data.dayRate >= 0 ? '+' : '') + data.dayRate.toFixed(
-                        2) + '%' : '--';
-                    const dayProfitStr = formatMoney(data.dayProfit);
-                    const holdProfitStr = formatMoney(data.holdProfit);
-                    const holdYieldStr = data.holdYield !== null ? (data.holdYield >= 0 ? '+' : '') + data
-                        .holdYield.toFixed(2) + '%' : '--';
-                    const cls = data.dayRate > 0 ? 'positive' : (data.dayRate < 0 ? 'negative' : 'neutral');
-                    const displayName = data.name.length > 14 ? data.name.slice(0, 14) + '…' : data.name;
-                    let decorClass = 'decor-old';
-                    const display = getDisplayData(code);
-                    if (display.date && display.nav > 0) {
-                        const navDate = new Date(display.date + 'T00:00:00');
-                        const now = new Date();
-                        const nextTradeDay = new Date(navDate);
-                        nextTradeDay.setDate(nextTradeDay.getDate() + 1);
-                        while (!isTradingDay(nextTradeDay)) { nextTradeDay.setDate(nextTradeDay.getDate() + 1); }
-                        nextTradeDay.setHours(9, 0, 0, 0);
-                        if (now >= navDate && now <= nextTradeDay) decorClass = 'decor-today';
-                    }
-                    const clickAttr = editMode ? '' : `onclick="window.toggleTrend('${code}')"`;
-                    html += `<div class="fund-card ${decorClass}${editMode ? ' edit-mode' : ''}" data-code="${code}" ${clickAttr}>
-                        <div class="fund-content">
-                            <div class="fund-row fund-row-top">
-                                <div class="fund-name-wrap"><span class="fund-name">${escapeHTML(displayName)}</span></div>
-                                <div class="fund-code-wrap"><span class="fund-code-standalone">${code}</span></div>
-                                <div class="fund-right-actions">
-                                    <span class="fund-market-value">
-                                        <i class="fas fa-coins coin-icon"></i> ¥${data.marketValue.toFixed(2)}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="fund-row-metrics">
-                                <div class="metric-item"><span class="metric-label">最新收益率</span><span class="metric-value ${cls}">${dayRateStr}</span></div>
-                                <div class="metric-item"><span class="metric-label">最新盈亏</span><span class="metric-value ${data.dayProfit > 0 ? 'positive' : data.dayProfit < 0 ? 'negative' : 'neutral'}">${dayProfitStr}</span></div>
-                                <div class="metric-item"><span class="metric-label">持有收益率</span><span class="metric-value ${data.holdYield > 0 ? 'positive' : data.holdYield < 0 ? 'negative' : 'neutral'}">${holdYieldStr}</span></div>
-                                <div class="metric-item"><span class="metric-label">持有盈亏</span><span class="metric-value ${data.holdProfit > 0 ? 'positive' : data.holdProfit < 0 ? 'negative' : 'neutral'}">${holdProfitStr}</span></div>
-                            </div>
-                            <div class="trend-wrapper" id="trend-${code}" style="${editMode ? 'display:none;' : ''}">
-                                <div class="trend-loading" id="trendLoading-${code}">加载中...</div>
-                                <canvas id="trendCanvas-${code}" style="display:none;"></canvas>
-                            </div>
-                            <div class="fund-edit-area ${editMode ? 'active' : ''}" data-code="${code}">
-                                <div class="edit-row">
-                                    <input type="number" class="edit-input" id="editCost_${code}" value="${data.cost.toFixed(4)}" step="any" inputmode="decimal" placeholder="成本">
-                                    <input type="number" class="edit-input" id="editShares_${code}" value="${data.shares.toFixed(2)}" step="any" inputmode="decimal" placeholder="份额">
-                                    <input type="text" class="edit-input" id="editTag_${code}" value="${escapeHTML(industryTags[code] || '')}" placeholder="行业标签">
-                                    <button class="edit-delete-btn" data-code="${code}">删除</button>
-                                </div>
-                                <div class="edit-hint">
-                                    <span class="current-cost">当前成本: ${data.cost.toFixed(4)}</span>
-                                    <span class="hint-tip">💡 修改后持有收益将重新计算</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                });
-                container.innerHTML = html;
-                if (editMode) {
-                    container.querySelectorAll('.edit-delete-btn').forEach(btn => {
-                        btn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            deleteFund(this.getAttribute('data-code'));
-                        });
-                    });
-                }
-                updateBottomBar();
-            }
-
-            // ===== 趋势图切换 =====
-            window.toggleTrend = function(code) {
-                if (editMode) return;
-                const wrapper = document.getElementById('trend-' + code);
-                if (!wrapper) return;
-                if (currentExpandedCode === code) {
-                    wrapper.classList.remove('expanded');
-                    const canvas = document.getElementById('trendCanvas-' + code);
-                    if (canvas) canvas.style.display = 'none';
-                    const loading = document.getElementById('trendLoading-' + code);
-                    if (loading) loading.style.display = 'block';
-                    if (trendCharts[code]) {
-                        trendCharts[code].destroy();
-                        delete trendCharts[code];
-                    }
-                    currentExpandedCode = null;
-                    return;
-                }
-                if (currentExpandedCode) {
-                    const oldWrapper = document.getElementById('trend-' + currentExpandedCode);
-                    if (oldWrapper) {
-                        oldWrapper.classList.remove('expanded');
-                        const oldCanvas = document.getElementById('trendCanvas-' + currentExpandedCode);
-                        if (oldCanvas) oldCanvas.style.display = 'none';
-                        const oldLoading = document.getElementById('trendLoading-' + currentExpandedCode);
-                        if (oldLoading) oldLoading.style.display = 'block';
-                        if (trendCharts[currentExpandedCode]) {
-                            trendCharts[currentExpandedCode].destroy();
-                            delete trendCharts[currentExpandedCode];
-                        }
-                    }
-                }
-                wrapper.classList.add('expanded');
-                const loading = document.getElementById('trendLoading-' + code);
-                const canvas = document.getElementById('trendCanvas-' + code);
-                if (loading) loading.style.display = 'block';
-                if (canvas) canvas.style.display = 'none';
-                currentExpandedCode = code;
-
-                fetchTrendData(code).then(data => {
-                    if (!data || !data.navs || data.navs.length < 2) {
-                        if (loading) {
-                            loading.innerHTML =
-                                '暂无历史数据<div class="trend-retry-btn" onclick="window.toggleTrend(\'' +
-                                code + '\')">重试</div>';
-                        }
-                        return;
-                    }
-                    if (loading) loading.style.display = 'none';
-                    if (canvas) {
-                        canvas.style.display = 'block';
-                        const ctx = canvas.getContext('2d');
-                        const lineColor = '#3D7A8C';
-                        const grad = ctx.createLinearGradient(0, 0, 0, 150);
-                        grad.addColorStop(0, 'rgba(61, 122, 140, 0.35)');
-                        grad.addColorStop(0.3, 'rgba(61, 122, 140, 0.20)');
-                        grad.addColorStop(0.7, 'rgba(61, 122, 140, 0.08)');
-                        grad.addColorStop(1, 'rgba(61, 122, 140, 0.02)');
-
-                        if (trendCharts[code]) {
-                            trendCharts[code].destroy();
-                            delete trendCharts[code];
-                        }
-
-                        trendCharts[code] = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: data.dates,
-                                datasets: [{
-                                    data: data.navs,
-                                    borderColor: lineColor,
-                                    backgroundColor: grad,
-                                    fill: true,
-                                    tension: 0.4,
-                                    pointRadius: 0,
-                                    pointHoverRadius: 4,
-                                    pointBackgroundColor: lineColor,
-                                    borderWidth: 1.8
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                interaction: { intersect: false, mode: 'index' },
-                                plugins: {
-                                    legend: { display: false },
-                                    tooltip: {
-                                        backgroundColor: 'rgba(255,255,255,0.95)',
-                                        titleColor: '#0b1a33',
-                                        bodyColor: '#0b1a33',
-                                        borderColor: 'rgba(0,0,0,0.06)',
-                                        borderWidth: 1,
-                                        cornerRadius: 10,
-                                        padding: 8,
-                                        callbacks: {
-                                            label: function(context) {
-                                                return '净值: ' + context.parsed.y.toFixed(4);
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    x: {
-                                        ticks: { color: '#94a3b8', font: { size: 7 },
-                                        maxTicksLimit: 8 },
-                                        grid: { color: 'rgba(0, 0, 0, 0.06)',
-                                        drawBorder: false }
-                                    },
-                                    y: {
-                                        ticks: { color: '#94a3b8', font: { size: 7 },
-                                            count: 4 },
-                                        grid: { color: 'rgba(0, 0, 0, 0.06)',
-                                            drawBorder: false }
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }).catch(() => {
-                    if (loading) {
-                        loading.innerHTML =
-                            '加载失败<div class="trend-retry-btn" onclick="window.toggleTrend(\'' + code +
-                            '\')">重试</div>';
-                    }
-                });
+            const dom = {
+                eventList: document.getElementById('eventList'),
+                emptyState: document.getElementById('emptyState'),
+                emptyTapHint: document.getElementById('emptyTapHint'),
+                heroCard: document.getElementById('heroCard'),
+                heroName: document.getElementById('heroName'),
+                heroDateSub: document.getElementById('heroDateSub'),
+                heroDaysPassed: document.getElementById('heroDaysPassed'),
+                heroDaysPassedLabel: document.getElementById('heroDaysPassedLabel'),
+                heroDaysRemain: document.getElementById('heroDaysRemain'),
+                heroDaysRemainLabel: document.getElementById('heroDaysRemainLabel'),
+                headerAddBtn: document.getElementById('headerAddBtn'),
+                headerBrand: document.getElementById('headerBrand'),
+                addModal: document.getElementById('addModal'),
+                addCloseBtn: document.getElementById('addCloseBtn'),
+                addName: document.getElementById('addName'),
+                addSubmit: document.getElementById('addSubmit'),
+                addModalTitle: document.getElementById('addModalTitle'),
+                dateTrigger: document.getElementById('dateTrigger'),
+                selectedDateText: document.getElementById('selectedDateText'),
+                calendarModal: document.getElementById('calendarModal'),
+                calCancel: document.getElementById('calCancel'),
+                calConfirm: document.getElementById('calConfirm'),
+                pickerYear: document.getElementById('pickerYear'),
+                pickerMonth: document.getElementById('pickerMonth'),
+                pickerDay: document.getElementById('pickerDay'),
+                confirmModal: document.getElementById('confirmModal'),
+                confirmCancel: document.getElementById('confirmCancel'),
+                confirmOk: document.getElementById('confirmOk'),
+                confirmMessage: document.getElementById('confirmMessage'),
+                appContainer: document.getElementById('appContainer'),
             };
 
-            // ===== 柱状图 =====
-            function renderProfitChart() {
-                const canvas = document.getElementById('profitChartCanvas');
-                const emptyEl = document.getElementById('chartEmpty');
-                if (!canvas || !emptyEl) return;
+            let events = [];
+            let currentDateStr = '';
+            let pendingDeleteId = null;
+            let openWrapper = null;
+            let editingId = null;
+            let pickerYearVal, pickerMonthVal, pickerDayVal;
+            let longPressTimer = null;
+            let heroPressStart = null;
+            let longPressTriggered = false;
+            const scrollListeners = new Map();
 
-                if (profitChart) { profitChart.destroy();
-                    profitChart = null; }
+            function pad(n) { return String(n).padStart(2, '0'); }
+            function fmt(y, m, d) { return y + '-' + pad(m) + '-' + pad(d); }
+            function parseDate(s) { const p = s.split('-').map(Number); return { year: p[0], month: p[1], day: p[2] }; }
+            function today() { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+            function daysBetween(a, b) { return Math.round((b.getTime() - a.getTime()) / 86400000); }
+            function getDaysInMonth(y, m) { return new Date(y, m, 0).getDate(); }
+            function isLeapYear(y) { return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0); }
+            function safeDate(year, month, day) {
+                if (month === 2 && day === 29 && !isLeapYear(year)) return new Date(year, 1, 28);
+                return new Date(year, month - 1, day);
+            }
 
-                if (accountProfitHistory.length === 0) {
-                    canvas.style.display = 'none';
-                    emptyEl.style.display = 'flex';
-                    return;
-                }
+            function calcEventInfo(event) {
+                const t = today();
+                const d = parseDate(event.date);
+                const origDate = safeDate(d.year, d.month, d.day);
+                const daysPassed = daysBetween(origDate, t);
+                const thisYearTarget = safeDate(t.getFullYear(), d.month, d.day);
+                const nextTarget = thisYearTarget >= t ? thisYearTarget : safeDate(t.getFullYear() + 1, d.month, d.day);
+                const daysRemain = daysBetween(t, nextTarget);
+                const prevTarget = safeDate(nextTarget.getFullYear() - 1, d.month, d.day);
+                const totalDaysInCycle = daysBetween(prevTarget, nextTarget);
+                const progress = totalDaysInCycle > 0 ? Math.min(1, Math.max(0, (totalDaysInCycle - daysRemain) / totalDaysInCycle)) : 1;
+                const isToday = daysRemain === 0;
+                const isFuture = daysPassed < 0;
+                let displayMonth = d.month, displayDay = d.day;
+                if (d.month === 2 && d.day === 29 && !isLeapYear(d.year)) displayDay = 28;
+                const origDateStr = d.year + '年' + displayMonth + '月' + displayDay + '日';
+                return { daysPassed, daysRemain, isToday, progress, origDateStr, isFuture };
+            }
 
-                canvas.style.display = 'block';
-                emptyEl.style.display = 'none';
-
-                const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
-                const labels = sorted.map(item => item.date.slice(5));
-                const data = sorted.map(item => item.profit);
-                const colors = data.map(v => v >= 0 ? '#D96060' : '#3AAD9F');
-                const ctx = canvas.getContext('2d');
-
-                profitChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: colors,
-                            borderRadius: 4,
-                            barPercentage: 0.6,
-                            categoryPercentage: 0.8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: 'rgba(255,255,255,0.95)',
-                                titleColor: '#0b1a33',
-                                bodyColor: '#0b1a33',
-                                borderColor: 'rgba(0,0,0,0.06)',
-                                borderWidth: 1,
-                                cornerRadius: 10,
-                                padding: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        return (context.parsed.y >= 0 ? '+' : '') + context.parsed.y
-                                            .toFixed(2) + ' 元';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                ticks: { color: '#94a3b8', font: { size: 8 }, maxTicksLimit: 10 },
-                                grid: { color: 'rgba(0, 0, 0, 0.06)', drawBorder: false }
-                            },
-                            y: {
-                                ticks: { color: '#94a3b8', font: { size: 8 }, callback: function(v) {
-                                        return (v >= 0 ? '+' : '') + v.toFixed(0); } },
-                                grid: { color: 'rgba(0, 0, 0, 0.06)', drawBorder: false }
-                            }
-                        }
-                    }
+            function sortEvents() {
+                events.sort((a, b) => {
+                    const ia = calcEventInfo(a), ib = calcEventInfo(b);
+                    if (ia.isToday && !ib.isToday) return -1;
+                    if (!ia.isToday && ib.isToday) return 1;
+                    return ia.daysRemain - ib.daysRemain;
                 });
             }
 
-            // ===== 饼图 =====
-            function renderPieChart() {
-                const canvas = document.getElementById('pieChartCanvas');
-                const emptyEl = document.getElementById('analysisEmpty');
-                if (!canvas) return;
-
-                const codes = Object.keys(holdings);
-
-                if (!codes.length) {
-                    if (pieChart) { pieChart.destroy();
-                        pieChart = null; }
-                    canvas.style.display = 'none';
-                    emptyEl.style.display = 'block';
-                    return;
-                }
-
-                const industryMap = {};
-                let total = 0;
-                codes.forEach(code => {
-                    const data = getCardData(code);
-                    if (!data || data.marketValue <= 0) return;
-                    const tag = industryTags[code] || '未分类';
-                    industryMap[tag] = (industryMap[tag] || 0) + data.marketValue;
-                    total += data.marketValue;
-                });
-
-                if (total <= 0 || Object.keys(industryMap).length === 0) {
-                    if (pieChart) { pieChart.destroy();
-                        pieChart = null; }
-                    canvas.style.display = 'none';
-                    emptyEl.style.display = 'block';
-                    return;
-                }
-
-                canvas.style.display = 'block';
-                emptyEl.style.display = 'none';
-
-                const labels = Object.keys(industryMap);
-                const values = labels.map(k => industryMap[k]);
-                const colors = OCEAN_COLORS.slice(0, labels.length);
-
-                const ctx = canvas.getContext('2d');
-                if (pieChart) { pieChart.destroy();
-                    pieChart = null; }
-
-                pieChart = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: values,
-                            backgroundColor: colors,
-                            borderColor: '#ffffff',
-                            borderWidth: 2.5,
-                            hoverOffset: 12
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 4,
-                                bottom: 4,
-                                left: 4,
-                                right: 8
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'left',
-                                align: 'center',
-                                labels: {
-                                    padding: 10,
-                                    usePointStyle: true,
-                                    pointStyle: 'circle',
-                                    font: { size: 11, weight: '500' },
-                                    color: '#0b1a33',
-                                    boxWidth: 10,
-                                    boxHeight: 10
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(255,255,255,0.95)',
-                                titleColor: '#0b1a33',
-                                bodyColor: '#0b1a33',
-                                borderColor: 'rgba(0,0,0,0.06)',
-                                borderWidth: 1,
-                                cornerRadius: 10,
-                                padding: 8,
-                                callbacks: {
-                                    label: function(context) {
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const pct = ((context.parsed / total) * 100).toFixed(1);
-                                        return context.label + ': ' + pct + '%';
-                                    }
-                                }
-                            }
-                        },
-                        cutout: '0%'
-                    }
-                });
+            function getHeroEvent() { return events.length ? events[0] : null; }
+            function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); } catch (e) {} }
+            function load() {
+                try { const raw = localStorage.getItem(STORAGE_KEY); events = raw ? JSON.parse(raw).filter(e => e && e.id && e.name && e.date) : []; } catch (e) { events = []; }
+                sortEvents();
             }
 
-            // ===== 全部渲染 =====
+            function applyTheme(theme) {
+                document.body.setAttribute('data-theme', theme === 'default' ? '' : theme);
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) {
+                    const style = getComputedStyle(document.body);
+                    meta.setAttribute('content', style.getPropertyValue('--bg-color').trim() || '#FDF3E5');
+                }
+                localStorage.setItem(THEME_KEY, theme);
+            }
+
+            function switchTheme() {
+                const current = localStorage.getItem(THEME_KEY) || 'default';
+                let newTheme;
+                do {
+                    newTheme = themes[Math.floor(Math.random() * themes.length)];
+                } while (newTheme === current && themes.length > 1);
+                applyTheme(newTheme);
+            }
+
+            (function initTheme() {
+                const saved = localStorage.getItem(THEME_KEY);
+                applyTheme(saved && themes.includes(saved) ? saved : 'default');
+            })();
+
+            (function initThemeToggle() {
+                let pressTimer;
+                const brand = dom.headerBrand;
+                brand.addEventListener('touchstart', () => {
+                    pressTimer = setTimeout(() => {
+                        brand.classList.add('pressed');
+                        switchTheme();
+                        if (navigator.vibrate) navigator.vibrate(15);
+                        setTimeout(() => brand.classList.remove('pressed'), 200);
+                    }, THEME_PRESS_DURATION);
+                }, { passive: true });
+                brand.addEventListener('touchend', () => { clearTimeout(pressTimer); brand.classList.remove('pressed'); });
+                brand.addEventListener('touchcancel', () => { clearTimeout(pressTimer); brand.classList.remove('pressed'); });
+            })();
+
+            function updateEmptyMode() { dom.appContainer.classList.toggle('empty-mode', events.length === 0); }
+            function updateBodyScroll() {
+                const anyOpen = dom.addModal.classList.contains('active') || dom.calendarModal.classList.contains('active') || dom.confirmModal.classList.contains('active');
+                document.body.style.overflow = anyOpen ? 'hidden' : '';
+            }
+
             function renderAll() {
-                renderSummary();
-                renderFundList();
-                renderProfitChart();
-                renderPieChart();
-                const chartBlock = document.getElementById('chartBlock');
-                const analysisBlock = document.getElementById('analysisBlock');
-                if (editMode) {
-                    chartBlock.classList.add('edit-hidden');
-                    analysisBlock.classList.add('edit-hidden');
-                } else {
-                    chartBlock.classList.remove('edit-hidden');
-                    analysisBlock.classList.remove('edit-hidden');
-                }
-                updateBottomBar();
-            }
-
-            // ===== 底部操作栏 =====
-            function updateBottomBar() {
-                const bar = document.getElementById('bottomActions');
-                const addBtn = document.getElementById('openAddModalBtn');
-                const batchBtn = document.getElementById('batchEditBtn');
-                const dataBtn = document.getElementById('openBackupModalBtn');
-                const refreshBtn = document.getElementById('refreshBtn');
-
-                // 清除所有已有的事件监听
-                const newAddBtn = addBtn.cloneNode(true);
-                const newBatchBtn = batchBtn.cloneNode(true);
-                const newDataBtn = dataBtn.cloneNode(true);
-                const newRefreshBtn = refreshBtn.cloneNode(true);
-                addBtn.parentNode.replaceChild(newAddBtn, addBtn);
-                batchBtn.parentNode.replaceChild(newBatchBtn, batchBtn);
-                dataBtn.parentNode.replaceChild(newDataBtn, dataBtn);
-                refreshBtn.parentNode.replaceChild(newRefreshBtn, refreshBtn);
-
-                const addBtnNew = document.getElementById('openAddModalBtn');
-                const batchBtnNew = document.getElementById('batchEditBtn');
-                const dataBtnNew = document.getElementById('openBackupModalBtn');
-                const refreshBtnNew = document.getElementById('refreshBtn');
-
-                if (editMode) {
-                    bar.classList.add('edit-mode');
-                    addBtnNew.style.display = 'none';
-                    dataBtnNew.style.display = 'none';
-                    refreshBtnNew.style.display = 'none';
-                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
-                    batchBtnNew.className = 'action-btn edit-highlight';
-                    batchBtnNew.style.display = 'flex';
-                    batchBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        exitEditMode();
-                    });
-                } else {
-                    bar.classList.remove('edit-mode');
-                    addBtnNew.style.display = 'flex';
-                    dataBtnNew.style.display = 'flex';
-                    refreshBtnNew.style.display = 'flex';
-                    batchBtnNew.style.display = 'flex';
-                    addBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
-                    addBtnNew.className = 'action-btn';
-                    addBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (editMode) return;
-                        const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop');
-                            void icon.offsetWidth;
-                            icon.classList.add('pop'); }
-                        document.getElementById('modalOverlay').classList.add('active');
-                    });
-                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
-                    batchBtnNew.className = 'action-btn';
-                    batchBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        enterEditMode();
-                    });
-                    dataBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
-                    dataBtnNew.className = 'action-btn';
-                    dataBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (editMode) { showAlert('请先完成编辑'); return; }
-                        const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop');
-                            void icon.offsetWidth;
-                            icon.classList.add('pop'); }
-                        document.getElementById('backupModalOverlay').classList.add('active');
-                    });
-                    refreshBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span>';
-                    refreshBtnNew.className = 'action-btn';
-                    refreshBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop');
-                            void icon.offsetWidth;
-                            icon.classList.add('pop'); }
-                        refreshData();
-                    });
-                }
-            }
-
-            // ===== ★★★ 刷新数据（强制刷新 ★★★ =====
-            async function refreshData() {
-                if (isUpdating) return;
-                showCheck();
-                isUpdating = true;
-                const timeoutId = setTimeout(() => { if (isUpdating) { isUpdating = false;
-                        console.log('刷新超时，已解锁'); } }, 15000);
-                try {
-                    const codes = Object.keys(holdings);
-                    if (codes.length) {
-                        for (let i = 0; i < codes.length; i++) {
-                            // ★★★ 强制刷新：不检查缓存，直接从接口拉取 ★★★
-                            await fetchFundDataOnlyForce(codes[i]);
-                        }
-                        saveTodaySnapshot();
-                    }
-                    renderAll();
-                } catch (e) {
-                    console.warn('刷新失败', e);
-                    showAlert('刷新失败，请检查网络后重试');
-                } finally {
-                    clearTimeout(timeoutId);
-                    isUpdating = false;
-                }
-            }
-
-            function showCheck() {
-                const el = document.getElementById('checkPop');
-                if (!el) return;
-                el.classList.remove('show');
-                void el.offsetWidth;
-                el.classList.add('show');
-                setTimeout(() => el.classList.remove('show'), 600);
-            }
-
-            // ===== 编辑模式 =====
-            function enterEditMode() {
-                if (!Object.keys(holdings).length) {
-                    showAlert('暂无持仓');
+                updateEmptyMode();
+                if (!events.length) {
+                    dom.heroCard.style.display = 'none';
+                    dom.eventList.innerHTML = '';
+                    dom.emptyState.classList.add('show');
+                    updateBodyScroll();
                     return;
                 }
-                if (currentExpandedCode) {
-                    const wrapper = document.getElementById('trend-' + currentExpandedCode);
-                    if (wrapper) wrapper.classList.remove('expanded');
-                    const canvas = document.getElementById('trendCanvas-' + currentExpandedCode);
-                    if (canvas) canvas.style.display = 'none';
-                    const loading = document.getElementById('trendLoading-' + currentExpandedCode);
-                    if (loading) loading.style.display = 'block';
-                    if (trendCharts[currentExpandedCode]) {
-                        trendCharts[currentExpandedCode].destroy();
-                        delete trendCharts[currentExpandedCode];
-                    }
-                    currentExpandedCode = null;
+                dom.emptyState.classList.remove('show');
+                dom.heroCard.style.display = 'flex';
+                renderHero(getHeroEvent());
+                renderList();
+                updateBodyScroll();
+            }
+
+            function renderHero(event) {
+                const info = calcEventInfo(event);
+                dom.heroName.textContent = event.name;
+                dom.heroDateSub.textContent = info.origDateStr;
+                if (info.isFuture) {
+                    dom.heroDaysPassed.textContent = '未到';
+                    dom.heroDaysPassed.className = 'hero-days-num future-num';
+                    dom.heroDaysPassedLabel.textContent = '尚未到来';
+                } else {
+                    dom.heroDaysPassed.textContent = info.daysPassed;
+                    dom.heroDaysPassed.className = 'hero-days-num';
+                    dom.heroDaysPassedLabel.textContent = '已过天数';
                 }
-                editMode = true;
-                renderAll();
+                if (info.isToday) {
+                    dom.heroDaysRemain.textContent = '今天 🎉';
+                    dom.heroDaysRemain.className = 'hero-days-num today-num';
+                    dom.heroDaysRemainLabel.textContent = '就是今天';
+                } else {
+                    dom.heroDaysRemain.textContent = info.daysRemain;
+                    dom.heroDaysRemain.className = 'hero-days-num';
+                    dom.heroDaysRemainLabel.textContent = '剩余天数';
+                }
             }
 
-            function exitEditMode() {
-                const codes = Object.keys(holdings);
-                let changed = false;
-                codes.forEach(code => {
-                    const ci = document.getElementById('editCost_' + code);
-                    const si = document.getElementById('editShares_' + code);
-                    const ti = document.getElementById('editTag_' + code);
-                    if (ci && si) {
-                        const nc = parseFloat(ci.value);
-                        const ns = parseFloat(si.value);
-                        const nt = ti ? ti.value.trim() : '';
-                        if (!isNaN(nc) && nc > 0 && !isNaN(ns) && ns > 0) {
-                            const roundedCost = round4(nc);
-                            const roundedShares = round4(ns);
-                            if (holdings[code].cost !== roundedCost || holdings[code].shares !== roundedShares) {
-                                holdings[code].cost = roundedCost;
-                                holdings[code].shares = roundedShares;
-                                changed = true;
-                            }
-                            if (industryTags[code] !== nt) {
-                                if (nt) { industryTags[code] = nt; } else { delete industryTags[code]; }
-                                changed = true;
-                            }
-                        }
-                    }
+            function renderList() {
+                closeAllSwipe();
+                const list = dom.eventList;
+                list.innerHTML = '';
+                const fragment = document.createDocumentFragment();
+                const circumference = 2 * Math.PI * 14;
+
+                events.slice(1).forEach(e => {
+                    const info = calcEventInfo(e);
+                    const dashOffset = circumference * (1 - info.progress);
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'swipe-wrapper';
+                    wrapper.dataset.id = e.id;
+                    const inner = document.createElement('div');
+                    inner.className = 'swipe-inner';
+
+                    const content = document.createElement('div');
+                    content.className = 'card-content';
+
+                    const ringDiv = document.createElement('div');
+                    ringDiv.className = 'card-ring';
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('viewBox', '0 0 34 34');
+                    const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    bgCircle.setAttribute('cx', '17'); bgCircle.setAttribute('cy', '17'); bgCircle.setAttribute('r', '14'); bgCircle.setAttribute('class', 'ring-bg');
+                    const fgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    fgCircle.setAttribute('cx', '17'); fgCircle.setAttribute('cy', '17'); fgCircle.setAttribute('r', '14'); fgCircle.setAttribute('class', 'ring-fg');
+                    fgCircle.setAttribute('stroke-dasharray', circumference.toFixed(2));
+                    fgCircle.setAttribute('stroke-dashoffset', circumference.toFixed(2));
+                    fgCircle.dataset.target = dashOffset.toFixed(2);
+                    svg.appendChild(bgCircle); svg.appendChild(fgCircle);
+                    ringDiv.appendChild(svg);
+                    content.appendChild(ringDiv);
+
+                    const center = document.createElement('div');
+                    center.className = 'card-center';
+                    center.innerHTML = `<div class="card-name">${e.name}</div><div class="card-date">${info.origDateStr}</div>`;
+                    content.appendChild(center);
+
+                    const right = document.createElement('div');
+                    right.className = 'card-right';
+                    const passedBadge = document.createElement('div');
+                    passedBadge.className = 'badge passed-badge';
+                    passedBadge.innerHTML = info.isFuture
+                        ? `<span class="badge-label">未到</span><span class="badge-number future-badge-number">—</span>`
+                        : `<span class="badge-label">已过</span><span class="badge-number">${info.daysPassed}</span>`;
+                    right.appendChild(passedBadge);
+
+                    const remainBadge = document.createElement('div');
+                    remainBadge.className = `badge ${info.isToday ? 'today-badge' : 'remain-badge'}`;
+                    remainBadge.innerHTML = info.isToday
+                        ? `<span class="badge-label">今天</span><span class="badge-number">🎉</span>`
+                        : `<span class="badge-label">剩余</span><span class="badge-number">${info.daysRemain}</span>`;
+                    right.appendChild(remainBadge);
+                    content.appendChild(right);
+                    inner.appendChild(content);
+
+                    const del = document.createElement('div');
+                    del.className = 'swipe-delete'; del.dataset.id = e.id;
+                    del.innerHTML = '<div class="delete-circle"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg><span class="delete-label">删除</span></div>';
+                    inner.appendChild(del);
+                    wrapper.appendChild(inner);
+                    fragment.appendChild(wrapper);
                 });
-                if (changed) { saveAll();
-                    refreshData(); }
-                editMode = false;
-                renderAll();
-            }
+                list.appendChild(fragment);
+                document.querySelectorAll('.swipe-wrapper').forEach(w => initSwipe(w));
 
-            function deleteFund(code) {
-                showConfirm('确定删除 ' + code + ' 吗？').then(ok => {
-                    if (!ok) return;
-                    delete holdings[code];
-                    delete fundDataCache[code];
-                    delete industryTags[code];
-                    saveAll();
-                    if (Object.keys(holdings).length === 0 && editMode) editMode = false;
-                    renderAll();
-                });
-            }
-
-            // ===== 提示弹窗 =====
-            const promptOverlay = document.getElementById('promptModalOverlay');
-            const promptTitle = document.getElementById('promptTitle');
-            const promptMessage = document.getElementById('promptMessage');
-            const promptActions = document.getElementById('promptActions');
-            let promptResolve = null;
-
-            function showPrompt(title, msg, btns) {
-                if (promptResolve) { promptResolve(null);
-                    promptResolve = null; }
-                return new Promise(resolve => {
-                    promptResolve = resolve;
-                    promptTitle.textContent = title || '提示';
-                    promptMessage.textContent = msg || '';
-                    promptActions.innerHTML = '';
-                    btns.forEach(b => {
-                        const el = document.createElement('button');
-                        el.textContent = b.text;
-                        el.className = b.cls || 'btn-confirm';
-                        el.onclick = () => {
-                            promptOverlay.classList.remove('active');
-                            const cb = promptResolve;
-                            promptResolve = null;
-                            if (cb) cb(b.value);
-                        };
-                        promptActions.appendChild(el);
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.ring-fg[data-target]').forEach(ring => {
+                        const target = parseFloat(ring.dataset.target);
+                        ring.style.transition = 'none';
+                        ring.style.strokeDashoffset = circumference;
+                        requestAnimationFrame(() => {
+                            ring.style.transition = 'stroke-dashoffset 0.9s cubic-bezier(0.4, 0, 0.2, 1)';
+                            ring.style.strokeDashoffset = target;
+                        });
                     });
-                    promptOverlay.classList.add('active');
                 });
             }
 
-            function showAlert(msg) { return showPrompt('提示', msg, [{ text: '确定', cls: 'btn-confirm', value: true }]); }
-
-            function showConfirm(msg) {
-                return showPrompt('确认', msg, [
-                    { text: '取消', cls: 'btn-cancel', value: false },
-                    { text: '确定', cls: 'btn-danger', value: true }
-                ]);
-            }
-
-            promptOverlay.addEventListener('click', function(e) {
-                if (e.target === promptOverlay && promptResolve) {
-                    promptOverlay.classList.remove('active');
-                    const cb = promptResolve;
-                    promptResolve = null;
-                    if (cb) cb(null);
+            dom.eventList.addEventListener('click', e => {
+                const del = e.target.closest('.swipe-delete');
+                if (del) {
+                    e.stopPropagation();
+                    const id = del.dataset.id;
+                    if (id) {
+                        pendingDeleteId = id;
+                        const evt = events.find(ev => ev.id === id);
+                        dom.confirmMessage.textContent = evt ? `确定要删除「${evt.name}」吗？` : '确定要删除这条记录吗？';
+                        dom.confirmModal.classList.add('active');
+                        updateBodyScroll();
+                        if (navigator.vibrate) navigator.vibrate(15);
+                    }
+                    return;
+                }
+                const card = e.target.closest('.card-content');
+                if (card) {
+                    const wrapper = card.closest('.swipe-wrapper');
+                    if (wrapper?.classList.contains('open')) return;
+                    const id = wrapper?.dataset.id;
+                    if (id) openEdit(id);
                 }
             });
 
-            // ===== 添加基金模态框 =====
-            function setupModal() {
-                const overlay = document.getElementById('modalOverlay');
-                const closeBtn = document.getElementById('closeModalBtn');
-                const confirmBtn = document.getElementById('confirmAddBtn');
-                const codeInput = document.getElementById('fundCodeInput');
-                const costInput = document.getElementById('fundCostInput');
-                const sharesInput = document.getElementById('fundSharesInput');
-                const industryInput = document.getElementById('fundIndustryInput');
-                const closeCircle = document.getElementById('closeModalBtnCircle');
-                const infoBox = document.getElementById('autoFillInfo');
-                const infoText = document.getElementById('autoFillText');
-                let fetchName = '';
-                let identifyTimer = null;
-
-                function openAddHandler() {
-                    if (editMode) return;
-                    const icon = document.querySelector('#openAddModalBtn .icon-wrap');
-                    if (icon) { icon.classList.remove('pop');
-                        void icon.offsetWidth;
-                        icon.classList.add('pop'); }
-                    confirmBtn.disabled = true;
-                    codeInput.value = '';
-                    costInput.value = '';
-                    sharesInput.value = '';
-                    industryInput.value = '';
-                    infoBox.classList.remove('show');
-                    fetchName = '';
-                    overlay.classList.add('active');
-                    setTimeout(() => codeInput.focus(), 300);
+            function closeAllSwipe() {
+                if (openWrapper) {
+                    openWrapper.classList.remove('open');
+                    const inner = openWrapper.querySelector('.swipe-inner');
+                    if (inner) { inner.style.transition = ''; inner.style.transform = 'translateX(0)'; }
+                    openWrapper = null;
                 }
-                document.getElementById('openAddModalBtn').addEventListener('click', openAddHandler);
+            }
 
-                function closeModal() { overlay.classList.remove('active');
-                    fetchName = ''; }
-                closeBtn.onclick = closeModal;
-                closeCircle.onclick = closeModal;
-                overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
-
-                codeInput.addEventListener('input', function() {
-                    const code = this.value.trim();
-                    clearTimeout(identifyTimer);
-                    if (code.length === 6 && /^\d{6}$/.test(code)) {
-                        identifyTimer = setTimeout(() => {
-                            fetchTxFund(code).then(data => {
-                                if (data && data.name) {
-                                    fetchName = data.name;
-                                    infoText.textContent = '已识别：' + data.name;
-                                    infoBox.classList.add('show');
-                                    confirmBtn.disabled = false;
-                                } else {
-                                    infoBox.classList.remove('show');
-                                    confirmBtn.disabled = true;
-                                    fetchName = '';
-                                }
-                            }).catch(() => {
-                                infoBox.classList.remove('show');
-                                confirmBtn.disabled = true;
-                                fetchName = '';
-                            });
-                        }, 400);
+            function initSwipe(w) {
+                const inner = w.querySelector('.swipe-inner');
+                if (!inner) return;
+                let startX = 0, startY = 0, lastX = 0, isDragging = false, isHorizontal = false;
+                const reset = () => {
+                    isDragging = false; isHorizontal = false;
+                    inner.style.transition = ''; inner.style.transform = 'translateX(0)';
+                    w.classList.remove('open'); openWrapper = null;
+                };
+                w.addEventListener('touchstart', e => {
+                    if (e.touches.length !== 1) return;
+                    startX = e.touches[0].clientX; startY = e.touches[0].clientY; lastX = startX;
+                    isDragging = true; isHorizontal = false; inner.style.transition = 'none';
+                }, { passive: true });
+                w.addEventListener('touchmove', e => {
+                    if (!isDragging) return;
+                    const dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
+                    if (!isHorizontal && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) isHorizontal = Math.abs(dx) > Math.abs(dy);
+                    if (!isHorizontal) return;
+                    e.preventDefault();
+                    lastX = e.touches[0].clientX;
+                    const open = w.classList.contains('open');
+                    const offset = open ? Math.max(-SWIPE_DIST, Math.min(0, dx - SWIPE_DIST)) : Math.max(-SWIPE_DIST, Math.min(0, dx));
+                    inner.style.transform = `translateX(${offset}px)`;
+                }, { passive: false });
+                w.addEventListener('touchend', () => {
+                    if (!isDragging) return;
+                    isDragging = false; inner.style.transition = '';
+                    if (!isHorizontal) { inner.style.transform = 'translateX(0)'; return; }
+                    if (lastX - startX < -SWIPE_THRESHOLD) {
+                        if (openWrapper && openWrapper !== w) closeAllSwipe();
+                        w.classList.add('open'); openWrapper = w;
+                        inner.style.transform = `translateX(-${SWIPE_DIST}px)`;
+                        if (navigator.vibrate) navigator.vibrate(8);
                     } else {
-                        infoBox.classList.remove('show');
-                        confirmBtn.disabled = true;
-                        fetchName = '';
+                        w.classList.remove('open'); inner.style.transform = 'translateX(0)';
+                        if (openWrapper === w) openWrapper = null;
                     }
                 });
-
-                confirmBtn.addEventListener('click', async function() {
-                    if (this.disabled) return;
-                    this.disabled = true;
-                    try {
-                        const code = codeInput.value.trim();
-                        const cost = parseFloat(costInput.value);
-                        const shares = parseFloat(sharesInput.value);
-                        const industry = industryInput.value.trim();
-                        if (code.length !== 6 || !/^\d{6}$/.test(code)) {
-                            await showAlert('请输入6位数字代码');
-                            return;
-                        }
-                        if (isNaN(cost) || cost <= 0) {
-                            await showAlert('请输入有效成本价');
-                            return;
-                        }
-                        if (isNaN(shares) || shares <= 0) {
-                            await showAlert('请输入有效份额');
-                            return;
-                        }
-                        if (!industry) {
-                            await showAlert('请输入行业标签（必填）');
-                            return;
-                        }
-                        let name = fetchName;
-                        if (!name) {
-                            try {
-                                const d = await fetchTxFund(code);
-                                if (d && d.name) name = d.name;
-                            } catch (e) {}
-                        }
-                        if (!name) {
-                            await showAlert('未能识别基金代码，请检查网络后重试');
-                            return;
-                        }
-                        if (holdings[code]) {
-                            const overwrite = await showConfirm('已存在 ' + name + '，是否覆盖？');
-                            if (!overwrite) return;
-                        }
-                        holdings[code] = { cost: round4(cost), shares: round4(shares), name };
-                        industryTags[code] = industry;
-                        saveAll();
-                        closeModal();
-                        await fetchFundDataOnly(code);
-                        renderAll();
-                    } catch (err) {
-                        console.error('添加失败:', err);
-                        await showAlert('添加失败，请重试');
-                    } finally {
-                        this.disabled = false;
-                    }
-                });
+                w.addEventListener('touchcancel', reset);
             }
 
-            // ===== 数据管理 =====
-            function setupBackup() {
-                const overlay = document.getElementById('backupModalOverlay');
-                const exportBtn = document.getElementById('exportBtn');
-                const importInput = document.getElementById('importFileInput');
-                const clearCacheBtn = document.getElementById('clearCacheBtn');
-                const hardResetBtn = document.getElementById('hardResetBtn');
-                const closeCircle = document.getElementById('closeBackupModalBtnCircle');
-
-                document.getElementById('openBackupModalBtn').addEventListener('click', function() {
-                    if (editMode) { showAlert('请先完成编辑'); return; }
-                    const icon = this.querySelector('.icon-wrap');
-                    if (icon) { icon.classList.remove('pop');
-                        void icon.offsetWidth;
-                        icon.classList.add('pop'); }
-                    overlay.classList.add('active');
-                });
-
-                function closeModal() { overlay.classList.remove('active'); }
-                closeCircle.onclick = closeModal;
-                overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
-
-                exportBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const data = JSON.stringify({ holdings, fundDataCache, accountProfitHistory, industryTags },
-                        null, 2);
-                    const blob = new Blob([data], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'iFunds_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                });
-
-                importInput.addEventListener('change', async function(e) {
-                    e.stopPropagation();
-                    const file = this.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = async function(ev) {
-                        try {
-                            const data = JSON.parse(ev.target.result);
-                            if (!data.holdings || typeof data.holdings !== 'object') {
-                                await showAlert('配置格式无效，缺少持仓数据');
-                                return;
-                            }
-                            const codes = Object.keys(data.holdings);
-                            let valid = true;
-                            for (let code of codes) {
-                                const h = data.holdings[code];
-                                if (!/^\d{6}$/.test(code) || typeof h.cost !== 'number' || h.cost <= 0 ||
-                                    typeof h.shares !== 'number' || h.shares <= 0) {
-                                    valid = false;
-                                    break;
-                                }
-                            }
-                            if (!valid) {
-                                await showAlert('导入数据格式错误：请确保每个基金有6位数字代码、正数成本和份额');
-                                return;
-                            }
-                            const count = codes.length;
-                            const ok = await showConfirm('将导入 ' + count + ' 只基金，覆盖当前数据？');
-                            if (ok) {
-                                holdings = data.holdings || {};
-                                fundDataCache = data.fundDataCache || {};
-                                accountProfitHistory = data.accountProfitHistory || [];
-                                industryTags = data.industryTags || {};
-                                saveAll();
-                                closeModal();
-                                await refreshData();
-                            }
-                        } catch (_) { await showAlert('文件解析失败，请确认是有效的JSON文件'); }
-                    };
-                    reader.readAsText(file);
-                    this.value = '';
-                });
-
-                clearCacheBtn.addEventListener('click', async function(e) {
-                    e.stopPropagation();
-                    const ok = await showConfirm('清除所有缓存数据？（持仓配置保留）');
-                    if (ok) {
-                        fundDataCache = {};
-                        saveAll();
-                        closeModal();
-                        await refreshData();
-                        await showAlert('缓存已清除');
-                    }
-                });
-
-                hardResetBtn.addEventListener('click', async function(e) {
-                    e.stopPropagation();
-                    const ok = await showConfirm('⚠️ 硬重置将清除所有基金数据并重新加载页面，确定吗？');
-                    if (ok) {
-                        hardReset();
-                        location.reload(true);
-                    }
-                });
+            function initHeroLongPress() {
+                const card = dom.heroCard; if (!card) return;
+                const cancel = () => { clearTimeout(longPressTimer); card.classList.remove('long-press-hint'); heroPressStart = null; };
+                card.addEventListener('touchstart', e => {
+                    if (e.touches.length !== 1) return; cancel(); longPressTriggered = false;
+                    heroPressStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    longPressTimer = setTimeout(() => {
+                        card.classList.add('long-press-hint'); longPressTriggered = true;
+                        if (navigator.vibrate) navigator.vibrate(20);
+                        const hero = getHeroEvent();
+                        if (hero) { pendingDeleteId = hero.id; dom.confirmMessage.textContent = `确定要删除「${hero.name}」吗？`; dom.confirmModal.classList.add('active'); updateBodyScroll(); }
+                        longPressTimer = null;
+                    }, LONG_PRESS_DURATION);
+                }, { passive: true });
+                card.addEventListener('touchmove', e => {
+                    if (!heroPressStart || !longPressTimer) return;
+                    if (Math.abs(e.touches[0].clientX - heroPressStart.x) > 12 || Math.abs(e.touches[0].clientY - heroPressStart.y) > 12) cancel();
+                }, { passive: true });
+                card.addEventListener('touchend', () => { cancel(); setTimeout(() => { longPressTriggered = false; }, 50); });
+                card.addEventListener('touchcancel', () => { cancel(); longPressTriggered = false; });
+                card.addEventListener('click', e => { if (longPressTriggered) { e.preventDefault(); return; } const hero = getHeroEvent(); if (hero) openEdit(hero.id); });
             }
 
-            // ===== 隐私模式 =====
-            let clickCount = 0,
-                clickTimer = null;
-
-            function setupPrivacy() {
-                document.getElementById('summaryCard').addEventListener('click', function(e) {
-                    if (e.target.closest('button')) return;
-                    clearTimeout(clickTimer);
-                    clickCount++;
-                    clickTimer = setTimeout(() => {
-                        if (clickCount >= 3) {
-                            privacyMode = !privacyMode;
-                            if (privacyMode) {
-                                ['todayProfitBig', 'totalAssets', 'totalProfit', 'totalReturn'].forEach(
-                                id => {
-                                    const el = document.getElementById(id);
-                                    if (el) { el.textContent = '***';
-                                        el.className = 'stat-number privacy'; }
-                                });
-                                document.getElementById('dataTimestamp').textContent = '净值日期：--';
-                            } else { renderSummary(); }
-                            clickCount = 0;
-                        }
-                    }, 400);
-                });
-            }
-
-            // ===== Service Worker =====
-            function registerSW() {
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('./sw.js')
-                        .then(reg => console.log('SW 注册成功', reg.scope))
-                        .catch(err => console.warn('SW 注册失败:', err.message));
+            let removeTrap = null;
+            function trapFocus(modal, firstFocusable) {
+                const nodes = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                const first = nodes[0], last = nodes[nodes.length - 1];
+                function handler(e) {
+                    if (e.key === 'Tab') {
+                        if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+                        else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+                    }
                 }
+                modal.addEventListener('keydown', handler);
+                if (firstFocusable) firstFocusable.focus();
+                return () => modal.removeEventListener('keydown', handler);
             }
 
-            // ===== 初始化 =====
-            function init() {
-                loadData();
-                if (Object.keys(holdings).length > 0) {
-                    backfillProfitHistory();
+            function setModalActive(modal, isActive, firstFocusable) {
+                modal.classList.toggle('active', isActive);
+                if (isActive) removeTrap = trapFocus(modal, firstFocusable);
+                else { if (removeTrap) { removeTrap(); removeTrap = null; } }
+            }
+
+            function openAdd() {
+                editingId = null;
+                dom.addModalTitle.textContent = '记录纪念日';
+                dom.addName.value = '';
+                currentDateStr = fmt(today().getFullYear(), today().getMonth() + 1, today().getDate());
+                dom.selectedDateText.textContent = currentDateStr;
+                setModalActive(dom.addModal, true, dom.addName);
+                updateBodyScroll(); closeAllSwipe();
+            }
+
+            function openEdit(id) {
+                const evt = events.find(e => e.id === id); if (!evt) return;
+                editingId = id;
+                dom.addModalTitle.textContent = '编辑纪念日';
+                dom.addName.value = evt.name;
+                currentDateStr = evt.date;
+                dom.selectedDateText.textContent = currentDateStr;
+                setModalActive(dom.addModal, true, dom.addName);
+                updateBodyScroll(); closeAllSwipe();
+            }
+
+            function closeAdd() { setModalActive(dom.addModal, false); updateBodyScroll(); dom.addName.blur(); editingId = null; }
+
+            function submitForm() {
+                const name = dom.addName.value.trim();
+                if (!name) { dom.addName.style.animation = 'shake 0.5s ease'; dom.addName.focus(); return; }
+                if (!currentDateStr) return;
+                if (editingId) { const evt = events.find(e => e.id === editingId); if (evt) { evt.name = name; evt.date = currentDateStr; } }
+                else events.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, date: currentDateStr });
+                sortEvents(); save(); renderAll(); closeAdd(); editingId = null;
+            }
+
+            function addSpacer(container) { const s = document.createElement('div'); s.className = 'picker-spacer'; container.appendChild(s); }
+            function scrollToSelected(container) {
+                const selected = container.querySelector('.picker-option.selected'); if (!selected) return;
+                const offset = selected.getBoundingClientRect().top - container.getBoundingClientRect().top - container.clientHeight / 2 + selected.clientHeight / 2;
+                container.scrollTop += offset;
+            }
+
+            function buildPicker() {
+                scrollListeners.clear();
+                if (!currentDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(currentDateStr)) {
+                    const t = today();
+                    currentDateStr = fmt(t.getFullYear(), t.getMonth() + 1, t.getDate());
                 }
-                setupPrivacy();
-                renderAll();
-                if (Object.keys(holdings).length) refreshData();
-                setupModal();
-                setupBackup();
-                initPullToRefresh();
-                registerSW();
+                const d = parseDate(currentDateStr);
+                pickerYearVal = d.year; pickerMonthVal = d.month; pickerDayVal = d.day;
 
-                console.log('✅ iFunds 方案一：刷新时强制从接口拉取最新净值');
+                dom.pickerYear.innerHTML = ''; addSpacer(dom.pickerYear);
+                for (let y = PICKER_START_YEAR; y <= PICKER_END_YEAR; y++) {
+                    const o = document.createElement('div'); o.className = 'picker-option' + (y === pickerYearVal ? ' selected' : ''); o.textContent = y; o.dataset.value = y; dom.pickerYear.appendChild(o);
+                }
+                addSpacer(dom.pickerYear);
+
+                dom.pickerMonth.innerHTML = ''; addSpacer(dom.pickerMonth);
+                for (let m = 1; m <= 12; m++) {
+                    const o = document.createElement('div'); o.className = 'picker-option' + (m === pickerMonthVal ? ' selected' : ''); o.textContent = m; o.dataset.value = m; dom.pickerMonth.appendChild(o);
+                }
+                addSpacer(dom.pickerMonth);
+                updatePickerDayOptions(true);
+                requestAnimationFrame(() => { scrollToSelected(dom.pickerYear); scrollToSelected(dom.pickerMonth); scrollToSelected(dom.pickerDay); });
+
+                setupScrollSnap(dom.pickerYear, v => { pickerYearVal = v; updatePickerDayOptions(false); });
+                setupScrollSnap(dom.pickerMonth, v => { pickerMonthVal = v; updatePickerDayOptions(false); });
+                setupScrollSnap(dom.pickerDay, v => { pickerDayVal = v; });
             }
 
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else { init(); }
+            function updatePickerDayOptions(silent) {
+                const maxDay = getDaysInMonth(pickerYearVal, pickerMonthVal);
+                if (pickerDayVal > maxDay) pickerDayVal = maxDay;
+                dom.pickerDay.innerHTML = ''; addSpacer(dom.pickerDay);
+                for (let d = 1; d <= maxDay; d++) {
+                    const o = document.createElement('div'); o.className = 'picker-option' + (d === pickerDayVal ? ' selected' : ''); o.textContent = d; o.dataset.value = d; dom.pickerDay.appendChild(o);
+                }
+                addSpacer(dom.pickerDay);
+                if (!silent) requestAnimationFrame(() => scrollToSelected(dom.pickerDay));
+                setupScrollSnap(dom.pickerDay, v => { pickerDayVal = v; });
+            }
 
-            window.deleteFund = deleteFund;
-            window.toggleTrend = toggleTrend;
+            function setupScrollSnap(container, onChange) {
+                if (!container) return;
+                if (scrollListeners.has(container)) { const prev = scrollListeners.get(container); container.removeEventListener('scroll', prev.handler); clearTimeout(prev.timer); scrollListeners.delete(container); }
+                let timer;
+                const handler = () => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        const rect = container.getBoundingClientRect(), cy = rect.top + rect.height / 2;
+                        let closest = null, md = Infinity;
+                        container.querySelectorAll('.picker-option').forEach(o => {
+                            const or = o.getBoundingClientRect(), oc = or.top + or.height / 2, d = Math.abs(cy - oc);
+                            if (d < md) { md = d; closest = o; }
+                        });
+                        if (closest) {
+                            const v = parseInt(closest.dataset.value);
+                            container.querySelectorAll('.picker-option').forEach(o => o.classList.remove('selected'));
+                            closest.classList.add('selected');
+                            if (onChange) onChange(v);
+                        }
+                    }, SCROLL_SNAP_DELAY);
+                };
+                container.addEventListener('scroll', handler, { passive: true });
+                scrollListeners.set(container, { handler, timer });
+            }
 
+            function openCal() {
+                if (!editingId) {
+                    const t = today();
+                    const todayStr = fmt(t.getFullYear(), t.getMonth() + 1, t.getDate());
+                    if (currentDateStr !== todayStr) {
+                        currentDateStr = todayStr;
+                        dom.selectedDateText.textContent = currentDateStr;
+                    }
+                }
+                buildPicker();
+                setModalActive(dom.calendarModal, true, dom.calCancel);
+                updateBodyScroll();
+            }
+
+            function closeCal() { setModalActive(dom.calendarModal, false); updateBodyScroll(); dom.dateTrigger.focus(); }
+            function confirmCal() { currentDateStr = fmt(pickerYearVal, pickerMonthVal, pickerDayVal); dom.selectedDateText.textContent = currentDateStr; closeCal(); }
+            function deleteEvent(id) { events = events.filter(e => e.id !== id); save(); sortEvents(); renderAll(); }
+            function closeConfirm() { setModalActive(dom.confirmModal, false); dom.heroCard.classList.remove('long-press-hint'); pendingDeleteId = null; updateBodyScroll(); }
+
+            dom.headerAddBtn.addEventListener('click', e => { e.stopPropagation(); openAdd(); });
+            dom.addCloseBtn.addEventListener('click', closeAdd);
+            dom.addSubmit.addEventListener('click', submitForm);
+            dom.dateTrigger.addEventListener('click', openCal);
+            dom.calCancel.addEventListener('click', closeCal);
+            dom.calConfirm.addEventListener('click', confirmCal);
+            dom.emptyTapHint.addEventListener('click', e => { e.stopPropagation(); openAdd(); });
+            dom.confirmCancel.addEventListener('click', closeConfirm);
+            dom.confirmOk.addEventListener('click', () => {
+                const id = pendingDeleteId; pendingDeleteId = null;
+                setModalActive(dom.confirmModal, false); dom.heroCard.classList.remove('long-press-hint'); updateBodyScroll();
+                if (id) deleteEvent(id);
+            });
+            dom.addModal.addEventListener('click', e => { if (e.target === dom.addModal) closeAdd(); });
+            dom.calendarModal.addEventListener('click', e => { if (e.target === dom.calendarModal) closeCal(); });
+            dom.confirmModal.addEventListener('click', e => { if (e.target === dom.confirmModal) closeConfirm(); });
+            document.addEventListener('click', e => { if (!e.target.closest('.swipe-wrapper') && !e.target.closest('.modal-overlay')) closeAllSwipe(); });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    if (dom.calendarModal.classList.contains('active')) closeCal();
+                    else if (dom.addModal.classList.contains('active')) closeAdd();
+                    else if (dom.confirmModal.classList.contains('active')) closeConfirm();
+                }
+                if (e.key === 'Enter' && dom.addModal.classList.contains('active')) submitForm();
+            });
+
+            load();
+            currentDateStr = fmt(today().getFullYear(), today().getMonth() + 1, today().getDate());
+            dom.selectedDateText.textContent = currentDateStr;
+            renderAll();
+            initHeroLongPress();
+            window.dispatchEvent(new Event('resize'));
+
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
         })();
     </script>
 </body>
