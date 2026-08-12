@@ -1015,7 +1015,7 @@
                 if (pieChart) { pieChart.destroy(); pieChart = null; }
                 pieChart = new Chart(canvas.getContext('2d'), {
                     type: 'pie', data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#ffffff', borderWidth: 2, hoverBorderWidth: 3, hoverBorderColor: '#ffffff', hoverOffset: 6, borderRadius: 4, spacing: 2 }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(255,255,255,0.95)', titleColor: '#0b1a33', bodyColor: '#0b1a33', borderColor: 'rgba(0,0,0,0.06)', borderWidth: 1, cornerRadius: 8, padding: 6, callbacks: { label: ctx => { const v = ctx.parsed; return ctx.label + ': ¥' + v.toFixed(2) + ' (' + (v / total * 100).toFixed(1) + '%)'; } } } }, animation: { animateRotate: true, duration: 500 } }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(255,255,255,0.95)', titleColor: '#0b1a33', bodyColor: '#0b1a33', borderColor: 'rgba(0,0,0,0.06)', borderWidth: 1, cornerRadius: 8, padding: 6, callbacks: { label: (ctx) => { const pct = (ctx.parsed / total * 100).toFixed(1); return ctx.label + ': ' + pct + '%'; } } } }, animation: { animateRotate: true, duration: 500 } }
                 });
                 const half = Math.ceil(labels.length / 2);
                 leftL.innerHTML = labels.slice(0, half).map((l, i) => `<div class="legend-item"><span class="legend-dot" style="background:${colors[i]};"></span>${l} (${(values[i] / total * 100).toFixed(1)}%)</div>`).join('');
