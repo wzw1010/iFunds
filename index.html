@@ -1208,9 +1208,6 @@
     <div class="check-pop" id="checkPop"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
 
     <script>
-        // ================================================================
-        // 完整 JavaScript（方案一：刷新时强制从接口拉取最新净值）
-        // ================================================================
         (function() {
             'use strict';
 
@@ -1335,38 +1332,247 @@
                 return { fundcode: parts[0], name: parts[1], dwjz: nav, gszzl: rate, jzrq: date };
             }
 
-            // ===== 天天基金历史净值 =====
-            function fetchTrendData(code) {
+            // ===== ★★★ 天天基金历史净值（支持自动重试 + 缓存破坏）★★★ =====
+            function fetchTrendData(code, retries = 2) {
                 return new Promise((resolve) => {
-                    const script = document.createElement('script');
-                    const timer = setTimeout(() => { if (script.parentNode) script.remove();
-                        resolve(null); }, 10000);
-                    script.src = 'https://fund.eastmoney.com/pingzhongdata/' + code + '.js';
-                    script.onload = function() {
-                        clearTimeout(timer);
-                        const raw = window.Data_netWorthTrend;
-                        if (raw && raw.length > 0) {
-                            const recent = raw.slice(-30);
-                            const dates = [];
-                            const navs = [];
-                            for (let i = 0; i < recent.length; i++) {
-                                const d = new Date(recent[i].x);
-                                dates.push((d.getMonth() + 1) + '/' + d.getDate());
-                                navs.push(recent[i].y);
-                            }
-                            resolve({ dates, navs });
-                        } else { resolve(null); }
-                        if (script.parentNode) script.remove();
+                    let resolved = false;
+
+                    const doFetch = () => {
                         delete window.Data_netWorthTrend;
+                        const script = document.createElement('script');
+                        script.src = 'https://fund.eastmoney.com/pingzhongdata/' + code + '.js?_=' + Date.now() +
+                            Math.random();
+
+                        const timer = setTimeout(() => {
+                            if (script.parentNode) script.remove();
+                            if (!resolved) {
+                                resolved = true;
+                                if (retries > 0) {
+                                    fetchTrendData(code, retries - 1).then(resolve);
+                                } else {
+                                    resolve(null);
+                                }
+                            }
+                        }, 8000);
+
+                        script.onload = function() {
+                            clearTimeout(timer);
+                            if (resolved) return;
+                            resolved = true;
+                            const raw = window.Data_netWorthTrend;
+                            if (raw && raw.length > 0) {
+                                const recent = raw.slice(-60);
+                                const dates = [];
+                                const navs = [];
+                                for (let i = 0; i < recent.length; i++) {
+                                    const d = new Date(recent[i].x);
+                                    dates.push((d.getMonth() + 1) + '/' + d.getDate());
+                                    navs.push(recent[i].y);
+                                }
+                                resolve({ dates, navs });
+                            } else {
+                                if (retries > 0) {
+                                    fetchTrendData(code, retries - 1).then(resolve);
+                                } else {
+                                    resolve(null);
+                                }
+                            }
+                            if (script.parentNode) script.remove();
+                            delete window.Data_netWorthTrend;
+                        };
+
+                        script.onerror = function() {
+                            clearTimeout(timer);
+                            if (resolved) return;
+                            resolved = true;
+                            if (script.parentNode) script.remove();
+                            if (retries > 0) {
+                                fetchTrendData(code, retries - 1).then(resolve);
+                            } else {
+                                resolve(null);
+                            }
+                        };
+                        document.head.appendChild(script);
                     };
-                    script.onerror = function() { clearTimeout(timer);
-                        if (script.parentNode) script.remove();
-                        resolve(null); };
-                    document.head.appendChild(script);
+                    doFetch();
                 });
             }
 
-            // ===== ★★★ 强制刷新：不检查缓存，直接调用接口 ★★★ =====
+            // ===== ★★★ 核心：渲染趋势图（共用函数）★★★ =====
+            function renderTrendChart(code, data) {
+                const loading = document.getElementById('trendLoading-' + code);
+                const canvas = document.getElementById('trendCanvas-' + code);
+                if (!canvas) return;
+
+                if (!data || !data.navs || data.navs.length < 2) {
+                    if (loading) {
+                        loading.style.display = 'block';
+                        loading.innerHTML =
+                            '暂无历史数据<div class="trend-retry-btn" onclick="window.retryTrend(\'' + code +
+                            '\')">重试</div>';
+                    }
+                    if (canvas) canvas.style.display = 'none';
+                    return;
+                }
+
+                if (loading) loading.style.display = 'none';
+                canvas.style.display = 'block';
+
+                const ctx = canvas.getContext('2d');
+                const lineColor = '#3D7A8C';
+                const grad = ctx.createLinearGradient(0, 0, 0, 150);
+                grad.addColorStop(0, 'rgba(61, 122, 140, 0.65)');
+                grad.addColorStop(0.3, 'rgba(61, 122, 140, 0.45)');
+                grad.addColorStop(0.7, 'rgba(61, 122, 140, 0.20)');
+                grad.addColorStop(1, 'rgba(61, 122, 140, 0.08)');
+
+                if (trendCharts[code]) {
+                    trendCharts[code].destroy();
+                    delete trendCharts[code];
+                }
+
+                trendCharts[code] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            data: data.navs,
+                            borderColor: lineColor,
+                            backgroundColor: grad,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointBackgroundColor: lineColor,
+                            borderWidth: 1.8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(255,255,255,0.95)',
+                                titleColor: '#0b1a33',
+                                bodyColor: '#0b1a33',
+                                borderColor: 'rgba(0,0,0,0.06)',
+                                borderWidth: 1,
+                                cornerRadius: 10,
+                                padding: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        return '净值: ' + context.parsed.y.toFixed(4);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#94a3b8', font: { size: 7 }, maxTicksLimit: 8 },
+                                grid: { color: 'rgba(0, 0, 0, 0.06)', drawBorder: false }
+                            },
+                            y: {
+                                ticks: { color: '#94a3b8', font: { size: 7 }, count: 4 },
+                                grid: { color: 'rgba(0, 0, 0, 0.06)', drawBorder: false }
+                            }
+                        }
+                    }
+                });
+                trendCharts[code].resize();
+            }
+
+            // ===== ★★★ 趋势图切换（每次展开/折叠都会重置加载文字）★★★ =====
+            window.toggleTrend = function(code) {
+                if (editMode) return;
+                const wrapper = document.getElementById('trend-' + code);
+                if (!wrapper) return;
+
+                if (currentExpandedCode === code) {
+                    wrapper.classList.remove('expanded');
+                    const canvas = document.getElementById('trendCanvas-' + code);
+                    if (canvas) canvas.style.display = 'none';
+                    const loading = document.getElementById('trendLoading-' + code);
+                    if (loading) {
+                        loading.style.display = 'block';
+                        loading.innerHTML = '加载中...'; // ★ 重置文字，避免残留“重试”
+                    }
+                    if (trendCharts[code]) {
+                        trendCharts[code].destroy();
+                        delete trendCharts[code];
+                    }
+                    currentExpandedCode = null;
+                    return;
+                }
+
+                if (currentExpandedCode) {
+                    const oldWrapper = document.getElementById('trend-' + currentExpandedCode);
+                    if (oldWrapper) {
+                        oldWrapper.classList.remove('expanded');
+                        const oldCanvas = document.getElementById('trendCanvas-' + currentExpandedCode);
+                        if (oldCanvas) oldCanvas.style.display = 'none';
+                        const oldLoading = document.getElementById('trendLoading-' + currentExpandedCode);
+                        if (oldLoading) {
+                            oldLoading.style.display = 'block';
+                            oldLoading.innerHTML = '加载中...';
+                        }
+                        if (trendCharts[currentExpandedCode]) {
+                            trendCharts[currentExpandedCode].destroy();
+                            delete trendCharts[currentExpandedCode];
+                        }
+                    }
+                }
+
+                wrapper.classList.add('expanded');
+                const loading = document.getElementById('trendLoading-' + code);
+                const canvas = document.getElementById('trendCanvas-' + code);
+                if (loading) {
+                    loading.style.display = 'block';
+                    loading.innerHTML = '加载中...'; // ★ 重置文字，确保每次打开都是干净的
+                }
+                if (canvas) canvas.style.display = 'none';
+                currentExpandedCode = code;
+
+                fetchTrendData(code).then(data => {
+                    renderTrendChart(code, data);
+                });
+            };
+
+            // ===== ★★★ 重试函数（只刷新数据，不改变展开状态）★★★ =====
+            window.retryTrend = function(code) {
+                const wrapper = document.getElementById('trend-' + code);
+                if (!wrapper || !wrapper.classList.contains('expanded')) {
+                    if (currentExpandedCode && currentExpandedCode !== code) {
+                        const oldWrapper = document.getElementById('trend-' + currentExpandedCode);
+                        if (oldWrapper) oldWrapper.classList.remove('expanded');
+                        if (trendCharts[currentExpandedCode]) {
+                            trendCharts[currentExpandedCode].destroy();
+                            delete trendCharts[currentExpandedCode];
+                        }
+                    }
+                    window.toggleTrend(code);
+                    return;
+                }
+
+                const loading = document.getElementById('trendLoading-' + code);
+                const canvas = document.getElementById('trendCanvas-' + code);
+                if (loading) {
+                    loading.style.display = 'block';
+                    loading.innerHTML = '加载中...'; // ★ 重置文字
+                }
+                if (canvas) canvas.style.display = 'none';
+                if (trendCharts[code]) {
+                    trendCharts[code].destroy();
+                    delete trendCharts[code];
+                }
+
+                fetchTrendData(code).then(data => {
+                    renderTrendChart(code, data);
+                });
+            };
+
+            // ===== 强制刷新净值 =====
             async function fetchFundDataOnlyForce(code) {
                 try {
                     const tx = await fetchTxFund(code);
@@ -1388,7 +1594,6 @@
                 return false;
             }
 
-            // ===== 普通获取（用于添加基金时获取名称，不强制） =====
             async function fetchFundDataOnly(code) {
                 try {
                     const tx = await fetchTxFund(code);
@@ -1597,7 +1802,6 @@
                         spinner.classList.add('active');
                         status.textContent = '刷新中...';
                         container.style.transform = 'translateY(36px)';
-                        // ★★★ 使用强制刷新 ★★★
                         refreshData().then(function() {
                             isRefreshing = false;
                             arrow.style.display = 'inline';
@@ -1764,133 +1968,6 @@
                 }
                 updateBottomBar();
             }
-
-            // ===== 趋势图切换 =====
-            window.toggleTrend = function(code) {
-                if (editMode) return;
-                const wrapper = document.getElementById('trend-' + code);
-                if (!wrapper) return;
-                if (currentExpandedCode === code) {
-                    wrapper.classList.remove('expanded');
-                    const canvas = document.getElementById('trendCanvas-' + code);
-                    if (canvas) canvas.style.display = 'none';
-                    const loading = document.getElementById('trendLoading-' + code);
-                    if (loading) loading.style.display = 'block';
-                    if (trendCharts[code]) {
-                        trendCharts[code].destroy();
-                        delete trendCharts[code];
-                    }
-                    currentExpandedCode = null;
-                    return;
-                }
-                if (currentExpandedCode) {
-                    const oldWrapper = document.getElementById('trend-' + currentExpandedCode);
-                    if (oldWrapper) {
-                        oldWrapper.classList.remove('expanded');
-                        const oldCanvas = document.getElementById('trendCanvas-' + currentExpandedCode);
-                        if (oldCanvas) oldCanvas.style.display = 'none';
-                        const oldLoading = document.getElementById('trendLoading-' + currentExpandedCode);
-                        if (oldLoading) oldLoading.style.display = 'block';
-                        if (trendCharts[currentExpandedCode]) {
-                            trendCharts[currentExpandedCode].destroy();
-                            delete trendCharts[currentExpandedCode];
-                        }
-                    }
-                }
-                wrapper.classList.add('expanded');
-                const loading = document.getElementById('trendLoading-' + code);
-                const canvas = document.getElementById('trendCanvas-' + code);
-                if (loading) loading.style.display = 'block';
-                if (canvas) canvas.style.display = 'none';
-                currentExpandedCode = code;
-
-                fetchTrendData(code).then(data => {
-                    if (!data || !data.navs || data.navs.length < 2) {
-                        if (loading) {
-                            loading.innerHTML =
-                                '暂无历史数据<div class="trend-retry-btn" onclick="window.toggleTrend(\'' +
-                                code + '\')">重试</div>';
-                        }
-                        return;
-                    }
-                    if (loading) loading.style.display = 'none';
-                    if (canvas) {
-                        canvas.style.display = 'block';
-                        const ctx = canvas.getContext('2d');
-                        const lineColor = '#3D7A8C';
-                        const grad = ctx.createLinearGradient(0, 0, 0, 150);
-                        grad.addColorStop(0, 'rgba(61, 122, 140, 0.35)');
-                        grad.addColorStop(0.3, 'rgba(61, 122, 140, 0.20)');
-                        grad.addColorStop(0.7, 'rgba(61, 122, 140, 0.08)');
-                        grad.addColorStop(1, 'rgba(61, 122, 140, 0.02)');
-
-                        if (trendCharts[code]) {
-                            trendCharts[code].destroy();
-                            delete trendCharts[code];
-                        }
-
-                        trendCharts[code] = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: data.dates,
-                                datasets: [{
-                                    data: data.navs,
-                                    borderColor: lineColor,
-                                    backgroundColor: grad,
-                                    fill: true,
-                                    tension: 0.4,
-                                    pointRadius: 0,
-                                    pointHoverRadius: 4,
-                                    pointBackgroundColor: lineColor,
-                                    borderWidth: 1.8
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                interaction: { intersect: false, mode: 'index' },
-                                plugins: {
-                                    legend: { display: false },
-                                    tooltip: {
-                                        backgroundColor: 'rgba(255,255,255,0.95)',
-                                        titleColor: '#0b1a33',
-                                        bodyColor: '#0b1a33',
-                                        borderColor: 'rgba(0,0,0,0.06)',
-                                        borderWidth: 1,
-                                        cornerRadius: 10,
-                                        padding: 8,
-                                        callbacks: {
-                                            label: function(context) {
-                                                return '净值: ' + context.parsed.y.toFixed(4);
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    x: {
-                                        ticks: { color: '#94a3b8', font: { size: 7 },
-                                        maxTicksLimit: 8 },
-                                        grid: { color: 'rgba(0, 0, 0, 0.06)',
-                                        drawBorder: false }
-                                    },
-                                    y: {
-                                        ticks: { color: '#94a3b8', font: { size: 7 },
-                                            count: 4 },
-                                        grid: { color: 'rgba(0, 0, 0, 0.06)',
-                                            drawBorder: false }
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }).catch(() => {
-                    if (loading) {
-                        loading.innerHTML =
-                            '加载失败<div class="trend-retry-btn" onclick="window.toggleTrend(\'' + code +
-                            '\')">重试</div>';
-                    }
-                });
-            };
 
             // ===== 柱状图 =====
             function renderProfitChart() {
@@ -2094,7 +2171,6 @@
                 const dataBtn = document.getElementById('openBackupModalBtn');
                 const refreshBtn = document.getElementById('refreshBtn');
 
-                // 清除所有已有的事件监听
                 const newAddBtn = addBtn.cloneNode(true);
                 const newBatchBtn = batchBtn.cloneNode(true);
                 const newDataBtn = dataBtn.cloneNode(true);
@@ -2168,7 +2244,7 @@
                 }
             }
 
-            // ===== ★★★ 刷新数据（强制刷新 ★★★ =====
+            // ===== 刷新数据（强制刷新） =====
             async function refreshData() {
                 if (isUpdating) return;
                 showCheck();
@@ -2179,7 +2255,6 @@
                     const codes = Object.keys(holdings);
                     if (codes.length) {
                         for (let i = 0; i < codes.length; i++) {
-                            // ★★★ 强制刷新：不检查缓存，直接从接口拉取 ★★★
                             await fetchFundDataOnlyForce(codes[i]);
                         }
                         saveTodaySnapshot();
@@ -2593,7 +2668,7 @@
                 initPullToRefresh();
                 registerSW();
 
-                console.log('✅ iFunds 方案一：刷新时强制从接口拉取最新净值');
+                console.log('✅ iFunds 已修复：重试不折叠 + 自动重试 + 重置加载文字');
             }
 
             if (document.readyState === 'loading') {
@@ -2602,6 +2677,7 @@
 
             window.deleteFund = deleteFund;
             window.toggleTrend = toggleTrend;
+            window.retryTrend = retryTrend;
 
         })();
     </script>
