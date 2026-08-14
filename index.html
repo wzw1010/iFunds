@@ -10,7 +10,8 @@
     <meta name="apple-mobile-web-app-title" content="iFunds" />
     <link rel="apple-touch-icon" href="./icon-1024.png" />
     <meta name="theme-color" content="#0b1a33" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
     <style>
         :root {
             --radius-top: 22px;
@@ -160,10 +161,19 @@
             line-height: 1.2;
             margin-top: 0px;
         }
-        .summary-today .today-value.positive { color: var(--color-positive); }
-        .summary-today .today-value.negative { color: var(--color-negative); }
-        .summary-today .today-value.neutral { color: var(--color-text-light); }
-        .summary-today .today-value.privacy { color: var(--color-text-light); letter-spacing: 4px; }
+        .summary-today .today-value.positive {
+            color: var(--color-positive);
+        }
+        .summary-today .today-value.negative {
+            color: var(--color-negative);
+        }
+        .summary-today .today-value.neutral {
+            color: var(--color-text-light);
+        }
+        .summary-today .today-value.privacy {
+            color: var(--color-text-light);
+            letter-spacing: 4px;
+        }
         .summary-divider {
             border: none;
             border-top: 1px solid rgba(255, 255, 255, 0.10);
@@ -213,9 +223,15 @@
             letter-spacing: 3px;
             color: var(--color-text-light) !important;
         }
-        .stat-number.positive { color: var(--color-positive); }
-        .stat-number.negative { color: var(--color-negative); }
-        .stat-number.neutral { color: var(--color-text-light); }
+        .stat-number.positive {
+            color: var(--color-positive);
+        }
+        .stat-number.negative {
+            color: var(--color-negative);
+        }
+        .stat-number.neutral {
+            color: var(--color-text-light);
+        }
         .data-timestamp {
             font-size: 10px;
             opacity: 0.5;
@@ -255,9 +271,15 @@
             border-radius: 0;
             transition: background 0.4s ease;
         }
-        .fund-card.decor-today::before { background: var(--decor-today); }
-        .fund-card.decor-old::before { background: var(--decor-old); }
-        .fund-card.flash-update { animation: flashCard 0.6s ease; }
+        .fund-card.decor-today::before {
+            background: var(--decor-today);
+        }
+        .fund-card.decor-old::before {
+            background: var(--decor-old);
+        }
+        .fund-card.flash-update {
+            animation: flashCard 0.6s ease;
+        }
         @keyframes flashCard {
             0% { background: #f0f7ff; }
             50% { background: #e0edf9; }
@@ -332,7 +354,9 @@
             height: 40px;
             position: relative;
         }
-        .edit-mode .fund-row-metrics { display: none; }
+        .edit-mode .fund-row-metrics {
+            display: none;
+        }
         .metric-item {
             flex: 1;
             display: flex;
@@ -368,9 +392,15 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .metric-item .metric-value.positive { color: var(--color-positive); }
-        .metric-item .metric-value.negative { color: var(--color-negative); }
-        .metric-item .metric-value.neutral { color: var(--color-text-light); }
+        .metric-item .metric-value.positive {
+            color: var(--color-positive);
+        }
+        .metric-item .metric-value.negative {
+            color: var(--color-negative);
+        }
+        .metric-item .metric-value.neutral {
+            color: var(--color-text-light);
+        }
 
         .fund-edit-area {
             display: none;
@@ -379,7 +409,9 @@
             flex-direction: column;
             gap: 6px;
         }
-        .fund-edit-area.active { display: flex; }
+        .fund-edit-area.active {
+            display: flex;
+        }
         .edit-row {
             display: flex;
             gap: 6px;
@@ -406,6 +438,10 @@
         .edit-row .edit-input:focus {
             border-color: var(--color-primary);
             box-shadow: 0 0 0 2px rgba(11, 26, 51, 0.08);
+        }
+        .edit-row .edit-input.input-error {
+            border-color: var(--color-positive);
+            box-shadow: 0 0 0 2px rgba(217, 96, 96, 0.25);
         }
         .edit-row .edit-input::placeholder {
             color: var(--color-text-light);
@@ -1008,7 +1044,8 @@
             .metric-item .metric-value { font-size: 11px; }
             .fund-edit-area { padding: 6px 0 2px 6px; }
             .edit-row .edit-input { height: 32px; font-size: 11px; padding: 3px 6px; border-radius: var(--radius-sm); }
-            .edit-row .edit-delete-btn { height: 32px; padding: 0 8px; font-size: 10px; border-radius: var(--radius-sm); flex: 0 0 50px; }
+            .edit-row .edit-delete-btn { height: 32px; padding: 0 8px; font-size: 10px; border-radius: var(--radius-sm);
+                flex: 0 0 50px; }
             .edit-hint { font-size: 9px; }
             .bottom-action-card { padding: 8px 4px; min-height: 62px; }
             .action-btn { min-height: 46px; padding: 4px 2px; gap: 1px; }
@@ -1031,7 +1068,7 @@
             .legend-item { font-size: 9px; }
         }
         @media (max-width: 360px) {
-            .fund-name { font-size: 12px; max-width: 100px; }
+            .fund-name { font-size: 12px; }
             .fund-market-value { font-size: 11px; }
             .metric-item .metric-value { font-size: 10px; }
             .card-block { padding: 10px; }
@@ -1208,42 +1245,42 @@
                 renderAll();
             }
 
+            // ===================== 修复1：JSONP 唯一变量名 + 修复3：缓存日期写入校验 =====================
             function fetchTxFund(code) {
                 return new Promise((resolve, reject) => {
-                    const varName = 'v_jj' + code;
-                    // 强制清除旧的全局变量，避免缓存
-                    try { delete window[varName]; } catch (e) {}
+                    const varName = 'v_jj_' + code + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+                    window[varName] = null;
 
                     const script = document.createElement('script');
-                    // 添加时间戳，确保每次都是新请求
                     script.src = 'https://qt.gtimg.cn/q=jj' + code + '?_t=' + Date.now();
                     script.async = true;
+
                     const tid = setTimeout(() => {
                         cleanup();
                         reject(new Error('腾讯接口超时'));
-                    }, 8000);
+                    }, 10000);
 
                     function cleanup() {
                         clearTimeout(tid);
                         if (script.parentNode) script.parentNode.removeChild(script);
-                        try { delete window[varName]; } catch (e) {}
+                        try { window[varName] = undefined; } catch (e) {}
                     }
 
                     script.onload = function() {
                         clearTimeout(tid);
                         try {
                             const raw = window[varName];
+                            window[varName] = undefined;
                             const data = parseTxData(raw);
                             if (data) {
-                                cleanup();
                                 resolve(data);
                                 return;
                             }
-                            cleanup();
                             reject(new Error('无法解析腾讯数据'));
                         } catch (e) {
-                            cleanup();
                             reject(e);
+                        } finally {
+                            cleanup();
                         }
                     };
 
@@ -1256,14 +1293,15 @@
                 });
             }
 
+            // ===================== 修复2：净值解析容错（支持净值=1） =====================
             function parseTxData(raw) {
                 if (typeof raw !== 'string') return null;
                 const parts = raw.split('~');
                 if (parts.length < 9) return null;
-                const nav = parseFloat(parts[5]) || 0;
+                const nav = parseFloat(parts[5]);
                 const rate = parseFloat(parts[7]) || 0;
                 const date = parts[8] || '';
-                if (nav <= 0 || !date) return null;
+                if (isNaN(nav) || nav <= 0 || !date) return null;
                 return { fundcode: parts[0], name: parts[1], dwjz: nav, gszzl: rate, jzrq: date };
             }
 
@@ -1271,12 +1309,24 @@
                 try {
                     const tx = await fetchTxFund(code);
                     if (tx && tx.dwjz > 0) {
+                        const today = getToday();
+                        const cacheEntry = fundDataCache[code] || {};
+                        // 核心修复：仅在今日为交易日且接口日期为今日时，才更新 date 字段
+                        let shouldUpdateDate = false;
+                        if (tx.jzrq === today && isTradingDay(new Date())) {
+                            shouldUpdateDate = true;
+                        }
+                        // 如果接口返回的日期是未来日期（极少见），忽略
+                        if (tx.jzrq > today) {
+                            shouldUpdateDate = false;
+                        }
+
                         fundDataCache[code] = {
                             name: getValidName(tx.name, code),
                             nav: tx.dwjz,
                             rate: tx.gszzl,
-                            date: tx.jzrq,
-                            updateDate: getToday()
+                            date: shouldUpdateDate ? tx.jzrq : (cacheEntry.date || ''),
+                            updateDate: today
                         };
                         saveAll();
                         return true;
@@ -1291,12 +1341,22 @@
                 try {
                     const tx = await fetchTxFund(code);
                     if (tx && tx.dwjz > 0) {
+                        const today = getToday();
+                        const cacheEntry = fundDataCache[code] || {};
+                        let shouldUpdateDate = false;
+                        if (tx.jzrq === today && isTradingDay(new Date())) {
+                            shouldUpdateDate = true;
+                        }
+                        if (tx.jzrq > today) {
+                            shouldUpdateDate = false;
+                        }
+
                         fundDataCache[code] = {
                             name: getValidName(tx.name, code),
                             nav: tx.dwjz,
                             rate: tx.gszzl,
-                            date: tx.jzrq,
-                            updateDate: getToday()
+                            date: shouldUpdateDate ? tx.jzrq : (cacheEntry.date || ''),
+                            updateDate: today
                         };
                         saveAll();
                         return true;
@@ -1363,24 +1423,28 @@
                 return computeSummary().todayProfit;
             }
 
+            // ===================== 修复3（附带）：历史盈亏回填优化 =====================
             function saveTodaySnapshot() {
                 const today = getToday();
+                // 只有今天有实际净值数据时才记录
                 const codes = Object.keys(holdings);
-                let hasTodayData = false;
+                let hasActualData = false;
                 for (let code of codes) {
                     const d = getDisplayData(code);
                     if (d.date === today && d.nav > 0) {
-                        hasTodayData = true;
+                        hasActualData = true;
                         break;
                     }
                 }
-                if (!hasTodayData) return;
+                if (!hasActualData) return;
+
                 const profit = getTodayProfit();
                 const existing = accountProfitHistory.findIndex(item => item.date === today);
                 if (existing >= 0) {
                     accountProfitHistory[existing].profit = round4(profit);
+                    accountProfitHistory[existing].estimated = false;
                 } else {
-                    accountProfitHistory.push({ date: today, profit: round4(profit) });
+                    accountProfitHistory.push({ date: today, profit: round4(profit), estimated: false });
                 }
                 accountProfitHistory.sort((a, b) => a.date.localeCompare(b.date));
                 if (accountProfitHistory.length > 30) {
@@ -1390,6 +1454,7 @@
             }
 
             function backfillProfitHistory() {
+                // 仅当今天有实际数据时才考虑回填，但为了避免过度回填，此处保持保守策略
                 const codes = Object.keys(holdings);
                 if (!codes.length) return;
                 let hasValidData = false;
@@ -1398,39 +1463,16 @@
                     if (d.nav > 0 && d.date) hasValidData = true;
                 });
                 if (!hasValidData) return;
-                const existingDates = new Set(accountProfitHistory.map(item => item.date));
-                let lastDate = null;
-                if (accountProfitHistory.length > 0) {
-                    const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
-                    lastDate = sorted[sorted.length - 1].date;
-                }
-                let startDate = lastDate ? new Date(lastDate) : new Date();
-                startDate.setDate(startDate.getDate() + 1);
-                const endDate = new Date();
-                endDate.setDate(endDate.getDate() - 1);
-                let daysToBackfill = 0;
-                const maxBackfill = 30;
-                const toFill = [];
-                let current = new Date(startDate);
-                while (current <= endDate && daysToBackfill < maxBackfill) {
-                    const dateStr = current.toISOString().slice(0, 10);
-                    if (!existingDates.has(dateStr) && isTradingDay(current)) {
-                        toFill.push(dateStr);
-                    }
-                    current.setDate(current.getDate() + 1);
-                    daysToBackfill++;
-                }
-                if (toFill.length > 0) {
-                    const currentProfit = getTodayProfit();
-                    toFill.forEach(dateStr => {
-                        if (!accountProfitHistory.find(item => item.date === dateStr)) {
-                            accountProfitHistory.push({ date: dateStr, profit: round4(currentProfit), estimated: true });
-                        }
-                    });
-                    accountProfitHistory.sort((a, b) => a.date.localeCompare(b.date));
-                    if (accountProfitHistory.length > 30) {
-                        accountProfitHistory = accountProfitHistory.slice(-30);
-                    }
+
+                // 如果有缺失日期，但缺失的日期无实际净值数据，则不再强行用估算值填充
+                // 只填充有真实净值数据的日期（通过 saveTodaySnapshot 已包含）
+                // 这里保留原逻辑但改为仅补全无数据的交易日？为简化，直接依赖 saveTodaySnapshot
+                // 因此本函数可不再主动添加估算值，避免污染图表
+                // 为了兼容旧数据，如果今天有数据且历史为空，仅补今天
+                const today = getToday();
+                if (hasValidData && accountProfitHistory.length === 0) {
+                    const profit = getTodayProfit();
+                    accountProfitHistory.push({ date: today, profit: round4(profit), estimated: false });
                     saveAll();
                 }
             }
@@ -1569,13 +1611,15 @@
                 tsEl.textContent = '净值日期：' + (latestDate || '--');
             }
 
+            // ===================== 修复6：移除手动截断，保留完整名称 =====================
             function renderFundList() {
                 const container = document.getElementById('fundList');
                 const codes = Object.keys(holdings);
                 if (!codes.length) {
                     container.innerHTML =
                         '<div class="empty-state"><i class="fas fa-inbox"></i><p>还没有持仓基金</p><div class="sub">点击底部「添加持仓」</div></div>';
-                    if (editMode) { editMode = false; updateBottomBar(); }
+                    if (editMode) { editMode = false;
+                        updateBottomBar(); }
                     return;
                 }
                 const sorted = codes.slice().sort((a, b) => {
@@ -1591,14 +1635,19 @@
                 sorted.forEach(code => {
                     const data = getCardData(code);
                     if (!data) return;
-                    const dayRateStr = data.dayRate !== null ? (data.dayRate >= 0 ? '+' : '') + data.dayRate.toFixed(2) + '%' : '--';
+                    const dayRateStr = data.dayRate !== null ? (data.dayRate >= 0 ? '+' : '') + data.dayRate.toFixed(
+                        2) + '%' : '--';
                     const dayProfitStr = formatMoney(data.dayProfit);
                     const holdProfitStr = formatMoney(data.holdProfit);
-                    const holdYieldStr = data.holdYield !== null ? (data.holdYield >= 0 ? '+' : '') + data.holdYield.toFixed(2) + '%' : '--';
+                    const holdYieldStr = data.holdYield !== null ? (data.holdYield >= 0 ? '+' : '') + data.holdYield
+                        .toFixed(2) + '%' : '--';
                     const cls = data.dayRate > 0 ? 'positive' : (data.dayRate < 0 ? 'negative' : 'neutral');
-                    const displayName = data.name.length > 14 ? data.name.slice(0, 14) + '…' : data.name;
+                    // 修复6：直接使用完整名称，由CSS处理省略
+                    const displayName = data.name;
                     const display = getDisplayData(code);
-                    const isToday = (display.date === getToday() && display.nav > 0);
+                    const today = getToday();
+                    // 修复3效果：今天非交易日时，date不会等于今天，装饰条自动变为旧色
+                    const isToday = (display.date === today && display.nav > 0);
                     const decorClass = isToday ? 'decor-today' : 'decor-old';
 
                     html += `<div class="fund-card ${decorClass}${editMode ? ' edit-mode' : ''}" data-code="${code}">
@@ -1636,10 +1685,12 @@
                 updateBottomBar();
             }
 
+            // ===================== 修复5：跨年图表标签自适应 =====================
             function renderProfitChart() {
                 const canvas = document.getElementById('profitChartCanvas');
                 const emptyEl = document.getElementById('chartEmpty');
-                if (profitChart) { profitChart.destroy(); profitChart = null; }
+                if (profitChart) { profitChart.destroy();
+                    profitChart = null; }
                 if (!accountProfitHistory.length) {
                     canvas.style.display = 'none';
                     emptyEl.style.display = 'flex';
@@ -1648,7 +1699,12 @@
                 canvas.style.display = 'block';
                 emptyEl.style.display = 'none';
                 const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
-                const labels = sorted.map(item => item.date.slice(5));
+
+                // 检测是否跨年
+                const years = new Set(sorted.map(item => item.date.slice(0, 4)));
+                const isMultiYear = years.size > 1;
+
+                const labels = sorted.map(item => isMultiYear ? item.date : item.date.slice(5));
                 const data = sorted.map(item => item.profit);
                 const colors = data.map(v => v >= 0 ? '#D96060' : '#3AAD9F');
                 const ctx = canvas.getContext('2d');
@@ -1678,7 +1734,8 @@
                             },
                             y: {
                                 grid: { color: 'rgba(0,0,0,0.06)' },
-                                ticks: { color: '#94a3b8', font: { size: 8 }, callback: v => (v >= 0 ? '+' : '') + v.toFixed(0) }
+                                ticks: { color: '#94a3b8', font: { size: 8 }, callback: v => (v >= 0 ? '+' : '') +
+                                        v.toFixed(0) }
                             }
                         }
                     }
@@ -1695,7 +1752,8 @@
 
                 const codes = Object.keys(holdings);
                 if (!codes.length) {
-                    if (pieChart) { pieChart.destroy(); pieChart = null; }
+                    if (pieChart) { pieChart.destroy();
+                        pieChart = null; }
                     canvas.style.display = 'none';
                     chartWrap.style.display = 'none';
                     leftLegend.innerHTML = '';
@@ -1715,7 +1773,8 @@
                 });
 
                 if (total <= 0 || Object.keys(industryMap).length === 0) {
-                    if (pieChart) { pieChart.destroy(); pieChart = null; }
+                    if (pieChart) { pieChart.destroy();
+                        pieChart = null; }
                     canvas.style.display = 'none';
                     chartWrap.style.display = 'none';
                     leftLegend.innerHTML = '';
@@ -1733,7 +1792,8 @@
                 const colors = DEEP_OCEAN.slice(0, labels.length);
 
                 const ctx = canvas.getContext('2d');
-                if (pieChart) { pieChart.destroy(); pieChart = null; }
+                if (pieChart) { pieChart.destroy();
+                    pieChart = null; }
 
                 pieChart = new Chart(ctx, {
                     type: 'pie',
@@ -1821,43 +1881,56 @@
                     addBtnNew.style.display = 'none';
                     dataBtnNew.style.display = 'none';
                     refreshBtnNew.style.display = 'none';
-                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
+                    batchBtnNew.innerHTML =
+                    '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
                     batchBtnNew.className = 'action-btn edit-highlight';
                     batchBtnNew.style.display = 'flex';
-                    batchBtnNew.addEventListener('click', function(e) { e.stopPropagation(); exitEditMode(); });
+                    batchBtnNew.addEventListener('click', function(e) { e.stopPropagation();
+                        exitEditMode(); });
                 } else {
                     bar.classList.remove('edit-mode');
                     addBtnNew.style.display = 'flex';
                     dataBtnNew.style.display = 'flex';
                     refreshBtnNew.style.display = 'flex';
                     batchBtnNew.style.display = 'flex';
-                    addBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
+                    addBtnNew.innerHTML =
+                        '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
                     addBtnNew.className = 'action-btn';
                     addBtnNew.addEventListener('click', function(e) {
                         e.stopPropagation();
                         if (editMode) return;
                         const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
+                        if (icon) { icon.classList.remove('pop');
+                            void icon.offsetWidth;
+                            icon.classList.add('pop'); }
                         document.getElementById('modalOverlay').classList.add('active');
                     });
-                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
+                    batchBtnNew.innerHTML =
+                        '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
                     batchBtnNew.className = 'action-btn';
-                    batchBtnNew.addEventListener('click', function(e) { e.stopPropagation(); enterEditMode(); });
-                    dataBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
+                    batchBtnNew.addEventListener('click', function(e) { e.stopPropagation();
+                        enterEditMode(); });
+                    dataBtnNew.innerHTML =
+                        '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
                     dataBtnNew.className = 'action-btn';
                     dataBtnNew.addEventListener('click', function(e) {
                         e.stopPropagation();
                         if (editMode) { showAlert('请先完成编辑'); return; }
                         const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
+                        if (icon) { icon.classList.remove('pop');
+                            void icon.offsetWidth;
+                            icon.classList.add('pop'); }
                         document.getElementById('backupModalOverlay').classList.add('active');
                     });
-                    refreshBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span>';
+                    refreshBtnNew.innerHTML =
+                        '<div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span>';
                     refreshBtnNew.className = 'action-btn';
                     refreshBtnNew.addEventListener('click', function(e) {
                         e.stopPropagation();
                         const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
+                        if (icon) { icon.classList.remove('pop');
+                            void icon.offsetWidth;
+                            icon.classList.add('pop'); }
                         refreshData();
                     });
                 }
@@ -1867,7 +1940,8 @@
                 if (isUpdating) return;
                 showCheck();
                 isUpdating = true;
-                const timeoutId = setTimeout(() => { if (isUpdating) { isUpdating = false; console.log('刷新超时'); } }, 15000);
+                const timeoutId = setTimeout(() => { if (isUpdating) { isUpdating = false;
+                        console.log('刷新超时'); } }, 15000);
                 try {
                     const codes = Object.keys(holdings);
                     if (codes.length) {
@@ -1904,8 +1978,46 @@
                 renderAll();
             }
 
+            // ===================== 修复4：批量编辑退出合法性校验 =====================
             function exitEditMode() {
                 const codes = Object.keys(holdings);
+                let hasError = false;
+                let errorCode = null;
+
+                // 先校验所有输入
+                codes.forEach(code => {
+                    const ci = document.getElementById('editCost_' + code);
+                    const si = document.getElementById('editShares_' + code);
+                    if (ci && si) {
+                        const nc = parseFloat(ci.value);
+                        const ns = parseFloat(si.value);
+                        if (isNaN(nc) || nc <= 0) {
+                            hasError = true;
+                            errorCode = code;
+                            ci.classList.add('input-error');
+                            ci.focus();
+                            return;
+                        } else {
+                            ci.classList.remove('input-error');
+                        }
+                        if (isNaN(ns) || ns <= 0) {
+                            hasError = true;
+                            errorCode = code;
+                            si.classList.add('input-error');
+                            si.focus();
+                            return;
+                        } else {
+                            si.classList.remove('input-error');
+                        }
+                    }
+                });
+
+                if (hasError) {
+                    showAlert('请修正 ' + errorCode + ' 的数据（成本或份额必须 > 0）');
+                    return;
+                }
+
+                // 校验通过，执行保存
                 let changed = false;
                 codes.forEach(code => {
                     const ci = document.getElementById('editCost_' + code);
@@ -1930,7 +2042,8 @@
                         }
                     }
                 });
-                if (changed) { saveAll(); refreshData(); }
+                if (changed) { saveAll();
+                    refreshData(); }
                 editMode = false;
                 renderAll();
             }
@@ -1954,7 +2067,8 @@
             let promptResolve = null;
 
             function showPrompt(title, msg, btns) {
-                if (promptResolve) { promptResolve(null); promptResolve = null; }
+                if (promptResolve) { promptResolve(null);
+                    promptResolve = null; }
                 return new Promise(resolve => {
                     promptResolve = resolve;
                     promptTitle.textContent = title || '提示';
@@ -2011,7 +2125,9 @@
                 document.getElementById('openAddModalBtn').addEventListener('click', function() {
                     if (editMode) return;
                     const icon = document.querySelector('#openAddModalBtn .icon-wrap');
-                    if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
+                    if (icon) { icon.classList.remove('pop');
+                        void icon.offsetWidth;
+                        icon.classList.add('pop'); }
                     confirmBtn.disabled = true;
                     codeInput.value = '';
                     costInput.value = '';
@@ -2023,7 +2139,8 @@
                     setTimeout(() => codeInput.focus(), 300);
                 });
 
-                function closeModal() { overlay.classList.remove('active'); fetchName = ''; }
+                function closeModal() { overlay.classList.remove('active');
+                    fetchName = ''; }
                 closeBtn.onclick = closeModal;
                 closeCircle.onclick = closeModal;
                 overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
@@ -2070,9 +2187,11 @@
                         if (isNaN(shares) || shares <= 0) { await showAlert('请输入有效份额'); return; }
                         if (!industry) { await showAlert('请输入行业标签'); return; }
                         let name = fetchName;
-                        if (!name) { try { const d = await fetchTxFund(code); if (d && d.name) name = d.name; } catch (e) {} }
+                        if (!name) { try { const d = await fetchTxFund(code); if (d && d.name) name = d.name; } catch (
+                            e) {} }
                         if (!name) { await showAlert('未能识别基金代码，请检查网络后重试'); return; }
-                        if (holdings[code]) { const overwrite = await showConfirm('已存在 ' + name + '，是否覆盖？'); if (!overwrite) return; }
+                        if (holdings[code]) { const overwrite = await showConfirm('已存在 ' + name + '，是否覆盖？'); if (!
+                                overwrite) return; }
                         holdings[code] = { cost: round4(cost), shares: round4(shares), name };
                         industryTags[code] = industry;
                         saveAll();
@@ -2099,7 +2218,9 @@
                 document.getElementById('openBackupModalBtn').addEventListener('click', function() {
                     if (editMode) { showAlert('请先完成编辑'); return; }
                     const icon = document.querySelector('#openBackupModalBtn .icon-wrap');
-                    if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
+                    if (icon) { icon.classList.remove('pop');
+                        void icon.offsetWidth;
+                        icon.classList.add('pop'); }
                     overlay.classList.add('active');
                 });
 
@@ -2109,7 +2230,8 @@
 
                 exportBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const data = JSON.stringify({ holdings, fundDataCache, accountProfitHistory, industryTags }, null, 2);
+                    const data = JSON.stringify({ holdings, fundDataCache, accountProfitHistory, industryTags },
+                    null, 2);
                     const blob = new Blob([data], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -2133,7 +2255,8 @@
                                 await showAlert('配置格式无效，缺少持仓数据');
                                 return;
                             }
-                            const ok = await showConfirm('将导入 ' + Object.keys(data.holdings).length + ' 只基金，覆盖当前数据？');
+                            const ok = await showConfirm('将导入 ' + Object.keys(data.holdings).length +
+                                ' 只基金，覆盖当前数据？');
                             if (ok) {
                                 holdings = data.holdings || {};
                                 fundDataCache = data.fundDataCache || {};
@@ -2185,7 +2308,8 @@
                             if (privacyMode) {
                                 ['todayProfitBig', 'totalAssets', 'totalProfit', 'totalReturn'].forEach(id => {
                                     const el = document.getElementById(id);
-                                    if (el) { el.textContent = '***'; el.className = 'stat-number privacy'; }
+                                    if (el) { el.textContent = '***';
+                                        el.className = 'stat-number privacy'; }
                                 });
                                 document.getElementById('dataTimestamp').textContent = '净值日期：--';
                             } else { renderSummary(); }
@@ -2209,7 +2333,7 @@
                         .then(reg => console.log('SW 注册成功'))
                         .catch(err => console.warn('SW 注册失败:', err.message));
                 }
-                console.log('✅ iFunds 已启动（修复 JSONP 缓存）');
+                console.log('✅ iFunds 已启动（完整优化版）');
             }
 
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
