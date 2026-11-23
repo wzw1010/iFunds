@@ -46,7 +46,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-                html,
+        html,
         body {
             width: 100%;
             min-height: 100vh;
@@ -69,21 +69,7 @@
             background: #ffffff;
             border-radius: var(--radius-md);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-            padding: 54px 14px 10px 14px;
-            display: flex;
-            flex-direction: column;
-            align-self: flex-start;
-            gap: 16px;
-            transition: transform 0.3s ease;
-        }
-
-        .app-container {
-            max-width: 480px;
-            width: 100%;
-            background: #ffffff;
-            border-radius: var(--radius-md);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-            padding: 50px 14px 10px 14px;
+            padding: calc(14px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom)) 14px;
             display: flex;
             flex-direction: column;
             align-self: flex-start;
@@ -155,7 +141,7 @@
         .summary-today .today-label {
             font-size: 13px;
             font-weight: 500;
-            opacity: 0.7;
+            opacity: 0.78;
             letter-spacing: 0.3px;
             display: flex;
             align-items: center;
@@ -164,7 +150,7 @@
         .summary-today .today-label svg {
             width: 16px;
             height: 16px;
-            stroke: rgba(255, 255, 255, 0.7);
+            stroke: rgba(255, 255, 255, 0.8);
             stroke-width: 2;
             fill: none;
         }
@@ -213,7 +199,7 @@
         }
         .summary-stat-item .stat-label {
             font-size: 10px;
-            opacity: 0.5;
+            opacity: 0.68;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -233,7 +219,7 @@
         .stat-number.neutral { color: var(--color-text-light); }
         .data-timestamp {
             font-size: 10px;
-            opacity: 0.5;
+            opacity: 0.68;
             text-align: center;
             margin-top: 4px;
             letter-spacing: 0.3px;
@@ -396,12 +382,13 @@
             width: 100%;
             flex-wrap: nowrap;
         }
+        /* 修复：批量编辑输入框字号调回 13px，视觉更协调 */
         .edit-row .edit-input {
             flex: 1;
             min-width: 0;
             height: 36px;
             padding: 4px 8px;
-            font-size: 12px;
+            font-size: 13px;
             font-family: inherit;
             border-radius: var(--radius-sm);
             border: 1px solid var(--color-edit-border);
@@ -473,6 +460,7 @@
             margin-top: 2px;
         }
 
+        /* 修复：max-height 提到 1000px，杜绝裁剪风险 */
         .card-block {
             background: var(--color-card-bg);
             border-radius: var(--radius-md);
@@ -481,11 +469,13 @@
             box-shadow: var(--shadow-card);
             transition: opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
             overflow: hidden;
+            max-height: 1000px;
         }
         .card-block.edit-hidden {
             opacity: 0;
             max-height: 0;
-            padding: 0 14px;
+            padding-top: 0;
+            padding-bottom: 0;
             border: none;
             margin: 0;
             pointer-events: none;
@@ -497,6 +487,7 @@
         .chart-container canvas {
             width: 100% !important;
             height: 100% !important;
+            touch-action: pan-y;
         }
         .chart-empty {
             display: flex;
@@ -668,7 +659,6 @@
             display: none !important;
         }
 
-        /* 统一全屏毛玻璃遮罩，解决顶部割裂与安全区留白 */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -702,6 +692,7 @@
             border: none;
             box-shadow: none;
             position: relative;
+            overflow-y: auto;
         }
         .add-modal .add-content h2,
         .backup-modal .backup-content h2 {
@@ -737,7 +728,7 @@
             background: rgba(255, 255, 255, 0.14);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
-            font-size: 15px;
+            font-size: 16px;
             color: #ffffff;
             outline: none;
             transition: 0.15s;
@@ -992,7 +983,10 @@
         }
 
         @media (max-width: 420px) {
-            .app-container { padding: 10px 12px 10px 12px; gap: 14px; }
+            .app-container {
+                padding: calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px;
+                gap: 14px;
+            }
             .summary-card { padding: 8px 12px 6px 12px; }
             .summary-today .today-value { font-size: 20px; }
             .summary-today .today-label { font-size: 12px; }
@@ -1008,8 +1002,9 @@
             .metric-item .metric-label { font-size: 9px; }
             .metric-item .metric-value { font-size: 11px; }
             .fund-edit-area { padding: 6px 0 2px 6px; }
-            .edit-row .edit-input { height: 32px; font-size: 11px; padding: 3px 6px; border-radius: var(--radius-sm); }
-            .edit-row .edit-delete-btn { height: 32px; padding: 0 8px; font-size: 10px; border-radius: var(--radius-sm); flex: 0 0 50px; }
+            /* 修复：小屏批量编辑字号 12px */
+            .edit-row .edit-input { height: 34px; font-size: 12px; padding: 3px 6px; border-radius: var(--radius-sm); }
+            .edit-row .edit-delete-btn { height: 34px; padding: 0 8px; font-size: 10px; border-radius: var(--radius-sm); flex: 0 0 50px; }
             .edit-hint { font-size: 9px; }
             .bottom-action-card { padding: 8px 4px; min-height: 62px; }
             .action-btn { min-height: 46px; padding: 4px 2px; gap: 1px; }
@@ -1018,7 +1013,7 @@
             .bottom-action-card.edit-mode .action-btn.edit-highlight { padding: 6px 20px; }
             .add-modal .add-content,
             .backup-modal .backup-content { padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) 16px; }
-            .add-modal .add-content .input-group input { font-size: 14px; padding: 10px 14px; }
+            .add-modal .add-content .input-group input { font-size: 16px; padding: 10px 14px; }
             .add-modal .add-content .input-group input::placeholder { font-size: 13px; }
             .add-modal .add-content .modal-actions button { font-size: 14px; padding: 10px 14px; }
             .backup-modal .backup-actions button,
@@ -1170,7 +1165,6 @@
             let profitChart = null;
             let pieChart = null;
 
-            // 使用本地时区日期，避免 UTC 凌晨跨天偏移
             function formatLocalDate(dateObj) {
                 const y = dateObj.getFullYear();
                 const m = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -1656,6 +1650,7 @@
                 emptyEl.style.display = 'none';
                 const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
                 const labels = sorted.map(item => item.date.slice(5));
+                const fullDates = sorted.map(item => item.date);
                 const data = sorted.map(item => item.profit);
                 const colors = data.map(v => v >= 0 ? '#D96060' : '#3AAD9F');
                 const ctx = canvas.getContext('2d');
@@ -1674,9 +1669,35 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        /* 修复：点击柱子显示当天收益 */
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { enabled: false }
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: 'rgba(11, 26, 51, 0.92)',
+                                titleColor: 'rgba(255, 255, 255, 0.68)',
+                                titleFont: { size: 11, weight: '500' },
+                                bodyColor: '#ffffff',
+                                bodyFont: { size: 13, weight: '600' },
+                                padding: 10,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                caretSize: 5,
+                                callbacks: {
+                                    title: (items) => {
+                                        const idx = items[0].dataIndex;
+                                        return fullDates[idx] || items[0].label;
+                                    },
+                                    label: (ctx) => {
+                                        const v = ctx.parsed.y;
+                                        return '收益 ' + (v >= 0 ? '+' : '') + v.toFixed(2);
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             x: {
@@ -1698,13 +1719,15 @@
                 const leftLegend = document.getElementById('legendLeft');
                 const rightLegend = document.getElementById('legendRight');
                 const chartWrap = document.getElementById('chartCanvasWrap');
-                if (!canvas || !leftLegend || !rightLegend) return;
+                const pieContainer = document.getElementById('pieChartContainer');
+                if (!canvas || !leftLegend || !rightLegend || !pieContainer) return;
 
                 const codes = Object.keys(holdings);
                 if (!codes.length) {
                     if (pieChart) { pieChart.destroy(); pieChart = null; }
                     canvas.style.display = 'none';
                     chartWrap.style.display = 'none';
+                    pieContainer.style.display = 'none';
                     leftLegend.innerHTML = '';
                     rightLegend.innerHTML = '';
                     emptyEl.style.display = 'block';
@@ -1725,12 +1748,14 @@
                     if (pieChart) { pieChart.destroy(); pieChart = null; }
                     canvas.style.display = 'none';
                     chartWrap.style.display = 'none';
+                    pieContainer.style.display = 'none';
                     leftLegend.innerHTML = '';
                     rightLegend.innerHTML = '';
                     emptyEl.style.display = 'block';
                     return;
                 }
 
+                pieContainer.style.display = 'flex';
                 canvas.style.display = 'block';
                 chartWrap.style.display = 'block';
                 emptyEl.style.display = 'none';
@@ -1802,7 +1827,6 @@
                 syncBottomBarState();
             }
 
-            // 仅切换底部栏展示状态，事件在初始化时绑定一次
             function syncBottomBarState() {
                 const bar = document.getElementById('bottomActions');
                 const addBtn = document.getElementById('openAddModalBtn');
@@ -2172,7 +2196,6 @@
                     this.value = '';
                 });
 
-                // 重置每日快照（收益柱状图）
                 if (resetSnapshotBtn) {
                     resetSnapshotBtn.addEventListener('click', async function(e) {
                         e.stopPropagation();
