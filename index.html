@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>iFunds</title>
     <link rel="manifest" href="./manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -11,6 +11,7 @@
     <link rel="apple-touch-icon" href="./icon-1024.png" />
     <meta name="theme-color" content="#0b1a33" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
             --radius-top: 22px;
@@ -257,12 +258,6 @@
         }
         .fund-card.decor-today::before { background: var(--decor-today); }
         .fund-card.decor-old::before { background: var(--decor-old); }
-        .fund-card.flash-update { animation: flashCard 0.6s ease; }
-        @keyframes flashCard {
-            0% { background: #f0f7ff; }
-            50% { background: #e0edf9; }
-            100% { background: var(--color-card-bg); }
-        }
 
         .fund-row-top {
             display: grid;
@@ -580,7 +575,7 @@
             gap: 2px;
             padding: 6px 4px;
             cursor: pointer;
-            transition: background 0.2s ease;
+            transition: background 0.2s ease, transform 0.15s ease;
             border: none;
             background: transparent;
             color: #ffffff;
@@ -659,13 +654,14 @@
             display: none !important;
         }
 
+        /* 统一全屏毛玻璃遮罩，解决顶部割裂与安全区留白 */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.25);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: rgba(11, 26, 51, 0.36);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             justify-content: center;
             align-items: center;
             z-index: 999;
@@ -682,14 +678,12 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 32px 24px;
+            padding: calc(32px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom)) 24px;
             width: 100%;
             height: 100%;
             max-width: 100%;
             max-height: 100%;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            background: transparent;
             border-radius: 0;
             border: none;
             box-shadow: none;
@@ -699,7 +693,7 @@
         .backup-modal .backup-content h2 {
             font-size: 22px;
             font-weight: 700;
-            color: #0b1a33;
+            color: rgba(255, 255, 255, 0.95);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -707,7 +701,7 @@
         }
         .add-modal .add-content h2 i,
         .backup-modal .backup-content h2 i {
-            color: #0b1a33;
+            color: rgba(255, 255, 255, 0.92);
         }
         .sub-placeholder {
             height: 24px;
@@ -715,6 +709,7 @@
         }
         .add-modal .add-content .input-group {
             width: 100%;
+            max-width: 380px;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -724,9 +719,10 @@
             width: 100%;
             padding: 12px 16px;
             border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             font-size: 15px;
             color: #ffffff;
             outline: none;
@@ -734,22 +730,22 @@
             -webkit-appearance: none;
         }
         .add-modal .add-content .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.5);
             font-weight: 400;
             font-size: 14px;
         }
         .add-modal .add-content .input-group input:focus {
-            border-color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.55);
+            background: rgba(255, 255, 255, 0.22);
         }
         .add-modal .add-content .auto-fill-info {
             width: 100%;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.14);
             border-radius: var(--radius-md);
             padding: 8px 14px;
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             display: none;
             margin-top: -6px;
             margin-bottom: 2px;
@@ -762,6 +758,7 @@
             display: flex;
             gap: 12px;
             width: 100%;
+            max-width: 380px;
             justify-content: center;
             margin-top: 12px;
         }
@@ -771,22 +768,22 @@
             border-radius: var(--radius-md);
             font-size: 15px;
             font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             cursor: pointer;
             transition: 0.15s;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             color: #ffffff;
         }
         .add-modal .add-content .modal-actions button:active {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.28);
             transform: scale(0.96);
         }
         .add-modal .add-content .modal-actions .btn-cancel {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.16);
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.16);
         }
         .add-modal .add-content .modal-actions .btn-confirm:disabled {
             opacity: 0.4;
@@ -797,15 +794,16 @@
             flex-direction: column;
             gap: 10px;
             width: 100%;
+            max-width: 340px;
         }
         .backup-modal .backup-actions button,
         .backup-modal .backup-actions .file-input-wrap {
             width: 100%;
             border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -851,38 +849,38 @@
         }
         .backup-modal .backup-actions button:active,
         .backup-modal .backup-actions .file-input-wrap:active {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.28);
             transform: scale(0.96);
         }
         .modal-close-btn {
             position: absolute;
-            bottom: 48px;
+            bottom: calc(48px + env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
             width: 48px;
             height: 48px;
             border-radius: var(--radius-full);
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.16);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.22);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: 0.2s;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.82);
             font-size: 18px;
             z-index: 10;
         }
         .modal-close-btn:active {
             transform: translateX(-50%) scale(0.88);
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.28);
         }
         .modal-close-btn svg {
             width: 24px;
             height: 24px;
-            stroke: rgba(255, 255, 255, 0.7);
+            stroke: rgba(255, 255, 255, 0.82);
             stroke-width: 2;
             fill: none;
         }
@@ -894,11 +892,11 @@
             padding: 24px;
             width: 100%;
             max-width: 340px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(11, 26, 51, 0.55);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-radius: var(--radius-md);
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.14);
         }
         .prompt-modal .prompt-content h2 {
             font-size: 18px;
@@ -908,7 +906,7 @@
         }
         .prompt-modal .prompt-content .prompt-message {
             font-size: 15px;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.88);
             line-height: 1.5;
             margin-bottom: 18px;
         }
@@ -930,12 +928,12 @@
             max-width: 140px;
         }
         .prompt-modal .prompt-content .modal-actions .btn-cancel {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.16);
             color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.14);
         }
         .prompt-modal .prompt-content .modal-actions .btn-cancel:active {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.26);
         }
         .prompt-modal .prompt-content .modal-actions .btn-confirm {
             background: #ffffff;
@@ -951,17 +949,6 @@
         .prompt-modal .prompt-content .modal-actions .btn-danger:active {
             background: #c92a3a;
         }
-        .refresh-loading {
-            pointer-events: none;
-            opacity: 0.6;
-        }
-        .refresh-loading i {
-            animation: spin 1s infinite linear;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
         .check-pop {
             position: fixed;
             top: 50%;
@@ -975,7 +962,7 @@
             align-items: center;
             justify-content: center;
             transition: transform 0.35s ease-out;
-            z-index: 200;
+            z-index: 1000;
             pointer-events: none;
             box-shadow: 0 6px 24px rgba(11, 26, 51, 0.3);
         }
@@ -1016,13 +1003,13 @@
             .action-btn .label { font-size: 9px; }
             .bottom-action-card.edit-mode .action-btn.edit-highlight { padding: 6px 20px; }
             .add-modal .add-content,
-            .backup-modal .backup-content { padding: 24px 16px; }
+            .backup-modal .backup-content { padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)) 16px; }
             .add-modal .add-content .input-group input { font-size: 14px; padding: 10px 14px; }
             .add-modal .add-content .input-group input::placeholder { font-size: 13px; }
             .add-modal .add-content .modal-actions button { font-size: 14px; padding: 10px 14px; }
             .backup-modal .backup-actions button,
             .backup-modal .backup-actions .file-input-wrap button { font-size: 14px; padding: 12px 14px; }
-            .modal-close-btn { width: 40px; height: 40px; bottom: 40px; font-size: 16px; }
+            .modal-close-btn { width: 40px; height: 40px; bottom: calc(40px + env(safe-area-inset-bottom)); font-size: 16px; }
             .modal-close-btn svg { width: 20px; height: 20px; }
             .data-timestamp { font-size: 9px; }
             .card-block { padding: 12px; }
@@ -1091,10 +1078,10 @@
         </div>
 
         <div class="bottom-action-card" id="bottomActions">
-            <div class="action-btn" id="openAddModalBtn"><div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span></div>
-            <div class="action-btn" id="batchEditBtn"><div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span></div>
-            <div class="action-btn" id="openBackupModalBtn"><div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span></div>
-            <div class="action-btn hide-in-edit" id="refreshBtn"><div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span></div>
+            <button type="button" class="action-btn" id="openAddModalBtn"><div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span></button>
+            <button type="button" class="action-btn" id="batchEditBtn"><div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span></button>
+            <button type="button" class="action-btn" id="openBackupModalBtn"><div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span></button>
+            <button type="button" class="action-btn hide-in-edit" id="refreshBtn"><div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span></button>
         </div>
     </div>
 
@@ -1103,14 +1090,19 @@
             <h2><i class="fas fa-coins"></i> 添加基金</h2>
             <div class="sub-placeholder"></div>
             <div class="input-group">
-                <input type="text" id="fundCodeInput" maxlength="6" inputmode="decimal" placeholder="基金代码（6位）">
+                <input type="text" id="fundCodeInput" maxlength="6" inputmode="numeric" placeholder="基金代码（6位）">
                 <div class="auto-fill-info" id="autoFillInfo"><i class="fas fa-check-circle"></i> <span id="autoFillText">已识别：易方达蓝筹精选</span></div>
                 <input type="number" id="fundCostInput" step="0.0001" inputmode="decimal" placeholder="成本价 (¥) 例如 1.1000">
                 <input type="number" id="fundSharesInput" step="0.01" inputmode="decimal" placeholder="持有份额 例如 1500.00">
                 <input type="text" id="fundIndustryInput" maxlength="20" placeholder="行业标签（必填） 例如 白酒">
             </div>
-            <div class="modal-actions"><button class="btn-cancel" id="closeModalBtn">取消</button><button class="btn-cancel" id="confirmAddBtn" disabled>确认添加</button></div>
-            <button class="modal-close-btn" id="closeModalBtnCircle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" id="closeModalBtn">取消</button>
+                <button type="button" class="btn-cancel btn-confirm" id="confirmAddBtn" disabled>确认添加</button>
+            </div>
+            <button type="button" class="modal-close-btn" id="closeModalBtnCircle" aria-label="关闭">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
         </div>
     </div>
 
@@ -1119,20 +1111,29 @@
             <h2><i class="fas fa-database"></i> 数据管理</h2>
             <div class="sub-placeholder"></div>
             <div class="backup-actions">
-                <button id="exportBtn"><i class="fas fa-download"></i> 导出配置</button>
-                <div class="file-input-wrap"><button class="primary"><i class="fas fa-upload"></i> 导入配置</button><input type="file" id="importFileInput" accept=".json"></div>
-                <button id="clearCacheBtn"><i class="fas fa-trash-alt"></i> 清除缓存</button>
-                <button id="hardResetBtn" style="background:rgba(255,50,50,0.3);border:1px solid rgba(255,50,50,0.2);"><i class="fas fa-power-off"></i> 硬重置</button>
+                <button type="button" id="exportBtn"><i class="fas fa-download"></i> 导出配置</button>
+                <div class="file-input-wrap">
+                    <button type="button" class="primary"><i class="fas fa-upload"></i> 导入配置</button>
+                    <input type="file" id="importFileInput" accept=".json">
+                </div>
+                <button type="button" id="resetSnapshotBtn"><i class="fas fa-chart-bar"></i> 重置快照</button>
+                <button type="button" id="clearCacheBtn"><i class="fas fa-trash-alt"></i> 清除缓存</button>
+                <button type="button" id="hardResetBtn" style="background:rgba(255,50,50,0.32);border:1px solid rgba(255,50,50,0.25);"><i class="fas fa-power-off"></i> 硬重置</button>
             </div>
-            <button class="modal-close-btn" id="closeBackupModalBtnCircle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
+            <button type="button" class="modal-close-btn" id="closeBackupModalBtnCircle" aria-label="关闭">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
         </div>
     </div>
 
     <div class="modal-overlay prompt-modal" id="promptModalOverlay">
-        <div class="prompt-content"><h2 id="promptTitle">提示</h2><div class="prompt-message" id="promptMessage">消息内容</div><div class="modal-actions" id="promptActions"></div></div>
+        <div class="prompt-content">
+            <h2 id="promptTitle">提示</h2>
+            <div class="prompt-message" id="promptMessage">消息内容</div>
+            <div class="modal-actions" id="promptActions"></div>
+        </div>
     </div>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <div class="check-pop" id="checkPop"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
 
     <script>
@@ -1155,8 +1156,16 @@
             let profitChart = null;
             let pieChart = null;
 
+            // 使用本地时区日期，避免 UTC 凌晨跨天偏移
+            function formatLocalDate(dateObj) {
+                const y = dateObj.getFullYear();
+                const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                const d = String(dateObj.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+
             function getToday() {
-                return new Date().toISOString().slice(0, 10);
+                return formatLocalDate(new Date());
             }
 
             function formatMoney(v) {
@@ -1200,60 +1209,13 @@
             }
 
             function hardReset() {
-                const keys = Object.keys(localStorage);
-                keys.forEach(key => {
-                    if (key.startsWith('fund_')) localStorage.removeItem(key);
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('fund_') || key === STORAGE_A || key === STORAGE_T) {
+                        localStorage.removeItem(key);
+                    }
                 });
                 loadData();
                 renderAll();
-            }
-
-            function fetchTxFund(code) {
-                return new Promise((resolve, reject) => {
-                    const varName = 'v_jj' + code;
-                    // 强制清除旧的全局变量，避免缓存
-                    try { delete window[varName]; } catch (e) {}
-
-                    const script = document.createElement('script');
-                    // 添加时间戳，确保每次都是新请求
-                    script.src = 'https://qt.gtimg.cn/q=jj' + code + '?_t=' + Date.now();
-                    script.async = true;
-                    const tid = setTimeout(() => {
-                        cleanup();
-                        reject(new Error('腾讯接口超时'));
-                    }, 8000);
-
-                    function cleanup() {
-                        clearTimeout(tid);
-                        if (script.parentNode) script.parentNode.removeChild(script);
-                        try { delete window[varName]; } catch (e) {}
-                    }
-
-                    script.onload = function() {
-                        clearTimeout(tid);
-                        try {
-                            const raw = window[varName];
-                            const data = parseTxData(raw);
-                            if (data) {
-                                cleanup();
-                                resolve(data);
-                                return;
-                            }
-                            cleanup();
-                            reject(new Error('无法解析腾讯数据'));
-                        } catch (e) {
-                            cleanup();
-                            reject(e);
-                        }
-                    };
-
-                    script.onerror = function() {
-                        cleanup();
-                        reject(new Error('腾讯接口请求失败'));
-                    };
-
-                    document.head.appendChild(script);
-                });
             }
 
             function parseTxData(raw) {
@@ -1265,6 +1227,55 @@
                 const date = parts[8] || '';
                 if (nav <= 0 || !date) return null;
                 return { fundcode: parts[0], name: parts[1], dwjz: nav, gszzl: rate, jzrq: date };
+            }
+
+            function fetchTxFund(code) {
+                return new Promise((resolve, reject) => {
+                    const varName = 'v_jj' + code;
+                    const script = document.createElement('script');
+                    script.src = 'https://qt.gtimg.cn/q=jj' + code + '?_t=' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+                    script.async = true;
+                    let settled = false;
+
+                    const tid = setTimeout(() => {
+                        if (settled) return;
+                        settled = true;
+                        cleanup();
+                        reject(new Error('腾讯接口超时'));
+                    }, 8000);
+
+                    function cleanup() {
+                        clearTimeout(tid);
+                        if (script.parentNode) script.parentNode.removeChild(script);
+                    }
+
+                    script.onload = function() {
+                        if (settled) return;
+                        settled = true;
+                        try {
+                            const raw = window[varName];
+                            const data = parseTxData(raw);
+                            cleanup();
+                            if (data) {
+                                resolve(data);
+                            } else {
+                                reject(new Error('无法解析腾讯数据'));
+                            }
+                        } catch (e) {
+                            cleanup();
+                            reject(e);
+                        }
+                    };
+
+                    script.onerror = function() {
+                        if (settled) return;
+                        settled = true;
+                        cleanup();
+                        reject(new Error('腾讯接口请求失败'));
+                    };
+
+                    document.head.appendChild(script);
+                });
             }
 
             async function fetchFundDataOnlyForce(code) {
@@ -1288,23 +1299,7 @@
             }
 
             async function fetchFundDataOnly(code) {
-                try {
-                    const tx = await fetchTxFund(code);
-                    if (tx && tx.dwjz > 0) {
-                        fundDataCache[code] = {
-                            name: getValidName(tx.name, code),
-                            nav: tx.dwjz,
-                            rate: tx.gszzl,
-                            date: tx.jzrq,
-                            updateDate: getToday()
-                        };
-                        saveAll();
-                        return true;
-                    }
-                } catch (e) {
-                    console.warn('fetch error', code, e.message);
-                }
-                return false;
+                return fetchFundDataOnlyForce(code);
             }
 
             function getDisplayData(code) {
@@ -1333,9 +1328,7 @@
             function computeSummary() {
                 const codes = Object.keys(holdings);
                 if (!codes.length) return { totalAsset: 0, todayProfit: 0, totalProfit: 0, totalYield: 0 };
-                let totalCost = 0,
-                    totalMV = 0,
-                    totalPrev = 0;
+                let totalCost = 0, totalMV = 0, totalPrev = 0;
                 codes.forEach(code => {
                     const h = holdings[code];
                     const cost = parseFloat(h.cost) || 0;
@@ -1367,7 +1360,7 @@
                 const today = getToday();
                 const codes = Object.keys(holdings);
                 let hasTodayData = false;
-                for (let code of codes) {
+                for (const code of codes) {
                     const d = getDisplayData(code);
                     if (d.date === today && d.nav > 0) {
                         hasTodayData = true;
@@ -1404,16 +1397,21 @@
                     const sorted = accountProfitHistory.slice().sort((a, b) => a.date.localeCompare(b.date));
                     lastDate = sorted[sorted.length - 1].date;
                 }
-                let startDate = lastDate ? new Date(lastDate) : new Date();
-                startDate.setDate(startDate.getDate() + 1);
+                const startDate = lastDate ? new Date(lastDate + 'T00:00:00') : new Date();
+                if (lastDate) startDate.setDate(startDate.getDate() + 1);
+
                 const endDate = new Date();
+                endDate.setHours(0, 0, 0, 0);
                 endDate.setDate(endDate.getDate() - 1);
+
                 let daysToBackfill = 0;
                 const maxBackfill = 30;
                 const toFill = [];
-                let current = new Date(startDate);
+                const current = new Date(startDate);
+                current.setHours(0, 0, 0, 0);
+
                 while (current <= endDate && daysToBackfill < maxBackfill) {
-                    const dateStr = current.toISOString().slice(0, 10);
+                    const dateStr = formatLocalDate(current);
                     if (!existingDates.has(dateStr) && isTradingDay(current)) {
                         toFill.push(dateStr);
                     }
@@ -1441,14 +1439,11 @@
                 const arrow = document.getElementById('pullArrow');
                 const status = document.getElementById('pullStatus');
                 const spinner = document.getElementById('pullSpinner');
-                let startY = 0,
-                    isPulling = false,
-                    pullHeight = 0;
+                let startY = 0, isPulling = false, pullHeight = 0;
 
                 container.addEventListener('touchstart', function(e) {
                     if (window.scrollY > 5) return;
-                    const touch = e.touches[0];
-                    startY = touch.clientY;
+                    startY = e.touches[0].clientY;
                     isPulling = false;
                     pullHeight = 0;
                 }, { passive: true });
@@ -1463,8 +1458,7 @@
                         }
                         return;
                     }
-                    const touch = e.touches[0];
-                    const deltaY = touch.clientY - startY;
+                    const deltaY = e.touches[0].clientY - startY;
                     if (deltaY > 0 && deltaY < 120) {
                         isPulling = true;
                         pullHeight = Math.min(deltaY * 0.4, 60);
@@ -1481,7 +1475,7 @@
                     }
                 }, { passive: false });
 
-                container.addEventListener('touchend', function(e) {
+                container.addEventListener('touchend', function() {
                     if (!isPulling || isUpdating) {
                         container.style.transform = '';
                         indicator.classList.remove('show');
@@ -1547,14 +1541,14 @@
                 todayEl.textContent = (val >= 0 ? '+' : '') + val.toFixed(2);
                 todayEl.className = 'today-value ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
 
-                function setStat(id, val, isPct) {
+                function setStat(id, numVal, isPct) {
                     const el = document.getElementById(id);
                     if (isPct) {
-                        el.textContent = val.toFixed(2) + '%';
-                        el.className = 'stat-number ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
+                        el.textContent = numVal.toFixed(2) + '%';
+                        el.className = 'stat-number ' + (numVal > 0 ? 'positive' : numVal < 0 ? 'negative' : 'neutral');
                     } else {
-                        el.textContent = (val >= 0 ? '+' : '') + val.toFixed(2);
-                        el.className = 'stat-number ' + (val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral');
+                        el.textContent = (numVal >= 0 ? '+' : '') + numVal.toFixed(2);
+                        el.className = 'stat-number ' + (numVal > 0 ? 'positive' : numVal < 0 ? 'negative' : 'neutral');
                     }
                 }
                 setStat('totalAssets', s.totalAsset, false);
@@ -1575,14 +1569,13 @@
                 if (!codes.length) {
                     container.innerHTML =
                         '<div class="empty-state"><i class="fas fa-inbox"></i><p>还没有持仓基金</p><div class="sub">点击底部「添加持仓」</div></div>';
-                    if (editMode) { editMode = false; updateBottomBar(); }
+                    if (editMode) editMode = false;
+                    syncBottomBarState();
                     return;
                 }
                 const sorted = codes.slice().sort((a, b) => {
-                    const hA = holdings[a],
-                        hB = holdings[b];
-                    const dA = getDisplayData(a),
-                        dB = getDisplayData(b);
+                    const hA = holdings[a], hB = holdings[b];
+                    const dA = getDisplayData(a), dB = getDisplayData(b);
                     const mvA = (dA.nav || parseFloat(hA.cost) || 0) * (parseFloat(hA.shares) || 0);
                     const mvB = (dB.nav || parseFloat(hB.cost) || 0) * (parseFloat(hB.shares) || 0);
                     return mvB - mvA;
@@ -1601,10 +1594,10 @@
                     const isToday = (display.date === getToday() && display.nav > 0);
                     const decorClass = isToday ? 'decor-today' : 'decor-old';
 
-                    html += `<div class="fund-card ${decorClass}${editMode ? ' edit-mode' : ''}" data-code="${code}">
+                    html += `<div class="fund-card ${decorClass}${editMode ? ' edit-mode' : ''}" data-code="${escapeHTML(code)}">
                         <div class="fund-row-top">
                             <div class="fund-name-wrap"><span class="fund-name">${escapeHTML(displayName)}</span></div>
-                            <div class="fund-code-wrap"><span class="fund-code-standalone">${code}</span></div>
+                            <div class="fund-code-wrap"><span class="fund-code-standalone">${escapeHTML(code)}</span></div>
                             <div class="fund-right-actions"><span class="fund-market-value"><i class="fas fa-coins coin-icon"></i> ¥${data.marketValue.toFixed(2)}</span></div>
                         </div>
                         <div class="fund-row-metrics">
@@ -1615,10 +1608,10 @@
                         </div>
                         <div class="fund-edit-area ${editMode ? 'active' : ''}">
                             <div class="edit-row">
-                                <input type="number" class="edit-input" id="editCost_${code}" value="${data.cost.toFixed(4)}" step="any" placeholder="成本">
-                                <input type="number" class="edit-input" id="editShares_${code}" value="${data.shares.toFixed(2)}" step="any" placeholder="份额">
-                                <input type="text" class="edit-input" id="editTag_${code}" value="${escapeHTML(industryTags[code] || '')}" placeholder="行业标签">
-                                <button class="edit-delete-btn" data-code="${code}">删除</button>
+                                <input type="number" class="edit-input" id="editCost_${escapeHTML(code)}" value="${data.cost.toFixed(4)}" step="any" placeholder="成本">
+                                <input type="number" class="edit-input" id="editShares_${escapeHTML(code)}" value="${data.shares.toFixed(2)}" step="any" placeholder="份额">
+                                <input type="text" class="edit-input" id="editTag_${escapeHTML(code)}" value="${escapeHTML(industryTags[code] || '')}" placeholder="行业标签">
+                                <button type="button" class="edit-delete-btn" data-code="${escapeHTML(code)}">删除</button>
                             </div>
                             <div class="edit-hint"><span class="current-cost">当前成本: ${data.cost.toFixed(4)}</span><span>💡 修改后持有收益将重新计算</span></div>
                         </div>
@@ -1633,7 +1626,7 @@
                         });
                     });
                 }
-                updateBottomBar();
+                syncBottomBarState();
             }
 
             function renderProfitChart() {
@@ -1730,7 +1723,7 @@
 
                 const labels = Object.keys(industryMap);
                 const values = labels.map(k => industryMap[k]);
-                const colors = DEEP_OCEAN.slice(0, labels.length);
+                const colors = labels.map((_, i) => DEEP_OCEAN[i % DEEP_OCEAN.length]);
 
                 const ctx = canvas.getContext('2d');
                 if (pieChart) { pieChart.destroy(); pieChart = null; }
@@ -1769,12 +1762,12 @@
                 const half = Math.ceil(labels.length / 2);
                 leftLegend.innerHTML = labels.slice(0, half).map((label, i) => {
                     const pct = (values[i] / total * 100).toFixed(1);
-                    return `<div class="legend-item"><span class="legend-dot" style="background:${colors[i]};"></span>${label} (${pct}%)</div>`;
+                    return `<div class="legend-item"><span class="legend-dot" style="background:${colors[i]};"></span>${escapeHTML(label)} (${pct}%)</div>`;
                 }).join('');
                 rightLegend.innerHTML = labels.slice(half).map((label, i) => {
                     const idx = half + i;
                     const pct = (values[idx] / total * 100).toFixed(1);
-                    return `<div class="legend-item"><span class="legend-dot" style="background:${colors[idx]};"></span>${label} (${pct}%)</div>`;
+                    return `<div class="legend-item"><span class="legend-dot" style="background:${colors[idx]};"></span>${escapeHTML(label)} (${pct}%)</div>`;
                 }).join('');
             }
 
@@ -1792,74 +1785,49 @@
                     chartBlock.classList.remove('edit-hidden');
                     analysisBlock.classList.remove('edit-hidden');
                 }
-                updateBottomBar();
+                syncBottomBarState();
             }
 
-            function updateBottomBar() {
+            // 仅切换底部栏展示状态，事件在初始化时绑定一次
+            function syncBottomBarState() {
                 const bar = document.getElementById('bottomActions');
                 const addBtn = document.getElementById('openAddModalBtn');
                 const batchBtn = document.getElementById('batchEditBtn');
                 const dataBtn = document.getElementById('openBackupModalBtn');
                 const refreshBtn = document.getElementById('refreshBtn');
-
-                const newAddBtn = addBtn.cloneNode(true);
-                const newBatchBtn = batchBtn.cloneNode(true);
-                const newDataBtn = dataBtn.cloneNode(true);
-                const newRefreshBtn = refreshBtn.cloneNode(true);
-                addBtn.parentNode.replaceChild(newAddBtn, addBtn);
-                batchBtn.parentNode.replaceChild(newBatchBtn, batchBtn);
-                dataBtn.parentNode.replaceChild(newDataBtn, dataBtn);
-                refreshBtn.parentNode.replaceChild(newRefreshBtn, refreshBtn);
-
-                const addBtnNew = document.getElementById('openAddModalBtn');
-                const batchBtnNew = document.getElementById('batchEditBtn');
-                const dataBtnNew = document.getElementById('openBackupModalBtn');
-                const refreshBtnNew = document.getElementById('refreshBtn');
+                if (!bar || !addBtn || !batchBtn || !dataBtn || !refreshBtn) return;
 
                 if (editMode) {
                     bar.classList.add('edit-mode');
-                    addBtnNew.style.display = 'none';
-                    dataBtnNew.style.display = 'none';
-                    refreshBtnNew.style.display = 'none';
-                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
-                    batchBtnNew.className = 'action-btn edit-highlight';
-                    batchBtnNew.style.display = 'flex';
-                    batchBtnNew.addEventListener('click', function(e) { e.stopPropagation(); exitEditMode(); });
+                    addBtn.style.display = 'none';
+                    dataBtn.style.display = 'none';
+                    refreshBtn.style.display = 'none';
+                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-check"></i></div><span class="label">完成编辑</span>';
+                    batchBtn.className = 'action-btn edit-highlight';
+                    batchBtn.style.display = 'flex';
                 } else {
                     bar.classList.remove('edit-mode');
-                    addBtnNew.style.display = 'flex';
-                    dataBtnNew.style.display = 'flex';
-                    refreshBtnNew.style.display = 'flex';
-                    batchBtnNew.style.display = 'flex';
-                    addBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
-                    addBtnNew.className = 'action-btn';
-                    addBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (editMode) return;
-                        const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
-                        document.getElementById('modalOverlay').classList.add('active');
-                    });
-                    batchBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
-                    batchBtnNew.className = 'action-btn';
-                    batchBtnNew.addEventListener('click', function(e) { e.stopPropagation(); enterEditMode(); });
-                    dataBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
-                    dataBtnNew.className = 'action-btn';
-                    dataBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (editMode) { showAlert('请先完成编辑'); return; }
-                        const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
-                        document.getElementById('backupModalOverlay').classList.add('active');
-                    });
-                    refreshBtnNew.innerHTML = '<div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span>';
-                    refreshBtnNew.className = 'action-btn';
-                    refreshBtnNew.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const icon = this.querySelector('.icon-wrap');
-                        if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
-                        refreshData();
-                    });
+                    addBtn.style.display = 'flex';
+                    dataBtn.style.display = 'flex';
+                    refreshBtn.style.display = 'flex';
+                    batchBtn.style.display = 'flex';
+                    addBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-plus-circle"></i></div><span class="label">添加持仓</span>';
+                    addBtn.className = 'action-btn';
+                    batchBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-pen"></i></div><span class="label">批量编辑</span>';
+                    batchBtn.className = 'action-btn';
+                    dataBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-database"></i></div><span class="label">数据管理</span>';
+                    dataBtn.className = 'action-btn';
+                    refreshBtn.innerHTML = '<div class="icon-wrap"><i class="fas fa-sync-alt"></i></div><span class="label">刷新净值</span>';
+                    refreshBtn.className = 'action-btn hide-in-edit';
+                }
+            }
+
+            function triggerIconPop(btnId) {
+                const icon = document.querySelector(`#${btnId} .icon-wrap`);
+                if (icon) {
+                    icon.classList.remove('pop');
+                    void icon.offsetWidth;
+                    icon.classList.add('pop');
                 }
             }
 
@@ -1867,7 +1835,12 @@
                 if (isUpdating) return;
                 showCheck();
                 isUpdating = true;
-                const timeoutId = setTimeout(() => { if (isUpdating) { isUpdating = false; console.log('刷新超时'); } }, 15000);
+                const timeoutId = setTimeout(() => {
+                    if (isUpdating) {
+                        isUpdating = false;
+                        console.warn('刷新超时');
+                    }
+                }, 15000);
                 try {
                     const codes = Object.keys(holdings);
                     if (codes.length) {
@@ -1923,16 +1896,21 @@
                                 holdings[code].shares = roundedShares;
                                 changed = true;
                             }
-                            if (industryTags[code] !== nt) {
+                            if ((industryTags[code] || '') !== nt) {
                                 if (nt) { industryTags[code] = nt; } else { delete industryTags[code]; }
                                 changed = true;
                             }
                         }
                     }
                 });
-                if (changed) { saveAll(); refreshData(); }
                 editMode = false;
-                renderAll();
+                if (changed) {
+                    saveAll();
+                    renderAll();
+                    refreshData();
+                } else {
+                    renderAll();
+                }
             }
 
             function deleteFund(code) {
@@ -1962,6 +1940,7 @@
                     promptActions.innerHTML = '';
                     btns.forEach(b => {
                         const el = document.createElement('button');
+                        el.type = 'button';
                         el.textContent = b.text;
                         el.className = b.cls || 'btn-confirm';
                         el.onclick = () => {
@@ -1994,6 +1973,44 @@
                 }
             });
 
+            function setupBottomActions() {
+                document.getElementById('openAddModalBtn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (editMode) return;
+                    triggerIconPop('openAddModalBtn');
+                    document.getElementById('confirmAddBtn').disabled = true;
+                    document.getElementById('fundCodeInput').value = '';
+                    document.getElementById('fundCostInput').value = '';
+                    document.getElementById('fundSharesInput').value = '';
+                    document.getElementById('fundIndustryInput').value = '';
+                    document.getElementById('autoFillInfo').classList.remove('show');
+                    document.getElementById('modalOverlay').classList.add('active');
+                    setTimeout(() => document.getElementById('fundCodeInput').focus(), 250);
+                });
+
+                document.getElementById('batchEditBtn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (editMode) {
+                        exitEditMode();
+                    } else {
+                        enterEditMode();
+                    }
+                });
+
+                document.getElementById('openBackupModalBtn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (editMode) { showAlert('请先完成编辑'); return; }
+                    triggerIconPop('openBackupModalBtn');
+                    document.getElementById('backupModalOverlay').classList.add('active');
+                });
+
+                document.getElementById('refreshBtn').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    triggerIconPop('refreshBtn');
+                    refreshData();
+                });
+            }
+
             function setupModal() {
                 const overlay = document.getElementById('modalOverlay');
                 const closeBtn = document.getElementById('closeModalBtn');
@@ -2008,22 +2025,11 @@
                 let fetchName = '';
                 let identifyTimer = null;
 
-                document.getElementById('openAddModalBtn').addEventListener('click', function() {
-                    if (editMode) return;
-                    const icon = document.querySelector('#openAddModalBtn .icon-wrap');
-                    if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
-                    confirmBtn.disabled = true;
-                    codeInput.value = '';
-                    costInput.value = '';
-                    sharesInput.value = '';
-                    industryInput.value = '';
-                    infoBox.classList.remove('show');
+                function closeModal() {
+                    clearTimeout(identifyTimer);
+                    overlay.classList.remove('active');
                     fetchName = '';
-                    overlay.classList.add('active');
-                    setTimeout(() => codeInput.focus(), 300);
-                });
-
-                function closeModal() { overlay.classList.remove('active'); fetchName = ''; }
+                }
                 closeBtn.onclick = closeModal;
                 closeCircle.onclick = closeModal;
                 overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
@@ -2049,7 +2055,7 @@
                                 confirmBtn.disabled = true;
                                 fetchName = '';
                             });
-                        }, 400);
+                        }, 350);
                     } else {
                         infoBox.classList.remove('show');
                         confirmBtn.disabled = true;
@@ -2070,14 +2076,23 @@
                         if (isNaN(shares) || shares <= 0) { await showAlert('请输入有效份额'); return; }
                         if (!industry) { await showAlert('请输入行业标签'); return; }
                         let name = fetchName;
-                        if (!name) { try { const d = await fetchTxFund(code); if (d && d.name) name = d.name; } catch (e) {} }
+                        if (!name) {
+                            try {
+                                const d = await fetchTxFund(code);
+                                if (d && d.name) name = d.name;
+                            } catch (_) {}
+                        }
                         if (!name) { await showAlert('未能识别基金代码，请检查网络后重试'); return; }
-                        if (holdings[code]) { const overwrite = await showConfirm('已存在 ' + name + '，是否覆盖？'); if (!overwrite) return; }
+                        if (holdings[code]) {
+                            const overwrite = await showConfirm('已存在 ' + name + '，是否覆盖？');
+                            if (!overwrite) return;
+                        }
                         holdings[code] = { cost: round4(cost), shares: round4(shares), name };
                         industryTags[code] = industry;
                         saveAll();
                         closeModal();
                         await fetchFundDataOnly(code);
+                        saveTodaySnapshot();
                         renderAll();
                     } catch (err) {
                         console.error('添加失败:', err);
@@ -2092,16 +2107,10 @@
                 const overlay = document.getElementById('backupModalOverlay');
                 const exportBtn = document.getElementById('exportBtn');
                 const importInput = document.getElementById('importFileInput');
+                const resetSnapshotBtn = document.getElementById('resetSnapshotBtn');
                 const clearCacheBtn = document.getElementById('clearCacheBtn');
                 const hardResetBtn = document.getElementById('hardResetBtn');
                 const closeCircle = document.getElementById('closeBackupModalBtnCircle');
-
-                document.getElementById('openBackupModalBtn').addEventListener('click', function() {
-                    if (editMode) { showAlert('请先完成编辑'); return; }
-                    const icon = document.querySelector('#openBackupModalBtn .icon-wrap');
-                    if (icon) { icon.classList.remove('pop'); void icon.offsetWidth; icon.classList.add('pop'); }
-                    overlay.classList.add('active');
-                });
 
                 function closeModal() { overlay.classList.remove('active'); }
                 closeCircle.onclick = closeModal;
@@ -2137,7 +2146,7 @@
                             if (ok) {
                                 holdings = data.holdings || {};
                                 fundDataCache = data.fundDataCache || {};
-                                accountProfitHistory = data.accountProfitHistory || [];
+                                accountProfitHistory = Array.isArray(data.accountProfitHistory) ? data.accountProfitHistory : [];
                                 industryTags = data.industryTags || {};
                                 saveAll();
                                 closeModal();
@@ -2148,6 +2157,22 @@
                     reader.readAsText(file);
                     this.value = '';
                 });
+
+                // 重置每日快照（收益柱状图）
+                if (resetSnapshotBtn) {
+                    resetSnapshotBtn.addEventListener('click', async function(e) {
+                        e.stopPropagation();
+                        const ok = await showConfirm('确定清空每日收益快照（柱状图）吗？');
+                        if (ok) {
+                            accountProfitHistory = [];
+                            saveTodaySnapshot();
+                            saveAll();
+                            renderProfitChart();
+                            closeModal();
+                            await showAlert('每日收益快照已重置');
+                        }
+                    });
+                }
 
                 clearCacheBtn.addEventListener('click', async function(e) {
                     e.stopPropagation();
@@ -2166,13 +2191,12 @@
                     const ok = await showConfirm('⚠️ 硬重置将清除所有基金数据并重新加载页面，确定吗？');
                     if (ok) {
                         hardReset();
-                        location.reload(true);
+                        location.reload();
                     }
                 });
             }
 
-            let clickCount = 0,
-                clickTimer = null;
+            let clickCount = 0, clickTimer = null;
 
             function setupPrivacy() {
                 document.getElementById('summaryCard').addEventListener('click', function(e) {
@@ -2199,17 +2223,17 @@
                 loadData();
                 if (Object.keys(holdings).length > 0) backfillProfitHistory();
                 setupPrivacy();
-                renderAll();
-                if (Object.keys(holdings).length) refreshData();
+                setupBottomActions();
                 setupModal();
                 setupBackup();
                 initPullToRefresh();
+                renderAll();
+                if (Object.keys(holdings).length) refreshData();
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register('./sw.js')
-                        .then(reg => console.log('SW 注册成功'))
+                        .then(() => console.log('SW 注册成功'))
                         .catch(err => console.warn('SW 注册失败:', err.message));
                 }
-                console.log('✅ iFunds 已启动（修复 JSONP 缓存）');
             }
 
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
